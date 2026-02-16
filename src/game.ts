@@ -6,7 +6,6 @@ interface CreateRoundInput {
   selectedPackIds: string[];
   spyCount: number;
   durationSeconds: number;
-  includeRoles: boolean;
 }
 
 export function shuffle<T>(items: readonly T[]): T[] {
@@ -23,12 +22,11 @@ export function normalizeValue(value: string): string {
 }
 
 function getLocationPool(selectedPackIds: string[]): LocationCard[] {
-  const packs = PACKS.filter((pack) => selectedPackIds.includes(pack.id));
-  return packs.flatMap((pack) => pack.locations);
+  return PACKS.filter((pack) => selectedPackIds.includes(pack.id)).flatMap((pack) => pack.locations);
 }
 
 export function createRound(input: CreateRoundInput): RoundState {
-  const { players, selectedPackIds, spyCount, durationSeconds, includeRoles } = input;
+  const { players, selectedPackIds, spyCount, durationSeconds } = input;
   const locationPool = getLocationPool(selectedPackIds);
   if (locationPool.length === 0) {
     throw new Error("Ingen lokasjoner er valgt.");
@@ -43,20 +41,13 @@ export function createRound(input: CreateRoundInput): RoundState {
   const location = locationPool[Math.floor(Math.random() * locationPool.length)];
   const shuffledPlayers = shuffle(players);
   const spyIds = shuffledPlayers.slice(0, spyCount).map((player) => player.id);
-  const roles = includeRoles ? shuffle(location.roles) : [];
 
   const assignments: Record<string, Assignment> = {};
-  let roleIndex = 0;
   for (const player of players) {
-    const isSpy = spyIds.includes(player.id);
     assignments[player.id] = {
       playerId: player.id,
-      isSpy,
-      role: isSpy ? "Spy" : roles[roleIndex] ?? "Agent",
+      isSpy: spyIds.includes(player.id),
     };
-    if (!isSpy) {
-      roleIndex += 1;
-    }
   }
 
   return {
@@ -66,4 +57,20 @@ export function createRound(input: CreateRoundInput): RoundState {
     spyIds,
     durationSeconds,
   };
+}
+
+export function tallyVotes(votes: Record<string, string>): { topTargetId: string | null; isTie: boolean } {
+  const counter: Record<string, number> = {};
+  for (const targetId of Object.values(votes)) {
+    counter[targetId] = (counter[targetId] ?? 0) + 1;
+  }
+
+  const entries = Object.entries(counter).sort((a, b) => b[1] - a[1]);
+  if (entries.length === 0) {
+    return { topTargetId: null, isTie: false };
+  }
+  if (entries.length > 1 && entries[0][1] === entries[1][1]) {
+    return { topTargetId: null, isTie: true };
+  }
+  return { topTargetId: entries[0][0], isTie: false };
 }

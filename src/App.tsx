@@ -1,47 +1,54 @@
 import { useEffect, useMemo, useState } from "react";
 import { HINT_QUESTIONS, PACKS } from "./content";
-import { createRound, normalizeValue } from "./game";
+import { createRound, normalizeValue, tallyVotes } from "./game";
 import type { GamePhase, GuessMode, Locale, Player, RoundResult, RoundState } from "./types";
 
 const DEFAULT_PLAYERS = ["Spiller 1", "Spiller 2", "Spiller 3", "Spiller 4"];
 
 const TEXT = {
   nb: {
+    appName: "Spion spillet",
+    subtitle: "Lokal pass-the-phone i nettleseren",
     languageLabel: "Sprak",
     norwegian: "Norsk",
     english: "Engelsk",
-    partyGame: "Party game",
-    subtitle: "Web-basert social deduction inspirert av Spy-konseptet.",
+    navTop: ["Spill", "Pakker", "Poeng"],
+    navSectionA: "Kom i gang",
+    navSectionB: "Kjerneflyt",
+    sidebarA: ["Oppsett", "Del ut kort", "Diskusjon"],
+    sidebarB: ["Avstemning", "Spiongjetning", "Resultat"],
     players: "Spillere",
-    playersHelp: "3-12 spillere. Telefonen sendes videre mellom hver visning.",
+    playersHelp: "3-12 spillere. Telefonen sendes videre mellom hver spiller.",
     nameFor: "Navn for",
     remove: "Fjern",
     addPlayer: "+ Legg til spiller",
     setup: "Oppsett",
     spiesCount: "Antall spioner",
     roundMinutes: "Rundetid (min)",
-    includeRoles: "Bruk roller",
     locationPacks: "Lokasjonspakker",
     scoreboard: "Poengtavle",
     startRound: "Start runde",
     step: "Steg",
     of: "av",
     revealPrompt: "Trykk for a se hemmelig informasjon. Ingen andre skal se skjermen.",
-    youAreSpy: "DU ER SPION",
-    youAreAgent: "DU ER AGENT",
-    spyInstruction: "Spill cool. Still smarte sporsmal. Prov a gjette lokasjonen.",
-    location: "Lokasjon",
-    role: "Rolle",
-    showCard: "Vis kort",
+    showCard: "Vis hemmelig kort",
     hideAndPass: "Skjul og gi videre",
+    identitySpy: "SPION",
+    identityAgent: "AGENT",
+    spyInstruction: "Du kjenner ikke lokasjonen. Spill smart og gjett riktig pa slutten.",
+    agentInstruction: "Du kjenner lokasjonen. Finn spionen uten a avslore for mye.",
+    location: "Lokasjon",
     discussion: "Diskusjon",
-    discussionInstruction: "Alle stiller sporsmal. Finn spionen uten a avslore lokasjonen.",
-    hintLabel: "Hint til neste sporsmal:",
+    discussionInstruction: "Still sporsmal til hverandre for a avslore spionen.",
+    hintLabel: "Hint",
     newHint: "Nytt hint",
-    pointAtSuspect: "Pek pa mistenkt",
-    pointAtSuspectHelp: "Nar gruppen er enig, pek ut en spiller direkte.",
+    startVote: "Start avstemning",
     spyGuessAction: "Spion gjetter lokasjon",
     endRound: "Avslutt runde",
+    votePhase: "Avstemning",
+    voteStep: "Stemme",
+    phoneWith: "Telefon hos",
+    voteInstruction: "Velg hvem du tror er spion, og gi telefonen videre.",
     lastChance: "Siste sjanse",
     spyGuessTitle: "Spionens gjetning",
     guessLocation: "Gjett lokasjonen",
@@ -55,10 +62,11 @@ const TEXT = {
     newRound: "Ny runde",
     toSetup: "Til oppsett",
     spyShort: "Spion",
-    roleShort: "Rolle",
+    agentShort: "Agent",
     reasons: {
       timeout: "Tiden gikk ut. Spionene overlevde runden.",
-      wrongVote: (name: string) => `${name} ble pekt ut, men var ikke spion.`,
+      tieVote: "Uavgjort avstemning. Spionene slipper unna.",
+      wrongVote: (name: string) => `${name} ble stemt ut, men var agent.`,
       spyGuessCorrect: "Spionen gjettet lokasjonen riktig.",
       caughtSpyWrongGuess: "Spionen ble tatt og gjettet feil.",
       freeSpyWrongGuess: "Spionen gjettet feil lokasjon.",
@@ -66,41 +74,48 @@ const TEXT = {
     },
   },
   en: {
+    appName: "Spion spillet",
+    subtitle: "Local pass-the-phone in the browser",
     languageLabel: "Language",
     norwegian: "Norwegian",
     english: "English",
-    partyGame: "Party game",
-    subtitle: "Web-based social deduction inspired by the Spy concept.",
+    navTop: ["Game", "Packs", "Score"],
+    navSectionA: "Get started",
+    navSectionB: "Core flow",
+    sidebarA: ["Setup", "Deal cards", "Discussion"],
+    sidebarB: ["Voting", "Spy guess", "Result"],
     players: "Players",
-    playersHelp: "3-12 players. Pass the phone between each reveal.",
+    playersHelp: "3-12 players. Pass the phone between players.",
     nameFor: "Name for",
     remove: "Remove",
     addPlayer: "+ Add player",
     setup: "Setup",
     spiesCount: "Number of spies",
     roundMinutes: "Round time (min)",
-    includeRoles: "Use roles",
     locationPacks: "Location packs",
     scoreboard: "Scoreboard",
     startRound: "Start round",
     step: "Step",
     of: "of",
-    revealPrompt: "Tap to see your secret information. No one else should look.",
-    youAreSpy: "YOU ARE THE SPY",
-    youAreAgent: "YOU ARE AN AGENT",
-    spyInstruction: "Stay calm. Ask smart questions. Try to guess the location.",
-    location: "Location",
-    role: "Role",
-    showCard: "Show card",
+    revealPrompt: "Tap to see secret information. No one else should look.",
+    showCard: "Show secret card",
     hideAndPass: "Hide and pass",
+    identitySpy: "SPY",
+    identityAgent: "AGENT",
+    spyInstruction: "You do not know the location. Play smart and guess at the end.",
+    agentInstruction: "You know the location. Find the spy without revealing too much.",
+    location: "Location",
     discussion: "Discussion",
-    discussionInstruction: "Ask questions. Find the spy without exposing the location.",
-    hintLabel: "Hint for the next question:",
+    discussionInstruction: "Ask each other questions to expose the spy.",
+    hintLabel: "Hint",
     newHint: "New hint",
-    pointAtSuspect: "Point at suspect",
-    pointAtSuspectHelp: "When your group agrees, point directly at one player.",
+    startVote: "Start voting",
     spyGuessAction: "Spy guesses location",
     endRound: "End round",
+    votePhase: "Voting",
+    voteStep: "Vote",
+    phoneWith: "Phone with",
+    voteInstruction: "Pick who you think is the spy, then pass the phone.",
     lastChance: "Last chance",
     spyGuessTitle: "Spy guess",
     guessLocation: "Guess the location",
@@ -114,10 +129,11 @@ const TEXT = {
     newRound: "New round",
     toSetup: "Back to setup",
     spyShort: "Spy",
-    roleShort: "Role",
+    agentShort: "Agent",
     reasons: {
       timeout: "Time ran out. The spies survived the round.",
-      wrongVote: (name: string) => `${name} was pointed out, but was not a spy.`,
+      tieVote: "The vote was tied. The spies got away.",
+      wrongVote: (name: string) => `${name} was voted out, but was an agent.`,
       spyGuessCorrect: "The spy guessed the location correctly.",
       caughtSpyWrongGuess: "The caught spy guessed wrong.",
       freeSpyWrongGuess: "The spy guessed the wrong location.",
@@ -148,7 +164,6 @@ export function App() {
   const [selectedPackIds, setSelectedPackIds] = useState<string[]>(() => [PACKS[0].id]);
   const [spyCount, setSpyCount] = useState(1);
   const [roundMinutes, setRoundMinutes] = useState(8);
-  const [includeRoles, setIncludeRoles] = useState(true);
 
   const [phase, setPhase] = useState<GamePhase>("setup");
   const [round, setRound] = useState<RoundState | null>(null);
@@ -159,6 +174,9 @@ export function App() {
 
   const [remainingSeconds, setRemainingSeconds] = useState(0);
   const [hintIndex, setHintIndex] = useState(0);
+
+  const [votes, setVotes] = useState<Record<string, string>>({});
+  const [voteIndex, setVoteIndex] = useState(0);
 
   const [guessMode, setGuessMode] = useState<GuessMode>("free_guess");
   const [guessingSpyId, setGuessingSpyId] = useState<string>("");
@@ -238,13 +256,14 @@ export function App() {
       selectedPackIds,
       spyCount,
       durationSeconds: roundMinutes * 60,
-      includeRoles,
     });
     setRound(createdRound);
     setPhase("deal");
     setRoundResult(null);
     setRevealIndex(0);
     setShowCard(false);
+    setVotes({});
+    setVoteIndex(0);
     setRemainingSeconds(createdRound.durationSeconds);
     setHintIndex(randomIndex(hints.length));
     setSpyGuess("");
@@ -265,23 +284,52 @@ export function App() {
     setShowCard(false);
   }
 
-  function accusePlayer(targetId: string) {
+  function startVoting() {
     if (!round) {
       return;
     }
-    const assignment = round.assignments[targetId];
-    if (assignment.isSpy) {
-      setGuessMode("caught_spy_guess");
-      setGuessingSpyId(targetId);
-      setPhase("spy_guess");
-      setSpyGuess("");
+    setVotes({});
+    setVoteIndex(0);
+    setPhase("vote");
+  }
+
+  function castVote(targetId: string) {
+    if (!round) {
       return;
     }
-    finishRound({
-      winner: "spies",
-      reason:
-        text.reasons.wrongVote(playersById[targetId]?.name ?? (locale === "nb" ? "Ukjent spiller" : "Unknown player")),
-    });
+    const voter = round.players[voteIndex];
+    const nextVotes = { ...votes, [voter.id]: targetId };
+
+    if (voteIndex >= round.players.length - 1) {
+      const summary = tallyVotes(nextVotes);
+      if (summary.isTie || !summary.topTargetId) {
+        finishRound({
+          winner: "spies",
+          reason: text.reasons.tieVote,
+        });
+        return;
+      }
+      const assignment = round.assignments[summary.topTargetId];
+      if (assignment.isSpy) {
+        setVotes(nextVotes);
+        setGuessMode("caught_spy_guess");
+        setGuessingSpyId(summary.topTargetId);
+        setPhase("spy_guess");
+        setSpyGuess("");
+        return;
+      }
+      finishRound({
+        winner: "spies",
+        reason:
+          text.reasons.wrongVote(
+            playersById[summary.topTargetId]?.name ?? (locale === "nb" ? "Ukjent spiller" : "Unknown player"),
+          ),
+      });
+      return;
+    }
+
+    setVotes(nextVotes);
+    setVoteIndex((value) => value + 1);
   }
 
   function openSpyGuessFromDiscussion() {
@@ -354,269 +402,305 @@ export function App() {
   }
 
   return (
-    <main className="shell">
-      <div className="ambient ambient-a" />
-      <div className="ambient ambient-b" />
-      <section className="panel">
-        <header className="panel__header">
-          <div className="row header-row">
-            <div>
-              <p className="eyebrow">{text.partyGame}</p>
-              <h1>Spy Web</h1>
-              <p className="muted">{text.subtitle}</p>
-            </div>
-            <label className="lang-switch">
-              <span>{text.languageLabel}</span>
-              <select value={locale} onChange={(event) => setLocale(event.target.value as Locale)}>
-                <option value="nb">{text.norwegian}</option>
-                <option value="en">{text.english}</option>
-              </select>
-            </label>
+    <main className="app-shell">
+      <aside className="sidebar">
+        <h1>{text.appName}</h1>
+        <p className="muted">{text.subtitle}</p>
+        <label className="search">
+          <span>Search</span>
+          <input value="spion" readOnly />
+        </label>
+        <div className="nav-group">
+          <p className="nav-title">{text.navSectionA}</p>
+          {text.sidebarA.map((item) => (
+            <button key={item} type="button" className="nav-item">
+              {item}
+            </button>
+          ))}
+        </div>
+        <div className="nav-group">
+          <p className="nav-title">{text.navSectionB}</p>
+          {text.sidebarB.map((item) => (
+            <button key={item} type="button" className="nav-item">
+              {item}
+            </button>
+          ))}
+        </div>
+      </aside>
+
+      <section className="workspace">
+        <header className="topbar">
+          <div className="topbar-links">
+            {text.navTop.map((item) => (
+              <span key={item}>{item}</span>
+            ))}
           </div>
+          <label className="lang-switch">
+            <span>{text.languageLabel}</span>
+            <select value={locale} onChange={(event) => setLocale(event.target.value as Locale)}>
+              <option value="nb">{text.norwegian}</option>
+              <option value="en">{text.english}</option>
+            </select>
+          </label>
         </header>
 
-        {phase === "setup" && (
-          <section className="stack">
-            <div className="card">
-              <h2>{text.players}</h2>
-              <p className="muted">{text.playersHelp}</p>
-              <div className="stack compact">
-                {players.map((player) => (
-                  <div className="row" key={player.id}>
-                    <input
-                      aria-label={`${text.nameFor} ${player.name}`}
-                      value={player.name}
-                      onChange={(event) => updatePlayerName(player.id, event.target.value)}
-                    />
-                    <button type="button" className="ghost" onClick={() => removePlayer(player.id)}>
-                      {text.remove}
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <button type="button" className="ghost" onClick={addPlayer}>
-                {text.addPlayer}
-              </button>
-            </div>
-
-            <div className="card">
-              <h2>{text.setup}</h2>
-              <div className="form-grid">
-                <label>
-                  <span>{text.spiesCount}</span>
-                  <input
-                    type="number"
-                    min={1}
-                    max={Math.max(1, players.length - 1)}
-                    value={spyCount}
-                    onChange={(event) => setSpyCount(Number(event.target.value))}
-                  />
-                </label>
-                <label>
-                  <span>{text.roundMinutes}</span>
-                  <input
-                    type="number"
-                    min={2}
-                    max={20}
-                    value={roundMinutes}
-                    onChange={(event) => setRoundMinutes(Number(event.target.value))}
-                  />
-                </label>
-                <label className="check">
-                  <input
-                    type="checkbox"
-                    checked={includeRoles}
-                    onChange={(event) => setIncludeRoles(event.target.checked)}
-                  />
-                  <span>{text.includeRoles}</span>
-                </label>
-              </div>
-            </div>
-
-            <div className="card">
-              <h2>{text.locationPacks}</h2>
-              <div className="chips">
-                {PACKS.map((pack) => (
-                  <button
-                    key={pack.id}
-                    type="button"
-                    className={selectedPackIds.includes(pack.id) ? "chip active" : "chip"}
-                    onClick={() => togglePack(pack.id)}
-                  >
-                    {pack.name[locale]}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="card">
-              <h2>{text.scoreboard}</h2>
-              <div className="score-grid">
-                {players.map((player) => (
-                  <div key={player.id} className="score-item">
-                    <span>{player.name}</span>
-                    <strong>{scores[player.id] ?? 0}</strong>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <button type="button" className="primary" disabled={!canStartGame} onClick={startRound}>
-              {text.startRound}
-            </button>
-          </section>
-        )}
-
-        {phase === "deal" && round && (
-          <section className="stack">
-            <div className="card big-card">
-              <p className="eyebrow">
-                {text.step} {revealIndex + 1} {text.of} {round.players.length}
-              </p>
-              <h2>{round.players[revealIndex].name}</h2>
-              {!showCard && <p>{text.revealPrompt}</p>}
-              {showCard && (
-                <div className="reveal">
-                  {round.assignments[round.players[revealIndex].id].isSpy ? (
-                    <>
-                      <p className="tag danger">{text.youAreSpy}</p>
-                      <p>{text.spyInstruction}</p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="tag safe">{text.youAreAgent}</p>
-                      <p>
-                        {text.location}: <strong>{round.location.name}</strong>
-                      </p>
-                      <p>
-                        {text.role}: <strong>{round.assignments[round.players[revealIndex].id].role}</strong>
-                      </p>
-                    </>
-                  )}
+        <section className="panel">
+          {phase === "setup" && (
+            <section className="stack">
+              <div className="card">
+                <h2>{text.players}</h2>
+                <p className="muted">{text.playersHelp}</p>
+                <div className="stack compact">
+                  {players.map((player) => (
+                    <div className="row" key={player.id}>
+                      <input
+                        aria-label={`${text.nameFor} ${player.name}`}
+                        value={player.name}
+                        onChange={(event) => updatePlayerName(player.id, event.target.value)}
+                      />
+                      <button type="button" className="ghost" onClick={() => removePlayer(player.id)}>
+                        {text.remove}
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              )}
-              <div className="actions">
-                {!showCard && (
-                  <button type="button" className="primary" onClick={() => setShowCard(true)}>
-                    {text.showCard}
-                  </button>
-                )}
-                {showCard && (
-                  <button type="button" className="primary" onClick={goToNextReveal}>
-                    {text.hideAndPass}
-                  </button>
-                )}
+                <button type="button" className="ghost" onClick={addPlayer}>
+                  {text.addPlayer}
+                </button>
               </div>
-            </div>
-          </section>
-        )}
 
-        {phase === "discussion" && round && (
-          <section className="stack">
-            <div className="card">
-              <p className="eyebrow">{text.discussion}</p>
-              <h2 className="timer">{formatSeconds(remainingSeconds)}</h2>
-              <p>{text.discussionInstruction}</p>
-              <div className="hint-box">
-                <p className="muted">{text.hintLabel}</p>
-                <strong>{hint}</strong>
-                <button type="button" className="ghost" onClick={() => setHintIndex(randomIndex(hints.length))}>
-                  {text.newHint}
-                </button>
+              <div className="card">
+                <h2>{text.setup}</h2>
+                <div className="form-grid">
+                  <label>
+                    <span>{text.spiesCount}</span>
+                    <input
+                      type="number"
+                      min={1}
+                      max={Math.max(1, players.length - 1)}
+                      value={spyCount}
+                      onChange={(event) => setSpyCount(Number(event.target.value))}
+                    />
+                  </label>
+                  <label>
+                    <span>{text.roundMinutes}</span>
+                    <input
+                      type="number"
+                      min={2}
+                      max={20}
+                      value={roundMinutes}
+                      onChange={(event) => setRoundMinutes(Number(event.target.value))}
+                    />
+                  </label>
+                </div>
               </div>
-              <div className="actions">
-                <button type="button" className="ghost" onClick={openSpyGuessFromDiscussion}>
-                  {text.spyGuessAction}
-                </button>
-                <button type="button" className="ghost danger" onClick={revealNow}>
-                  {text.endRound}
-                </button>
-              </div>
-              <div className="stack compact">
-                <p className="muted">{text.pointAtSuspectHelp}</p>
-                <p className="eyebrow">{text.pointAtSuspect}</p>
-                <div className="chips vertical">
-                  {round.players.map((player) => (
-                    <button key={player.id} type="button" className="chip" onClick={() => accusePlayer(player.id)}>
-                      {player.name}
+
+              <div className="card">
+                <h2>{text.locationPacks}</h2>
+                <div className="chips">
+                  {PACKS.map((pack) => (
+                    <button
+                      key={pack.id}
+                      type="button"
+                      className={selectedPackIds.includes(pack.id) ? "chip active" : "chip"}
+                      onClick={() => togglePack(pack.id)}
+                    >
+                      {pack.name[locale]}
                     </button>
                   ))}
                 </div>
               </div>
-            </div>
-          </section>
-        )}
 
-        {phase === "spy_guess" && round && (
-          <section className="stack">
-            <div className="card big-card">
-              <p className="eyebrow">{guessMode === "caught_spy_guess" ? text.lastChance : text.spyGuessTitle}</p>
-              <h2>{text.guessLocation}</h2>
-              {round.spyIds.length > 1 && guessMode === "free_guess" && (
-                <label>
-                  <span>{text.whichSpyGuesses}</span>
-                  <select value={guessingSpyId} onChange={(event) => setGuessingSpyId(event.target.value)}>
-                    {round.spyIds.map((id) => (
-                      <option key={id} value={id}>
-                        {playersById[id]?.name ?? id}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )}
-              <input
-                value={spyGuess}
-                onChange={(event) => setSpyGuess(event.target.value)}
-                placeholder={text.guessPlaceholder}
-              />
-              <div className="actions">
-                <button type="button" className="primary" onClick={submitSpyGuess}>
-                  {text.submitGuess}
-                </button>
-                {guessMode === "free_guess" && (
-                  <button type="button" className="ghost" onClick={() => setPhase("discussion")}>
-                    {text.backToDiscussion}
-                  </button>
-                )}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {phase === "result" && round && roundResult && (
-          <section className="stack">
-            <div className="card">
-              <p className="eyebrow">{text.result}</p>
-              <h2>{roundResult.winner === "spies" ? text.spiesWon : text.agentsWon}</h2>
-              <p>{roundResult.reason}</p>
-              <p>
-                {text.location}: <strong>{round.location.name}</strong>
-              </p>
-              <div className="score-grid">
-                {round.players.map((player) => {
-                  const assignment = round.assignments[player.id];
-                  return (
-                    <div className="score-item" key={player.id}>
-                      <span>
-                        {player.name}{" "}
-                        {assignment.isSpy ? `(${text.spyShort})` : `(${text.roleShort}: ${assignment.role})`}
-                      </span>
+              <div className="card">
+                <h2>{text.scoreboard}</h2>
+                <div className="score-grid">
+                  {players.map((player) => (
+                    <div key={player.id} className="score-item">
+                      <span>{player.name}</span>
                       <strong>{scores[player.id] ?? 0}</strong>
                     </div>
-                  );
-                })}
+                  ))}
+                </div>
               </div>
-              <div className="actions">
-                <button type="button" className="primary" onClick={startRound}>
-                  {text.newRound}
-                </button>
-                <button type="button" className="ghost" onClick={endToSetup}>
-                  {text.toSetup}
-                </button>
+
+              <button type="button" className="primary" disabled={!canStartGame} onClick={startRound}>
+                {text.startRound}
+              </button>
+            </section>
+          )}
+
+          {phase === "deal" && round && (
+            <section className="stack">
+              <div className="card big-card">
+                <p className="eyebrow">
+                  {text.step} {revealIndex + 1} {text.of} {round.players.length}
+                </p>
+                <h2>{round.players[revealIndex].name}</h2>
+                {!showCard && <p>{text.revealPrompt}</p>}
+                {showCard && (
+                  <div
+                    className={
+                      round.assignments[round.players[revealIndex].id].isSpy
+                        ? "identity-card identity-card--spy"
+                        : "identity-card identity-card--agent"
+                    }
+                  >
+                    {round.assignments[round.players[revealIndex].id].isSpy ? (
+                      <>
+                        <p className="identity-title">{text.identitySpy}</p>
+                        <p>{text.spyInstruction}</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="identity-title">{text.identityAgent}</p>
+                        <p>{text.agentInstruction}</p>
+                        <p>
+                          {text.location}: <strong>{round.location.name}</strong>
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
+                <div className="actions">
+                  {!showCard && (
+                    <button type="button" className="primary" onClick={() => setShowCard(true)}>
+                      {text.showCard}
+                    </button>
+                  )}
+                  {showCard && (
+                    <button type="button" className="primary" onClick={goToNextReveal}>
+                      {text.hideAndPass}
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          </section>
-        )}
+            </section>
+          )}
+
+          {phase === "discussion" && round && (
+            <section className="stack">
+              <div className="card">
+                <p className="eyebrow">{text.discussion}</p>
+                <h2 className="timer">{formatSeconds(remainingSeconds)}</h2>
+                <p>{text.discussionInstruction}</p>
+                <div className="hint-box">
+                  <p className="muted">{text.hintLabel}</p>
+                  <strong>{hint}</strong>
+                  <button type="button" className="ghost" onClick={() => setHintIndex(randomIndex(hints.length))}>
+                    {text.newHint}
+                  </button>
+                </div>
+                <div className="actions">
+                  <button type="button" className="primary" onClick={startVoting}>
+                    {text.startVote}
+                  </button>
+                  <button type="button" className="ghost" onClick={openSpyGuessFromDiscussion}>
+                    {text.spyGuessAction}
+                  </button>
+                  <button type="button" className="ghost danger" onClick={revealNow}>
+                    {text.endRound}
+                  </button>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {phase === "vote" && round && (
+            <section className="stack">
+              <div className="card big-card">
+                <p className="eyebrow">
+                  {text.votePhase} {text.voteStep} {voteIndex + 1} {text.of} {round.players.length}
+                </p>
+                <h2>
+                  {text.phoneWith} {round.players[voteIndex].name}
+                </h2>
+                <p className="muted">{text.voteInstruction}</p>
+                <div className="chips vertical">
+                  {round.players
+                    .filter((player) => player.id !== round.players[voteIndex].id)
+                    .map((player) => (
+                      <button key={player.id} type="button" className="chip" onClick={() => castVote(player.id)}>
+                        {player.name}
+                      </button>
+                    ))}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {phase === "spy_guess" && round && (
+            <section className="stack">
+              <div className="card big-card">
+                <p className="eyebrow">{guessMode === "caught_spy_guess" ? text.lastChance : text.spyGuessTitle}</p>
+                <h2>{text.guessLocation}</h2>
+                {round.spyIds.length > 1 && guessMode === "free_guess" && (
+                  <label>
+                    <span>{text.whichSpyGuesses}</span>
+                    <select value={guessingSpyId} onChange={(event) => setGuessingSpyId(event.target.value)}>
+                      {round.spyIds.map((id) => (
+                        <option key={id} value={id}>
+                          {playersById[id]?.name ?? id}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+                <input
+                  value={spyGuess}
+                  onChange={(event) => setSpyGuess(event.target.value)}
+                  placeholder={text.guessPlaceholder}
+                />
+                <div className="actions">
+                  <button type="button" className="primary" onClick={submitSpyGuess}>
+                    {text.submitGuess}
+                  </button>
+                  {guessMode === "free_guess" && (
+                    <button type="button" className="ghost" onClick={() => setPhase("discussion")}>
+                      {text.backToDiscussion}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </section>
+          )}
+
+          {phase === "result" && round && roundResult && (
+            <section className="stack">
+              <div className="card">
+                <p className="eyebrow">{text.result}</p>
+                <h2>{roundResult.winner === "spies" ? text.spiesWon : text.agentsWon}</h2>
+                <p>{roundResult.reason}</p>
+                <p>
+                  {text.location}: <strong>{round.location.name}</strong>
+                </p>
+                <div className="score-grid">
+                  {round.players.map((player) => {
+                    const assignment = round.assignments[player.id];
+                    return (
+                      <div className="score-item" key={player.id}>
+                        <span>
+                          {player.name}{" "}
+                          <strong className={assignment.isSpy ? "pill pill-spy" : "pill pill-agent"}>
+                            {assignment.isSpy ? text.spyShort : text.agentShort}
+                          </strong>
+                        </span>
+                        <strong>{scores[player.id] ?? 0}</strong>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="actions">
+                  <button type="button" className="primary" onClick={startRound}>
+                    {text.newRound}
+                  </button>
+                  <button type="button" className="ghost" onClick={endToSetup}>
+                    {text.toSetup}
+                  </button>
+                </div>
+              </div>
+            </section>
+          )}
+        </section>
       </section>
     </main>
   );
