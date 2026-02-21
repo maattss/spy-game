@@ -1,16 +1,42 @@
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Sora:wght@500;700;800&display=swap");
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
+  --radius: 0.8rem;
+
+  --background: 222 58% 8%;
+  --foreground: 213 100% 96%;
+  --card: 221 48% 14%;
+  --card-foreground: 213 100% 96%;
+  --popover: 221 46% 12%;
+  --popover-foreground: 213 100% 96%;
+  --primary: 222 95% 66%;
+  --primary-foreground: 223 54% 10%;
+  --secondary: 218 34% 22%;
+  --secondary-foreground: 213 100% 96%;
+  --muted: 220 30% 18%;
+  --muted-foreground: 215 40% 74%;
+  --accent: 173 60% 50%;
+  --accent-foreground: 173 70% 10%;
+  --destructive: 342 100% 72%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 218 34% 30%;
+  --input: 218 34% 30%;
+  --ring: 222 95% 66%;
+
   --bg-top: #0f1b3b;
   --bg-bottom: #070d1a;
   --panel: rgba(14, 27, 53, 0.82);
-  --card: rgba(15, 31, 60, 0.82);
+  --card-solid: rgba(15, 31, 60, 0.82);
   --card-soft: rgba(12, 24, 47, 0.8);
   --ink: #ecf4ff;
-  --muted: #9eb3d1;
-  --accent: #5a88ff;
-  --accent-strong: #3a6fff;
-  --accent-2: #31c3b6;
+  --muted-text: #9eb3d1;
+  --accent-blue: #5a88ff;
+  --accent-blue-strong: #3a6fff;
+  --accent-teal: #31c3b6;
   --danger: #ff7398;
   --safe: #41cb96;
   --line: rgba(236, 244, 255, 0.2);
@@ -116,7 +142,7 @@ select {
 }
 
 .eyebrow {
-  color: var(--accent-2);
+  color: var(--accent-teal);
   letter-spacing: 0.09em;
   text-transform: uppercase;
   font-size: 0.78rem;
@@ -124,7 +150,7 @@ select {
 }
 
 .muted {
-  color: var(--muted);
+  color: var(--muted-text);
 }
 
 .stack {
@@ -140,7 +166,7 @@ select {
   display: grid;
   gap: 0.72rem;
   border-radius: 1.1rem;
-  background: linear-gradient(180deg, var(--card), var(--card-soft));
+  background: linear-gradient(180deg, var(--card-solid), var(--card-soft));
   border: 1px solid var(--line);
   padding: 1.05rem;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
@@ -171,32 +197,78 @@ select {
 }
 
 .lang-switch {
-  min-width: 11rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 12rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--line-strong) 80%, transparent);
+  background: linear-gradient(
+    120deg,
+    color-mix(in srgb, var(--accent-blue) 17%, transparent),
+    color-mix(in srgb, var(--accent-teal) 21%, transparent)
+  );
+  color: var(--ink);
+  box-shadow: 0 10px 22px rgba(6, 16, 34, 0.42);
 }
 
-.row input {
+.lang-switch svg {
+  flex-shrink: 0;
+}
+
+.lang-switch__label {
+  display: grid;
+  line-height: 1.05;
+  text-align: left;
+  margin-right: auto;
+}
+
+.lang-switch__label small {
+  font-size: 0.63rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--muted-text) 76%, white);
+}
+
+.lang-switch__label strong {
+  font-size: 0.94rem;
+}
+
+.lang-switch__next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.67rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ink) 92%, white);
+  background: color-mix(in srgb, var(--line-strong) 72%, transparent);
+}
+
+.row .field-input {
   flex: 1;
 }
 
-input,
-select {
+.field-input,
+.field-trigger {
   width: 100%;
   border: 1px solid var(--line-strong);
   border-radius: 0.78rem;
   background: rgba(8, 17, 33, 0.92);
   color: var(--ink);
-  padding: 0.7rem 0.8rem;
 }
 
-input::placeholder {
-  color: color-mix(in srgb, var(--muted) 82%, white);
+.field-input::placeholder {
+  color: color-mix(in srgb, var(--muted-text) 82%, white);
 }
 
-input:focus,
-select:focus {
-  outline: 2px solid color-mix(in srgb, var(--accent) 72%, white);
-  outline-offset: 1px;
-  border-color: color-mix(in srgb, var(--accent) 66%, white);
+.field-input:focus,
+.field-trigger:focus,
+.field-trigger[data-state="open"] {
+  border-color: color-mix(in srgb, var(--accent-blue) 66%, white);
+  box-shadow: 0 0 0 2px rgba(90, 136, 255, 0.35);
 }
 
 label span {
@@ -222,15 +294,8 @@ label span {
   margin: 0;
 }
 
-.check input {
-  width: auto;
-}
-
 button {
   cursor: pointer;
-  border: none;
-  border-radius: 0.78rem;
-  padding: 0.7rem 0.92rem;
   transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
 }
 
@@ -247,7 +312,7 @@ button:disabled {
 }
 
 .primary {
-  background: linear-gradient(126deg, var(--accent), var(--accent-strong));
+  background: linear-gradient(126deg, var(--accent-blue), var(--accent-blue-strong));
   color: white;
   font-weight: 700;
   box-shadow: 0 10px 24px rgba(58, 111, 255, 0.35);
@@ -280,10 +345,11 @@ button:disabled {
   background: var(--chip);
   color: var(--ink);
   border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+  min-height: 2.5rem;
 }
 
 .chip.active {
-  background: linear-gradient(120deg, var(--accent-2), #41ddd0);
+  background: linear-gradient(120deg, var(--accent-teal), #41ddd0);
   color: #06221f;
   font-weight: 700;
   border-color: transparent;
@@ -312,7 +378,8 @@ button:disabled {
 }
 
 .tag {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   border-radius: 999px;
   padding: 0.25rem 0.76rem;
   color: white;
@@ -373,6 +440,10 @@ button:disabled {
   }
 
   .row button {
+    width: 100%;
+  }
+
+  .lang-switch {
     width: 100%;
   }
 }
