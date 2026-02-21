@@ -303,28 +303,21 @@ select {
   text-align: right;
 }
 
-.reveal-box,
+.reveal-box {
+  border-radius: var(--radius-md);
+  background: transparent;
+  padding: 0;
+  display: grid;
+  gap: 0.58rem;
+}
+
 .hint-box {
-  border: 1px solid var(--border);
+  border: 1px dashed var(--border);
   border-radius: var(--radius-md);
   background: var(--bg-subtle);
   padding: 0.72rem;
   display: grid;
   gap: 0.5rem;
-}
-
-.hint-box {
-  border-style: dashed;
-}
-
-.stage-card--spy .reveal-box {
-  border-color: color-mix(in srgb, var(--danger) 55%, var(--border));
-  background: color-mix(in srgb, var(--danger) 11%, var(--bg-subtle));
-}
-
-.stage-card--agent .reveal-box {
-  border-color: color-mix(in srgb, var(--success) 58%, var(--border));
-  background: color-mix(in srgb, var(--success) 11%, var(--bg-subtle));
 }
 
 .identity-title {
@@ -344,9 +337,10 @@ select {
 }
 
 .location-callout {
-  border: 1px solid color-mix(in srgb, var(--success) 42%, var(--border));
+  border: 0;
+  border-left: 3px solid color-mix(in srgb, var(--success) 62%, var(--border));
   border-radius: var(--radius-sm);
-  background: color-mix(in srgb, var(--success) 8%, var(--bg-subtle));
+  background: color-mix(in srgb, var(--success) 10%, var(--bg-subtle));
   padding: 0.62rem 0.68rem;
   display: grid;
   gap: 0.2rem;
