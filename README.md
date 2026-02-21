@@ -1,6 +1,11 @@
 # Spy Web
 
-Web-basert partyspill inspirert av "Spy"-konseptet (social deduction / pass-the-phone).
+Et kjapt, web-basert partyspill der alle later som de vet hva som skjer, bortsett fra spionen.
+Pass telefonen, hold maska, pek ut den skyldige.
+
+## Hva er dette?
+
+`Spy Web` er en social-deduction versjon av "hvem er spionen?"-konseptet laget for rask oppstart og korte, intense runder.
 
 ## Stack
 
@@ -15,19 +20,27 @@ npm install
 npm run dev
 ```
 
-## Inkludert i MVP
+## MVP-funksjoner
 
 - 3-12 spillere
 - 1+ spioner
 - Klassisk lokasjonspakke med roller
-- Roller for ikke-spioner
 - Hemmelig kortvisning med "send telefonen videre"
-- Rundetimer + hint
-- Utpekning av mistenkt (uten avstemningsrunde)
+- Rundetimer og hint
+- Utpeking av mistenkt (uten avstemningsrunde)
 - Spiongjetning
-- Resultat + enkel poengtavle
+- Resultatvisning og enkel poengtavle
 - Sprakstotte (norsk som standard + engelsk)
 
-## Neste naturlige steg
+## Rask spillflyt
 
-- Flere pakker og eksakt 1:1 import av lokasjoner/roller fra mobilappen
+1. Velg antall spillere og spioner.
+2. Del ut hemmelige kort ved å sende telefonen videre.
+3. Spill runden, still spørsmål, bygg mistanke.
+4. Pek ut mistenkt eller la spionen gjette lokasjon.
+5. Oppdater poeng og start neste runde.
+
+## Neste steg
+
+- Flere pakker med lokasjoner og roller
+- Eksakt 1:1 import av innhold fra mobilappen
