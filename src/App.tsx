@@ -289,22 +289,34 @@ export function App() {
         </header>
 
         {phase === "setup" && (
-          <SetupSection
-            text={text}
-            locale={locale}
-            players={players}
-            selectedPackIds={selectedPackIds}
-            spyCount={spyCount}
-            canStartGame={canStartGame}
-            onUpdatePlayerName={updatePlayerName}
-            onRemovePlayer={removePlayer}
-            onAddPlayer={addPlayer}
-            onSetSpyCount={setSpyCount}
-            onTogglePack={togglePack}
-            onStartRound={startRound}
-            displayPlayerName={displayPlayerName}
-            playerPlaceholder={playerPlaceholder}
-          />
+          <>
+            <div className="rules-box app-rules" aria-label={text.rulesTitle}>
+              <p className="rules-box__title">{text.playersIntro}</p>
+              <ul className="rules-list">
+                <li>{text.rulePlayerCount}</li>
+                <li>{text.rulePassPhone}</li>
+                <li>{text.ruleNoPeeking}</li>
+                <li>{text.ruleDiscussion}</li>
+              </ul>
+            </div>
+
+            <SetupSection
+              text={text}
+              locale={locale}
+              players={players}
+              selectedPackIds={selectedPackIds}
+              spyCount={spyCount}
+              canStartGame={canStartGame}
+              onUpdatePlayerName={updatePlayerName}
+              onRemovePlayer={removePlayer}
+              onAddPlayer={addPlayer}
+              onSetSpyCount={setSpyCount}
+              onTogglePack={togglePack}
+              onStartRound={startRound}
+              displayPlayerName={displayPlayerName}
+              playerPlaceholder={playerPlaceholder}
+            />
+          </>
         )}
 
         {phase === "deal" && round && currentRevealPlayer && currentRevealAssignment && (

@@ -236,6 +236,10 @@ select {
   color: var(--accent);
 }
 
+.app-rules {
+  margin-bottom: 0.78rem;
+}
+
 .player-remove {
   flex-shrink: 0;
 }

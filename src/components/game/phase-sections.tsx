@@ -47,19 +47,8 @@ export function SetupSection({
       <Card>
         <CardHeader>
           <CardTitle>{text.players}</CardTitle>
-          <CardDescription>{text.playersIntro}</CardDescription>
         </CardHeader>
         <CardContent className="stack-tight">
-          <div className="rules-box" aria-label={text.rulesTitle}>
-            <p className="rules-box__title">{text.rulesTitle}</p>
-            <ul className="rules-list">
-              <li>{text.rulePlayerCount}</li>
-              <li>{text.rulePassPhone}</li>
-              <li>{text.ruleNoPeeking}</li>
-              <li>{text.ruleDiscussion}</li>
-            </ul>
-          </div>
-
           {players.map((player, index) => (
             <div className="player-row" key={player.id}>
               <Input
