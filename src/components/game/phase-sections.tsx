@@ -5,7 +5,6 @@ import type { Player, RoundResult, RoundState } from "../../types";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { Checkbox } from "../ui/checkbox";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 
@@ -18,13 +17,11 @@ type SetupSectionProps = {
   players: Player[];
   selectedPackIds: string[];
   spyCount: number;
-  includeRoles: boolean;
   canStartGame: boolean;
   onUpdatePlayerName: (id: string, name: string) => void;
   onRemovePlayer: (id: string) => void;
   onAddPlayer: () => void;
   onSetSpyCount: (value: number) => void;
-  onSetIncludeRoles: (value: boolean) => void;
   onTogglePack: (id: string) => void;
   onStartRound: () => void;
   displayPlayerName: DisplayNameFn;
@@ -37,13 +34,11 @@ export function SetupSection({
   players,
   selectedPackIds,
   spyCount,
-  includeRoles,
   canStartGame,
   onUpdatePlayerName,
   onRemovePlayer,
   onAddPlayer,
   onSetSpyCount,
-  onSetIncludeRoles,
   onTogglePack,
   onStartRound,
   displayPlayerName,
@@ -110,11 +105,6 @@ export function SetupSection({
               onChange={(event) => onSetSpyCount(Number(event.target.value))}
             />
           </Label>
-
-          <Label className="check-row">
-            <Checkbox checked={includeRoles} onCheckedChange={(checked) => onSetIncludeRoles(checked === true)} />
-            <span>{text.includeRoles}</span>
-          </Label>
         </CardContent>
       </Card>
 
@@ -150,7 +140,6 @@ type DealSectionProps = {
   showCard: boolean;
   revealPlayerName: string;
   isSpy: boolean;
-  role: string;
   onShowCard: () => void;
   onNextReveal: () => void;
 };
@@ -162,7 +151,6 @@ export function DealSection({
   showCard,
   revealPlayerName,
   isSpy,
-  role,
   onShowCard,
   onNextReveal,
 }: DealSectionProps) {
@@ -192,9 +180,6 @@ export function DealSection({
                   <p className="identity-title identity-title--agent">{text.youAreAgent}</p>
                   <p>
                     {text.location}: <strong>{round.location.name}</strong>
-                  </p>
-                  <p>
-                    {text.role}: <strong>{role}</strong>
                   </p>
                 </>
               )}
@@ -324,7 +309,7 @@ export function ResultSection({
                 <div className="score-row" key={player.id}>
                   <span>
                     {displayPlayerName(player.name, index)}{" "}
-                    {assignment.isSpy ? `(${text.spyShort})` : `(${text.roleShort}: ${assignment.role})`}
+                    {assignment.isSpy ? `(${text.spyShort})` : `(${text.agentShort})`}
                   </span>
                 </div>
               );

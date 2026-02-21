@@ -27,7 +27,6 @@ export interface LocationPack {
 export interface Assignment {
   playerId: string;
   isSpy: boolean;
-  role: string;
 }
 
 export interface RoundResult {

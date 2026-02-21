@@ -37,7 +37,6 @@ export function App() {
   const [players, setPlayers] = useState<Player[]>(buildDefaultPlayers);
   const [selectedPackIds, setSelectedPackIds] = useState<string[]>(() => [PACKS[0]?.id ?? "classic"]);
   const [spyCount, setSpyCount] = useState(1);
-  const [includeRoles, setIncludeRoles] = useState(true);
 
   const [phase, setPhase] = useState<GamePhase>("setup");
   const [round, setRound] = useState<RoundState | null>(null);
@@ -125,7 +124,6 @@ export function App() {
       selectedPackIds,
       spyCount,
       durationSeconds: ROUND_DURATION_SECONDS,
-      includeRoles,
     });
 
     setRound(createdRound);
@@ -297,13 +295,11 @@ export function App() {
             players={players}
             selectedPackIds={selectedPackIds}
             spyCount={spyCount}
-            includeRoles={includeRoles}
             canStartGame={canStartGame}
             onUpdatePlayerName={updatePlayerName}
             onRemovePlayer={removePlayer}
             onAddPlayer={addPlayer}
             onSetSpyCount={setSpyCount}
-            onSetIncludeRoles={setIncludeRoles}
             onTogglePack={togglePack}
             onStartRound={startRound}
             displayPlayerName={displayPlayerName}
@@ -319,7 +315,6 @@ export function App() {
             showCard={showCard}
             revealPlayerName={displayPlayerName(currentRevealPlayer.name, revealIndex)}
             isSpy={currentRevealAssignment.isSpy}
-            role={currentRevealAssignment.role}
             onShowCard={() => setShowCard(true)}
             onNextReveal={goToNextReveal}
           />
