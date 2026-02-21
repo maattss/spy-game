@@ -1,17 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Languages, Moon, Sun } from "lucide-react";
-import { HINT_QUESTIONS, PACKS } from "./content";
+import { PACKS } from "./content";
 import { COPY } from "./copy";
 import { createRound, normalizeValue } from "./game";
-import type { GamePhase, GuessMode, Locale, Player, RoundResult, RoundState } from "./types";
+import type { GamePhase, Locale, Player, RoundResult, RoundState } from "./types";
 import { Button } from "./components/ui/button";
-import {
-  DealSection,
-  DiscussionSection,
-  ResultSection,
-  SetupSection,
-  SpyGuessSection,
-} from "./components/game/phase-sections";
+import { DealSection, ResultSection, SetupSection, SpyGuessSection, VoteSection } from "./components/game/phase-sections";
 
 const DEFAULT_PLAYER_COUNT = 4;
 const ROUND_DURATION_SECONDS = 8 * 60;
@@ -27,17 +21,6 @@ function buildDefaultPlayers(): Player[] {
   return Array.from({ length: DEFAULT_PLAYER_COUNT }, () => newPlayer(""));
 }
 
-function formatSeconds(total: number): string {
-  const safeTotal = Math.max(0, total);
-  const minutes = Math.floor(safeTotal / 60);
-  const seconds = safeTotal % 60;
-  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
-}
-
-function randomIndex(length: number): number {
-  return Math.floor(Math.random() * length);
-}
-
 function getInitialTheme(): Theme {
   if (typeof window === "undefined") {
     return "dark";
@@ -50,8 +33,8 @@ function getInitialTheme(): Theme {
 export function App() {
   const [locale, setLocale] = useState<Locale>("nb");
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
+
   const [players, setPlayers] = useState<Player[]>(buildDefaultPlayers);
-  const [scores, setScores] = useState<Record<string, number>>({});
   const [selectedPackIds, setSelectedPackIds] = useState<string[]>(() => [PACKS[0]?.id ?? "classic"]);
   const [spyCount, setSpyCount] = useState(1);
   const [includeRoles, setIncludeRoles] = useState(true);
@@ -63,26 +46,15 @@ export function App() {
   const [revealIndex, setRevealIndex] = useState(0);
   const [showCard, setShowCard] = useState(false);
 
-  const [remainingSeconds, setRemainingSeconds] = useState(0);
-  const [hintIndex, setHintIndex] = useState(0);
+  const [voteIndex, setVoteIndex] = useState(0);
+  const [votesByVoter, setVotesByVoter] = useState<Record<string, string>>({});
 
-  const [guessMode, setGuessMode] = useState<GuessMode>("free_guess");
-  const [guessingSpyId, setGuessingSpyId] = useState<string>("");
+  const [guessingSpyId, setGuessingSpyId] = useState("");
   const [spyGuess, setSpyGuess] = useState("");
 
   const text = COPY[locale];
-  const hints = HINT_QUESTIONS[locale];
-  const hint = hints[hintIndex % hints.length];
 
-  const playersById = useMemo<Record<string, Player>>(
-    () => Object.fromEntries(players.map((player) => [player.id, player])),
-    [players],
-  );
-
-  const playerIndexById = useMemo<Record<string, number>>(
-    () => Object.fromEntries(players.map((player, index) => [player.id, index])),
-    [players],
-  );
+  const canStartGame = players.length >= 3 && selectedPackIds.length > 0 && spyCount >= 1 && spyCount < players.length;
 
   const roundPlayerIndexById = useMemo<Record<string, number>>(() => {
     if (!round) {
@@ -91,13 +63,16 @@ export function App() {
     return Object.fromEntries(round.players.map((player, index) => [player.id, index]));
   }, [round]);
 
-  const canStartGame = players.length >= 3 && selectedPackIds.length > 0 && spyCount >= 1 && spyCount < players.length;
-
   const currentRevealPlayer = round?.players[revealIndex] ?? null;
   const currentRevealAssignment = currentRevealPlayer ? round?.assignments[currentRevealPlayer.id] : null;
 
   function playerPlaceholder(index: number): string {
     return locale === "nb" ? `Spiller ${index + 1}` : `Player ${index + 1}`;
+  }
+
+  function displayPlayerName(name: string, index: number): string {
+    const trimmedName = name.trim();
+    return trimmedName.length > 0 ? trimmedName : playerPlaceholder(index);
   }
 
   function toggleLocale() {
@@ -108,31 +83,9 @@ export function App() {
     setTheme((current) => (current === "dark" ? "light" : "dark"));
   }
 
-  function displayPlayerName(name: string, index: number): string {
-    const trimmedName = name.trim();
-    return trimmedName.length > 0 ? trimmedName : playerPlaceholder(index);
-  }
-
   function finishRound(result: RoundResult) {
-    if (!round) {
-      return;
-    }
-
     setRoundResult(result);
     setPhase("result");
-    setScores((current) => {
-      const next = { ...current };
-
-      for (const player of round.players) {
-        const assignment = round.assignments[player.id];
-        const gainsPoint =
-          (result.winner === "spies" && assignment.isSpy) ||
-          (result.winner === "agents" && !assignment.isSpy);
-        next[player.id] = gainsPoint ? (next[player.id] ?? 0) + 1 : (next[player.id] ?? 0);
-      }
-
-      return next;
-    });
   }
 
   function addPlayer() {
@@ -146,13 +99,7 @@ export function App() {
     if (players.length <= 3) {
       return;
     }
-
     setPlayers((current) => current.filter((player) => player.id !== id));
-    setScores((current) => {
-      const next = { ...current };
-      delete next[id];
-      return next;
-    });
   }
 
   function updatePlayerName(id: string, name: string) {
@@ -186,11 +133,10 @@ export function App() {
     setPhase("deal");
     setRevealIndex(0);
     setShowCard(false);
-    setRemainingSeconds(createdRound.durationSeconds);
-    setHintIndex(randomIndex(hints.length));
-    setSpyGuess("");
-    setGuessMode("free_guess");
+    setVoteIndex(0);
+    setVotesByVoter({});
     setGuessingSpyId(createdRound.spyIds[0] ?? "");
+    setSpyGuess("");
   }
 
   function goToNextReveal() {
@@ -199,8 +145,10 @@ export function App() {
     }
 
     if (revealIndex >= round.players.length - 1) {
-      setPhase("discussion");
+      setPhase("vote");
       setShowCard(false);
+      setVoteIndex(0);
+      setVotesByVoter({});
       return;
     }
 
@@ -208,40 +156,68 @@ export function App() {
     setShowCard(false);
   }
 
-  function accusePlayer(targetId: string) {
+  function finalizeVotes(votes: Record<string, string>) {
     if (!round) {
       return;
     }
 
-    const assignment = round.assignments[targetId];
-    if (assignment.isSpy) {
-      setGuessMode("caught_spy_guess");
-      setGuessingSpyId(targetId);
+    const counts: Record<string, number> = {};
+    for (const targetId of Object.values(votes)) {
+      counts[targetId] = (counts[targetId] ?? 0) + 1;
+    }
+
+    const entries = Object.entries(counts);
+    if (entries.length === 0) {
+      finishRound({ winner: "spies", reason: text.reasons.voteTie });
+      return;
+    }
+
+    const maxVotes = Math.max(...entries.map(([, count]) => count));
+    const topCandidates = entries.filter(([, count]) => count === maxVotes).map(([id]) => id);
+
+    if (topCandidates.length !== 1) {
+      finishRound({ winner: "spies", reason: text.reasons.voteTie });
+      return;
+    }
+
+    const suspectId = topCandidates[0];
+    const suspectAssignment = round.assignments[suspectId];
+
+    if (suspectAssignment?.isSpy) {
+      setGuessingSpyId(suspectId);
       setSpyGuess("");
       setPhase("spy_guess");
       return;
     }
 
-    const targetIndex = roundPlayerIndexById[targetId] ?? playerIndexById[targetId] ?? 0;
-    finishRound({
-      winner: "spies",
-      reason: text.reasons.wrongVote(displayPlayerName(playersById[targetId]?.name ?? "", targetIndex)),
-    });
+    const suspectIndex = roundPlayerIndexById[suspectId] ?? 0;
+    const suspectName = displayPlayerName(round.players[suspectIndex]?.name ?? "", suspectIndex);
+    finishRound({ winner: "spies", reason: text.reasons.wrongVote(suspectName) });
   }
 
-  function openSpyGuessFromDiscussion() {
+  function submitVote(targetId: string) {
     if (!round) {
       return;
     }
 
-    setGuessMode("free_guess");
-    setGuessingSpyId(round.spyIds[0] ?? "");
-    setSpyGuess("");
-    setPhase("spy_guess");
+    const voter = round.players[voteIndex];
+    if (!voter) {
+      return;
+    }
+
+    const nextVotes = { ...votesByVoter, [voter.id]: targetId };
+    setVotesByVoter(nextVotes);
+
+    if (voteIndex < round.players.length - 1) {
+      setVoteIndex((value) => value + 1);
+      return;
+    }
+
+    finalizeVotes(nextVotes);
   }
 
   function submitSpyGuess() {
-    if (!round) {
+    if (!round || !guessingSpyId) {
       return;
     }
 
@@ -257,10 +233,7 @@ export function App() {
       return;
     }
 
-    finishRound({
-      winner: "agents",
-      reason: guessMode === "caught_spy_guess" ? text.reasons.caughtSpyWrongGuess : text.reasons.freeSpyWrongGuess,
-    });
+    finishRound({ winner: "agents", reason: text.reasons.caughtSpyWrongGuess });
   }
 
   function endToSetup() {
@@ -268,10 +241,10 @@ export function App() {
     setRound(null);
     setRoundResult(null);
     setShowCard(false);
-  }
-
-  function revealNow() {
-    finishRound({ winner: "agents", reason: text.reasons.manualEnd });
+    setVoteIndex(0);
+    setVotesByVoter({});
+    setGuessingSpyId("");
+    setSpyGuess("");
   }
 
   useEffect(() => {
@@ -280,26 +253,6 @@ export function App() {
     const themeColor = theme === "dark" ? "#030507" : "#f4f7fb";
     document.querySelector("meta[name='theme-color']")?.setAttribute("content", themeColor);
   }, [theme]);
-
-  useEffect(() => {
-    if (phase !== "discussion") {
-      return undefined;
-    }
-
-    const timer = window.setInterval(() => {
-      setRemainingSeconds((value) => value - 1);
-    }, 1000);
-
-    return () => window.clearInterval(timer);
-  }, [phase]);
-
-  useEffect(() => {
-    if (phase !== "discussion" || !round || remainingSeconds > 0) {
-      return;
-    }
-
-    finishRound({ winner: "spies", reason: text.reasons.timeout });
-  }, [phase, round, remainingSeconds, text.reasons.timeout]);
 
   return (
     <main className="app-shell">
@@ -342,7 +295,6 @@ export function App() {
             text={text}
             locale={locale}
             players={players}
-            scores={scores}
             selectedPackIds={selectedPackIds}
             spyCount={spyCount}
             includeRoles={includeRoles}
@@ -373,34 +325,18 @@ export function App() {
           />
         )}
 
-        {phase === "discussion" && round && (
-          <DiscussionSection
+        {phase === "vote" && round && (
+          <VoteSection
             text={text}
             round={round}
-            formattedTime={formatSeconds(remainingSeconds)}
-            hint={hint}
-            onNewHint={() => setHintIndex(randomIndex(hints.length))}
-            onAccusePlayer={accusePlayer}
-            onOpenSpyGuess={openSpyGuessFromDiscussion}
-            onEndRound={revealNow}
+            voteIndex={voteIndex}
+            onVote={submitVote}
             displayPlayerName={displayPlayerName}
           />
         )}
 
         {phase === "spy_guess" && round && (
-          <SpyGuessSection
-            text={text}
-            round={round}
-            guessMode={guessMode}
-            guessingSpyId={guessingSpyId}
-            spyGuess={spyGuess}
-            roundPlayerIndexById={roundPlayerIndexById}
-            onSetGuessingSpyId={setGuessingSpyId}
-            onSetSpyGuess={setSpyGuess}
-            onSubmitGuess={submitSpyGuess}
-            onBackToDiscussion={() => setPhase("discussion")}
-            displayPlayerName={displayPlayerName}
-          />
+          <SpyGuessSection text={text} spyGuess={spyGuess} onSetSpyGuess={setSpyGuess} onSubmitGuess={submitSpyGuess} />
         )}
 
         {phase === "result" && round && roundResult && (
@@ -408,7 +344,6 @@ export function App() {
             text={text}
             round={round}
             roundResult={roundResult}
-            scores={scores}
             onNewRound={startRound}
             onBackToSetup={endToSetup}
             displayPlayerName={displayPlayerName}

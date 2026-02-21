@@ -1,14 +1,13 @@
+import { X } from "lucide-react";
 import { PACKS } from "../../content";
 import type { AppText } from "../../copy";
-import type { GuessMode, Player, RoundResult, RoundState } from "../../types";
+import type { Player, RoundResult, RoundState } from "../../types";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Checkbox } from "../ui/checkbox";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { X } from "lucide-react";
 
 type DisplayNameFn = (name: string, index: number) => string;
 type PlaceholderFn = (index: number) => string;
@@ -17,7 +16,6 @@ type SetupSectionProps = {
   text: AppText;
   locale: "nb" | "en";
   players: Player[];
-  scores: Record<string, number>;
   selectedPackIds: string[];
   spyCount: number;
   includeRoles: boolean;
@@ -37,7 +35,6 @@ export function SetupSection({
   text,
   locale,
   players,
-  scores,
   selectedPackIds,
   spyCount,
   includeRoles,
@@ -113,6 +110,7 @@ export function SetupSection({
               onChange={(event) => onSetSpyCount(Number(event.target.value))}
             />
           </Label>
+
           <Label className="check-row">
             <Checkbox checked={includeRoles} onCheckedChange={(checked) => onSetIncludeRoles(checked === true)} />
             <span>{text.includeRoles}</span>
@@ -134,20 +132,6 @@ export function SetupSection({
             >
               {pack.name[locale]}
             </Button>
-          ))}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{text.scoreboard}</CardTitle>
-        </CardHeader>
-        <CardContent className="score-grid">
-          {players.map((player, index) => (
-            <div key={player.id} className="score-row">
-              <span>{displayPlayerName(player.name, index)}</span>
-              <strong>{scores[player.id] ?? 0}</strong>
-            </div>
           ))}
         </CardContent>
       </Card>
@@ -235,64 +219,39 @@ export function DealSection({
   );
 }
 
-type DiscussionSectionProps = {
+type VoteSectionProps = {
   text: AppText;
   round: RoundState;
-  formattedTime: string;
-  hint: string;
-  onNewHint: () => void;
-  onAccusePlayer: (id: string) => void;
-  onOpenSpyGuess: () => void;
-  onEndRound: () => void;
+  voteIndex: number;
+  onVote: (targetId: string) => void;
   displayPlayerName: DisplayNameFn;
 };
 
-export function DiscussionSection({
-  text,
-  round,
-  formattedTime,
-  hint,
-  onNewHint,
-  onAccusePlayer,
-  onOpenSpyGuess,
-  onEndRound,
-  displayPlayerName,
-}: DiscussionSectionProps) {
+export function VoteSection({ text, round, voteIndex, onVote, displayPlayerName }: VoteSectionProps) {
+  const currentVoter = round.players[voteIndex];
   return (
     <section className="phase-stack">
       <Card>
         <CardHeader>
-          <p className="kicker">{text.discussion}</p>
-          <h2 className="timer">{formattedTime}</h2>
-          <CardDescription>{text.discussionInstruction}</CardDescription>
+          <p className="kicker">{text.voting}</p>
+          <CardTitle>
+            {text.step} {voteIndex + 1} {text.of} {round.players.length}
+          </CardTitle>
+          <CardDescription>{text.votingInstruction}</CardDescription>
         </CardHeader>
 
         <CardContent className="stack-tight">
-          <div className="hint-box">
-            <p className="muted">{text.hintLabel}</p>
-            <strong>{hint}</strong>
-            <Button type="button" variant="secondary" size="sm" onClick={onNewHint}>
-              {text.newHint}
-            </Button>
-          </div>
+          <p>
+            {text.votingTurn}: <strong>{displayPlayerName(currentVoter?.name ?? "", voteIndex)}</strong>
+          </p>
+          <p className="kicker">{text.votingQuestion}</p>
 
-          <p className="muted">{text.pointAtSuspectHelp}</p>
-          <p className="kicker">{text.pointAtSuspect}</p>
           <div className="chip-grid chip-grid--large">
             {round.players.map((player, index) => (
-              <Button key={player.id} type="button" variant="chip" onClick={() => onAccusePlayer(player.id)}>
-                {displayPlayerName(player.name, index)}
+              <Button key={player.id} type="button" variant="chip" onClick={() => onVote(player.id)}>
+                {text.voteFor} {displayPlayerName(player.name, index)}
               </Button>
             ))}
-          </div>
-
-          <div className="utility-actions">
-            <Button type="button" variant="outline" size="sm" onClick={onOpenSpyGuess}>
-              {text.spyGuessAction}
-            </Button>
-            <Button type="button" variant="danger" size="sm" onClick={onEndRound}>
-              {text.endRound}
-            </Button>
           </div>
         </CardContent>
       </Card>
@@ -302,74 +261,25 @@ export function DiscussionSection({
 
 type SpyGuessSectionProps = {
   text: AppText;
-  round: RoundState;
-  guessMode: GuessMode;
-  guessingSpyId: string;
   spyGuess: string;
-  roundPlayerIndexById: Record<string, number>;
-  onSetGuessingSpyId: (value: string) => void;
   onSetSpyGuess: (value: string) => void;
   onSubmitGuess: () => void;
-  onBackToDiscussion: () => void;
-  displayPlayerName: DisplayNameFn;
 };
 
-export function SpyGuessSection({
-  text,
-  round,
-  guessMode,
-  guessingSpyId,
-  spyGuess,
-  roundPlayerIndexById,
-  onSetGuessingSpyId,
-  onSetSpyGuess,
-  onSubmitGuess,
-  onBackToDiscussion,
-  displayPlayerName,
-}: SpyGuessSectionProps) {
+export function SpyGuessSection({ text, spyGuess, onSetSpyGuess, onSubmitGuess }: SpyGuessSectionProps) {
   return (
     <section className="phase-stack">
-      <Card className="stage-card">
+      <Card className="stage-card stage-card--spy">
         <CardHeader>
-          <p className="kicker">{guessMode === "caught_spy_guess" ? text.lastChance : text.spyGuessTitle}</p>
+          <p className="kicker">{text.lastChance}</p>
           <CardTitle>{text.guessLocation}</CardTitle>
         </CardHeader>
 
         <CardContent className="stack-tight">
-          {round.spyIds.length > 1 && guessMode === "free_guess" && (
-            <Label className="field">
-              <span>{text.whichSpyGuesses}</span>
-              <Select value={guessingSpyId} onValueChange={onSetGuessingSpyId}>
-                <SelectTrigger>
-                  <SelectValue placeholder={text.whichSpyGuesses} />
-                </SelectTrigger>
-                <SelectContent>
-                  {round.spyIds.map((id) => {
-                    const playerIndex = roundPlayerIndexById[id] ?? 0;
-                    const playerName = round.players[playerIndex]?.name ?? "";
-                    return (
-                      <SelectItem key={id} value={id}>
-                        {displayPlayerName(playerName, playerIndex)}
-                      </SelectItem>
-                    );
-                  })}
-                </SelectContent>
-              </Select>
-            </Label>
-          )}
-
           <Input value={spyGuess} onChange={(event) => onSetSpyGuess(event.target.value)} placeholder={text.guessPlaceholder} />
-
-          <div className="action-grid">
-            <Button type="button" onClick={onSubmitGuess}>
-              {text.submitGuess}
-            </Button>
-            {guessMode === "free_guess" && (
-              <Button type="button" variant="outline" onClick={onBackToDiscussion}>
-                {text.backToDiscussion}
-              </Button>
-            )}
-          </div>
+          <Button type="button" onClick={onSubmitGuess}>
+            {text.submitGuess}
+          </Button>
         </CardContent>
       </Card>
     </section>
@@ -380,7 +290,6 @@ type ResultSectionProps = {
   text: AppText;
   round: RoundState;
   roundResult: RoundResult;
-  scores: Record<string, number>;
   onNewRound: () => void;
   onBackToSetup: () => void;
   displayPlayerName: DisplayNameFn;
@@ -390,7 +299,6 @@ export function ResultSection({
   text,
   round,
   roundResult,
-  scores,
   onNewRound,
   onBackToSetup,
   displayPlayerName,
@@ -418,7 +326,6 @@ export function ResultSection({
                     {displayPlayerName(player.name, index)}{" "}
                     {assignment.isSpy ? `(${text.spyShort})` : `(${text.roleShort}: ${assignment.role})`}
                   </span>
-                  <strong>{scores[player.id] ?? 0}</strong>
                 </div>
               );
             })}
