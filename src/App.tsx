@@ -3,6 +3,13 @@ import { Languages, Repeat2 } from "lucide-react";
 import { HINT_QUESTIONS, PACKS } from "./content";
 import { createRound, normalizeValue } from "./game";
 import type { GamePhase, GuessMode, Locale, Player, RoundResult, RoundState } from "./types";
+import { Badge } from "./components/ui/badge";
+import { Button } from "./components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./components/ui/card";
+import { Checkbox } from "./components/ui/checkbox";
+import { Input } from "./components/ui/input";
+import { Label } from "./components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/ui/select";
 
 const DEFAULT_PLAYERS = ["Spiller 1", "Spiller 2", "Spiller 3", "Spiller 4"];
 const ROUND_DURATION_SECONDS = 8 * 60;
@@ -353,262 +360,286 @@ export function App() {
   }
 
   return (
-    <main className="shell">
-      <div className="ambient ambient-a" />
-      <div className="ambient ambient-b" />
-      <section className="panel">
-        <header className="panel__header">
-          <div className="row header-row">
-            <div>
-              <h1>Spionspillet</h1>
-            </div>
-            <button
-              type="button"
-              className="lang-switch"
-              onClick={toggleLocale}
-              aria-label={`${text.languageLabel}: ${locale === "nb" ? text.english : text.norwegian}`}
-            >
-              <Languages size={18} />
-              <span className="lang-switch__label">
-                <small>{text.languageLabel}</small>
-                <strong>{locale === "nb" ? text.norwegian : text.english}</strong>
-              </span>
-              <span className="lang-switch__next">{locale === "nb" ? text.english : text.norwegian}</span>
-              <Repeat2 size={15} />
-            </button>
+    <main className="app-shell">
+      <section className="app-frame">
+        <header className="app-header">
+          <div>
+            <p className="kicker">Spy party</p>
+            <h1 className="app-title">Spionspillet</h1>
           </div>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            className="locale-toggle"
+            onClick={toggleLocale}
+            aria-label={`${text.languageLabel}: ${locale === "nb" ? text.english : text.norwegian}`}
+          >
+            <Languages size={16} />
+            <span className="locale-toggle__current">{locale === "nb" ? text.norwegian : text.english}</span>
+            <Repeat2 size={14} />
+            <span className="locale-toggle__next">{locale === "nb" ? text.english : text.norwegian}</span>
+          </Button>
         </header>
 
         {phase === "setup" && (
-          <section className="stack">
-            <div className="card">
-              <h2>{text.players}</h2>
-              <p className="muted">{text.playersHelp}</p>
-              <div className="stack compact">
+          <section className="phase-stack phase-stack--setup">
+            <Card>
+              <CardHeader>
+                <CardTitle>{text.players}</CardTitle>
+                <CardDescription>{text.playersHelp}</CardDescription>
+              </CardHeader>
+              <CardContent className="stack-tight">
                 {players.map((player) => (
-                  <div className="row" key={player.id}>
-                    <input
+                  <div className="player-row" key={player.id}>
+                    <Input
                       aria-label={`${text.nameFor} ${player.name}`}
                       value={player.name}
                       onChange={(event) => updatePlayerName(player.id, event.target.value)}
                     />
-                    <button type="button" className="ghost" onClick={() => removePlayer(player.id)}>
+                    <Button type="button" variant="outline" onClick={() => removePlayer(player.id)}>
                       {text.remove}
-                    </button>
+                    </Button>
                   </div>
                 ))}
-              </div>
-              <button type="button" className="ghost" onClick={addPlayer}>
-                {text.addPlayer}
-              </button>
-            </div>
+                <Button type="button" variant="secondary" onClick={addPlayer}>
+                  {text.addPlayer}
+                </Button>
+              </CardContent>
+            </Card>
 
-            <div className="card">
-              <h2>{text.setup}</h2>
-              <div className="form-grid">
-                <label>
+            <Card>
+              <CardHeader>
+                <CardTitle>{text.setup}</CardTitle>
+              </CardHeader>
+              <CardContent className="form-grid">
+                <Label className="field">
                   <span>{text.spiesCount}</span>
-                  <input
+                  <Input
                     type="number"
                     min={1}
                     max={Math.max(1, players.length - 1)}
                     value={spyCount}
                     onChange={(event) => setSpyCount(Number(event.target.value))}
                   />
-                </label>
-                <label className="check">
-                  <input
-                    type="checkbox"
-                    checked={includeRoles}
-                    onChange={(event) => setIncludeRoles(event.target.checked)}
-                  />
+                </Label>
+                <Label className="check-row">
+                  <Checkbox checked={includeRoles} onCheckedChange={(checked) => setIncludeRoles(checked === true)} />
                   <span>{text.includeRoles}</span>
-                </label>
-              </div>
-            </div>
+                </Label>
+              </CardContent>
+            </Card>
 
-            <div className="card">
-              <h2>{text.locationPacks}</h2>
-              <div className="chips">
+            <Card>
+              <CardHeader>
+                <CardTitle>{text.locationPacks}</CardTitle>
+              </CardHeader>
+              <CardContent className="chip-grid">
                 {PACKS.map((pack) => (
-                  <button
+                  <Button
                     key={pack.id}
                     type="button"
-                    className={selectedPackIds.includes(pack.id) ? "chip active" : "chip"}
+                    variant={selectedPackIds.includes(pack.id) ? "chipActive" : "chip"}
                     onClick={() => togglePack(pack.id)}
                   >
                     {pack.name[locale]}
-                  </button>
+                  </Button>
                 ))}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
-            <div className="card">
-              <h2>{text.scoreboard}</h2>
-              <div className="score-grid">
+            <Card>
+              <CardHeader>
+                <CardTitle>{text.scoreboard}</CardTitle>
+              </CardHeader>
+              <CardContent className="score-grid">
                 {players.map((player) => (
-                  <div key={player.id} className="score-item">
+                  <div key={player.id} className="score-row">
                     <span>{player.name}</span>
                     <strong>{scores[player.id] ?? 0}</strong>
                   </div>
                 ))}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
-            <button type="button" className="primary" disabled={!canStartGame} onClick={startRound}>
+            <Button type="button" size="full" disabled={!canStartGame} onClick={startRound}>
               {text.startRound}
-            </button>
+            </Button>
           </section>
         )}
 
         {phase === "deal" && round && (
-          <section className="stack">
-            <div className="card big-card">
-              <p className="eyebrow">
-                {text.step} {revealIndex + 1} {text.of} {round.players.length}
-              </p>
-              <h2>{round.players[revealIndex].name}</h2>
-              {!showCard && <p>{text.revealPrompt}</p>}
-              {showCard && (
-                <div className="reveal">
-                  {round.assignments[round.players[revealIndex].id].isSpy ? (
-                    <>
-                      <p className="tag danger">{text.youAreSpy}</p>
-                      <p>{text.spyInstruction}</p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="tag safe">{text.youAreAgent}</p>
-                      <p>
-                        {text.location}: <strong>{round.location.name}</strong>
-                      </p>
-                      <p>
-                        {text.role}: <strong>{round.assignments[round.players[revealIndex].id].role}</strong>
-                      </p>
-                    </>
+          <section className="phase-stack">
+            <Card className="stage-card">
+              <CardHeader>
+                <p className="kicker">
+                  {text.step} {revealIndex + 1} {text.of} {round.players.length}
+                </p>
+                <CardTitle>{round.players[revealIndex].name}</CardTitle>
+                {!showCard && <CardDescription>{text.revealPrompt}</CardDescription>}
+              </CardHeader>
+              <CardContent>
+                {showCard && (
+                  <div className="reveal-box">
+                    {round.assignments[round.players[revealIndex].id].isSpy ? (
+                      <>
+                        <Badge variant="danger">{text.youAreSpy}</Badge>
+                        <p>{text.spyInstruction}</p>
+                      </>
+                    ) : (
+                      <>
+                        <Badge variant="success">{text.youAreAgent}</Badge>
+                        <p>
+                          {text.location}: <strong>{round.location.name}</strong>
+                        </p>
+                        <p>
+                          {text.role}: <strong>{round.assignments[round.players[revealIndex].id].role}</strong>
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
+                <div className="action-row">
+                  {!showCard && (
+                    <Button type="button" size="full" onClick={() => setShowCard(true)}>
+                      {text.showCard}
+                    </Button>
+                  )}
+                  {showCard && (
+                    <Button type="button" size="full" onClick={goToNextReveal}>
+                      {text.hideAndPass}
+                    </Button>
                   )}
                 </div>
-              )}
-              <div className="actions">
-                {!showCard && (
-                  <button type="button" className="primary" onClick={() => setShowCard(true)}>
-                    {text.showCard}
-                  </button>
-                )}
-                {showCard && (
-                  <button type="button" className="primary" onClick={goToNextReveal}>
-                    {text.hideAndPass}
-                  </button>
-                )}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </section>
         )}
 
         {phase === "discussion" && round && (
-          <section className="stack">
-            <div className="card">
-              <p className="eyebrow">{text.discussion}</p>
-              <h2 className="timer">{formatSeconds(remainingSeconds)}</h2>
-              <p>{text.discussionInstruction}</p>
-              <div className="hint-box">
-                <p className="muted">{text.hintLabel}</p>
-                <strong>{hint}</strong>
-                <button type="button" className="ghost" onClick={() => setHintIndex(randomIndex(hints.length))}>
-                  {text.newHint}
-                </button>
-              </div>
-              <div className="actions">
-                <button type="button" className="ghost" onClick={openSpyGuessFromDiscussion}>
-                  {text.spyGuessAction}
-                </button>
-                <button type="button" className="ghost danger" onClick={revealNow}>
-                  {text.endRound}
-                </button>
-              </div>
-              <div className="stack compact">
+          <section className="phase-stack">
+            <Card>
+              <CardHeader>
+                <p className="kicker">{text.discussion}</p>
+                <h2 className="timer">{formatSeconds(remainingSeconds)}</h2>
+                <CardDescription>{text.discussionInstruction}</CardDescription>
+              </CardHeader>
+              <CardContent className="stack-tight">
+                <div className="hint-box">
+                  <p className="muted">{text.hintLabel}</p>
+                  <strong>{hint}</strong>
+                  <Button type="button" variant="secondary" size="sm" onClick={() => setHintIndex(randomIndex(hints.length))}>
+                    {text.newHint}
+                  </Button>
+                </div>
+
+                <div className="action-grid">
+                  <Button type="button" variant="outline" onClick={openSpyGuessFromDiscussion}>
+                    {text.spyGuessAction}
+                  </Button>
+                  <Button type="button" variant="danger" onClick={revealNow}>
+                    {text.endRound}
+                  </Button>
+                </div>
+
                 <p className="muted">{text.pointAtSuspectHelp}</p>
-                <p className="eyebrow">{text.pointAtSuspect}</p>
-                <div className="chips vertical">
+                <p className="kicker">{text.pointAtSuspect}</p>
+                <div className="chip-grid chip-grid--large">
                   {round.players.map((player) => (
-                    <button key={player.id} type="button" className="chip" onClick={() => accusePlayer(player.id)}>
+                    <Button key={player.id} type="button" variant="chip" onClick={() => accusePlayer(player.id)}>
                       {player.name}
-                    </button>
+                    </Button>
                   ))}
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </section>
         )}
 
         {phase === "spy_guess" && round && (
-          <section className="stack">
-            <div className="card big-card">
-              <p className="eyebrow">{guessMode === "caught_spy_guess" ? text.lastChance : text.spyGuessTitle}</p>
-              <h2>{text.guessLocation}</h2>
-              {round.spyIds.length > 1 && guessMode === "free_guess" && (
-                <label>
-                  <span>{text.whichSpyGuesses}</span>
-                  <select value={guessingSpyId} onChange={(event) => setGuessingSpyId(event.target.value)}>
-                    {round.spyIds.map((id) => (
-                      <option key={id} value={id}>
-                        {playersById[id]?.name ?? id}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )}
-              <input
-                value={spyGuess}
-                onChange={(event) => setSpyGuess(event.target.value)}
-                placeholder={text.guessPlaceholder}
-              />
-              <div className="actions">
-                <button type="button" className="primary" onClick={submitSpyGuess}>
-                  {text.submitGuess}
-                </button>
-                {guessMode === "free_guess" && (
-                  <button type="button" className="ghost" onClick={() => setPhase("discussion")}>
-                    {text.backToDiscussion}
-                  </button>
+          <section className="phase-stack">
+            <Card className="stage-card">
+              <CardHeader>
+                <p className="kicker">{guessMode === "caught_spy_guess" ? text.lastChance : text.spyGuessTitle}</p>
+                <CardTitle>{text.guessLocation}</CardTitle>
+              </CardHeader>
+              <CardContent className="stack-tight">
+                {round.spyIds.length > 1 && guessMode === "free_guess" && (
+                  <Label className="field">
+                    <span>{text.whichSpyGuesses}</span>
+                    <Select value={guessingSpyId} onValueChange={setGuessingSpyId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={text.whichSpyGuesses} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {round.spyIds.map((id) => (
+                          <SelectItem key={id} value={id}>
+                            {playersById[id]?.name ?? id}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Label>
                 )}
-              </div>
-            </div>
+
+                <Input
+                  value={spyGuess}
+                  onChange={(event) => setSpyGuess(event.target.value)}
+                  placeholder={text.guessPlaceholder}
+                />
+
+                <div className="action-grid">
+                  <Button type="button" onClick={submitSpyGuess}>
+                    {text.submitGuess}
+                  </Button>
+                  {guessMode === "free_guess" && (
+                    <Button type="button" variant="outline" onClick={() => setPhase("discussion")}>
+                      {text.backToDiscussion}
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           </section>
         )}
 
         {phase === "result" && round && roundResult && (
-          <section className="stack">
-            <div className="card">
-              <p className="eyebrow">{text.result}</p>
-              <h2>{roundResult.winner === "spies" ? text.spiesWon : text.agentsWon}</h2>
-              <p>{roundResult.reason}</p>
-              <p>
-                {text.location}: <strong>{round.location.name}</strong>
-              </p>
-              <div className="score-grid">
-                {round.players.map((player) => {
-                  const assignment = round.assignments[player.id];
-                  return (
-                    <div className="score-item" key={player.id}>
-                      <span>
-                        {player.name}{" "}
-                        {assignment.isSpy ? `(${text.spyShort})` : `(${text.roleShort}: ${assignment.role})`}
-                      </span>
-                      <strong>{scores[player.id] ?? 0}</strong>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="actions">
-                <button type="button" className="primary" onClick={startRound}>
-                  {text.newRound}
-                </button>
-                <button type="button" className="ghost" onClick={endToSetup}>
-                  {text.toSetup}
-                </button>
-              </div>
-            </div>
+          <section className="phase-stack">
+            <Card>
+              <CardHeader>
+                <p className="kicker">{text.result}</p>
+                <CardTitle>{roundResult.winner === "spies" ? text.spiesWon : text.agentsWon}</CardTitle>
+                <CardDescription>{roundResult.reason}</CardDescription>
+              </CardHeader>
+              <CardContent className="stack-tight">
+                <p>
+                  {text.location}: <strong>{round.location.name}</strong>
+                </p>
+
+                <div className="score-grid">
+                  {round.players.map((player) => {
+                    const assignment = round.assignments[player.id];
+                    return (
+                      <div className="score-row" key={player.id}>
+                        <span>
+                          {player.name} {assignment.isSpy ? `(${text.spyShort})` : `(${text.roleShort}: ${assignment.role})`}
+                        </span>
+                        <strong>{scores[player.id] ?? 0}</strong>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="action-grid">
+                  <Button type="button" onClick={startRound}>
+                    {text.newRound}
+                  </Button>
+                  <Button type="button" variant="outline" onClick={endToSetup}>
+                    {text.toSetup}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </section>
         )}
       </section>
