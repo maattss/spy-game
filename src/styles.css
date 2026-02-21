@@ -245,6 +245,11 @@ select {
   gap: 0.8rem;
 }
 
+.setup-side-stack {
+  display: grid;
+  gap: 0.85rem;
+}
+
 .setup-card .ui-card__header {
   padding-top: 0.68rem;
   padding-bottom: 0.58rem;
@@ -606,14 +611,19 @@ select {
 
   .phase-stack--setup {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .phase-stack--setup > .ui-card:first-child {
+    grid-column: 1;
+  }
+
+  .phase-stack--setup > .setup-side-stack {
+    grid-column: 2;
   }
 
   .phase-stack--setup > .ui-button {
     grid-column: 1 / -1;
-  }
-
-  .phase-stack--setup > .setup-card {
-    align-self: start;
   }
 
   .score-grid {

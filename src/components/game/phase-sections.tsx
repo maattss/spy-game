@@ -88,39 +88,41 @@ export function SetupSection({
         </CardContent>
       </Card>
 
-      <Card className="setup-card">
-        <CardHeader className="setup-card__header">
-          <CardTitle>{text.spiesCount}</CardTitle>
-        </CardHeader>
-        <CardContent className="setup-card__content">
-          <Input
-            aria-label={text.spiesCount}
-            type="number"
-            min={1}
-            max={Math.max(1, players.length - 1)}
-            value={spyCount}
-            onChange={(event) => onSetSpyCount(Number(event.target.value))}
-          />
-        </CardContent>
-      </Card>
+      <div className="setup-side-stack">
+        <Card className="setup-card">
+          <CardHeader className="setup-card__header">
+            <CardTitle>{text.spiesCount}</CardTitle>
+          </CardHeader>
+          <CardContent className="setup-card__content">
+            <Input
+              aria-label={text.spiesCount}
+              type="number"
+              min={1}
+              max={Math.max(1, players.length - 1)}
+              value={spyCount}
+              onChange={(event) => onSetSpyCount(Number(event.target.value))}
+            />
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{text.locationPacks}</CardTitle>
-        </CardHeader>
-        <CardContent className="chip-grid">
-          {PACKS.map((pack) => (
-            <Button
-              key={pack.id}
-              type="button"
-              variant={selectedPackIds.includes(pack.id) ? "chipActive" : "chip"}
-              onClick={() => onTogglePack(pack.id)}
-            >
-              {pack.name[locale]}
-            </Button>
-          ))}
-        </CardContent>
-      </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>{text.locationPacks}</CardTitle>
+          </CardHeader>
+          <CardContent className="chip-grid">
+            {PACKS.map((pack) => (
+              <Button
+                key={pack.id}
+                type="button"
+                variant={selectedPackIds.includes(pack.id) ? "chipActive" : "chip"}
+                onClick={() => onTogglePack(pack.id)}
+              >
+                {pack.name[locale]}
+              </Button>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
 
       <Button type="button" size="full" disabled={!canStartGame} onClick={onStartRound}>
         {text.startRound}
