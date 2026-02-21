@@ -338,6 +338,31 @@ select {
   color: color-mix(in srgb, var(--success) 80%, var(--text));
 }
 
+.location-callout {
+  border: 1px solid color-mix(in srgb, var(--success) 42%, var(--border));
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--success) 8%, var(--bg-subtle));
+  padding: 0.62rem 0.68rem;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.location-callout__label {
+  margin: 0;
+  font-size: 0.77rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--success) 80%, var(--text));
+  font-weight: 700;
+}
+
+.location-callout__value {
+  margin: 0;
+  font-size: 1.16rem;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
 .timer {
   font-size: clamp(2.05rem, 14vw, 3.8rem);
   line-height: 0.95;
@@ -585,6 +610,10 @@ select {
 
   .phase-stack--setup > .ui-button {
     grid-column: 1 / -1;
+  }
+
+  .phase-stack--setup > .setup-card {
+    align-self: start;
   }
 
   .score-grid {
