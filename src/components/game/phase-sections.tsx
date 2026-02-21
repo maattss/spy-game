@@ -2,7 +2,6 @@ import { X } from "lucide-react";
 import { PACKS } from "../../content";
 import type { AppText } from "../../copy";
 import type { Player, RoundResult, RoundState } from "../../types";
-import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
@@ -169,13 +168,11 @@ export function DealSection({
             <div className="reveal-box">
               {isSpy ? (
                 <>
-                  <Badge variant="danger">{text.youAreSpy}</Badge>
                   <p className="identity-title identity-title--spy">{text.youAreSpy}</p>
                   <p>{text.spyInstruction}</p>
                 </>
               ) : (
                 <>
-                  <Badge variant="success">{text.youAreAgent}</Badge>
                   <p className="identity-title identity-title--agent">{text.youAreAgent}</p>
                   <p>
                     {text.location}: <strong>{round.location.name[locale]}</strong>
