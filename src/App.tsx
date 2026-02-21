@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Languages, Repeat2 } from "lucide-react";
+import { Languages, Moon, Sun } from "lucide-react";
 import { HINT_QUESTIONS, PACKS } from "./content";
 import { createRound, normalizeValue } from "./game";
 import type { GamePhase, GuessMode, Locale, Player, RoundResult, RoundState } from "./types";
@@ -11,14 +11,18 @@ import { Input } from "./components/ui/input";
 import { Label } from "./components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/ui/select";
 
-const DEFAULT_PLAYERS = ["Spiller 1", "Spiller 2", "Spiller 3", "Spiller 4"];
+const DEFAULT_PLAYER_COUNT = 4;
 const ROUND_DURATION_SECONDS = 8 * 60;
+const THEME_STORAGE_KEY = "spy-theme";
 
 const TEXT = {
   nb: {
     languageLabel: "Sprak",
+    themeLabel: "Tema",
     norwegian: "Norsk",
     english: "Engelsk",
+    dark: "Mork",
+    light: "Lys",
     players: "Spillere",
     playersHelp: "3-12 spillere. Telefonen sendes videre mellom hver visning.",
     nameFor: "Navn for",
@@ -73,8 +77,11 @@ const TEXT = {
   },
   en: {
     languageLabel: "Language",
+    themeLabel: "Theme",
     norwegian: "Norwegian",
     english: "English",
+    dark: "Dark",
+    light: "Light",
     players: "Players",
     playersHelp: "3-12 players. Pass the phone between each reveal.",
     nameFor: "Name for",
@@ -144,9 +151,21 @@ function randomIndex(length: number): number {
   return Math.floor(Math.random() * length);
 }
 
+type Theme = "dark" | "light";
+
 export function App() {
   const [locale, setLocale] = useState<Locale>("nb");
-  const [players, setPlayers] = useState<Player[]>(() => DEFAULT_PLAYERS.map((name) => newPlayer(name)));
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window === "undefined") {
+      return "dark";
+    }
+    const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+    if (storedTheme === "dark" || storedTheme === "light") {
+      return storedTheme;
+    }
+    return "dark";
+  });
+  const [players, setPlayers] = useState<Player[]>(() => Array.from({ length: DEFAULT_PLAYER_COUNT }, () => newPlayer("")));
   const [scores, setScores] = useState<Record<string, number>>({});
   const [selectedPackIds, setSelectedPackIds] = useState<string[]>(() => [PACKS[0].id]);
   const [spyCount, setSpyCount] = useState(1);
@@ -173,12 +192,41 @@ export function App() {
   const playersById = useMemo(() => {
     return Object.fromEntries(players.map((player) => [player.id, player]));
   }, [players]);
+  const playerIndexById = useMemo(() => {
+    return Object.fromEntries(players.map((player, index) => [player.id, index]));
+  }, [players]);
+  const roundPlayerIndexById = useMemo(() => {
+    if (!round) {
+      return {};
+    }
+    return Object.fromEntries(round.players.map((player, index) => [player.id, index]));
+  }, [round]);
 
   const canStartGame = players.length >= 3 && selectedPackIds.length > 0 && spyCount >= 1 && spyCount < players.length;
 
   function toggleLocale() {
     setLocale((current) => (current === "nb" ? "en" : "nb"));
   }
+
+  function toggleTheme() {
+    setTheme((current) => (current === "dark" ? "light" : "dark"));
+  }
+
+  function playerPlaceholder(index: number): string {
+    return locale === "nb" ? `Spiller ${index + 1}` : `Player ${index + 1}`;
+  }
+
+  function displayPlayerName(name: string, index: number): string {
+    const trimmedName = name.trim();
+    return trimmedName.length > 0 ? trimmedName : playerPlaceholder(index);
+  }
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    const themeColor = theme === "dark" ? "#030507" : "#f4f7fb";
+    document.querySelector("meta[name='theme-color']")?.setAttribute("content", themeColor);
+  }, [theme]);
 
   useEffect(() => {
     if (phase !== "discussion") {
@@ -203,8 +251,7 @@ export function App() {
     if (players.length >= 12) {
       return;
     }
-    const defaultName = locale === "nb" ? `Spiller ${players.length + 1}` : `Player ${players.length + 1}`;
-    setPlayers((current) => [...current, newPlayer(defaultName)]);
+    setPlayers((current) => [...current, newPlayer("")]);
   }
 
   function removePlayer(id: string) {
@@ -283,10 +330,10 @@ export function App() {
       setSpyGuess("");
       return;
     }
+    const targetIndex = playerIndexById[targetId] ?? 0;
     finishRound({
       winner: "spies",
-      reason:
-        text.reasons.wrongVote(playersById[targetId]?.name ?? (locale === "nb" ? "Ukjent spiller" : "Unknown player")),
+      reason: text.reasons.wrongVote(displayPlayerName(playersById[targetId]?.name ?? "", targetIndex)),
     });
   }
 
@@ -367,19 +414,30 @@ export function App() {
             <p className="kicker">Spy party</p>
             <h1 className="app-title">Spionspillet</h1>
           </div>
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            className="locale-toggle"
-            onClick={toggleLocale}
-            aria-label={`${text.languageLabel}: ${locale === "nb" ? text.english : text.norwegian}`}
-          >
-            <Languages size={16} />
-            <span className="locale-toggle__current">{locale === "nb" ? text.norwegian : text.english}</span>
-            <Repeat2 size={14} />
-            <span className="locale-toggle__next">{locale === "nb" ? text.english : text.norwegian}</span>
-          </Button>
+          <div className="header-controls">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="header-switch"
+              onClick={toggleLocale}
+              aria-label={`${text.languageLabel}: ${locale === "nb" ? text.english : text.norwegian}`}
+            >
+              <Languages size={16} />
+              <span>{locale === "nb" ? "NO" : "EN"}</span>
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="header-switch"
+              onClick={toggleTheme}
+              aria-label={`${text.themeLabel}: ${theme === "dark" ? text.light : text.dark}`}
+            >
+              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+              <span>{theme === "dark" ? text.light : text.dark}</span>
+            </Button>
+          </div>
         </header>
 
         {phase === "setup" && (
@@ -390,11 +448,12 @@ export function App() {
                 <CardDescription>{text.playersHelp}</CardDescription>
               </CardHeader>
               <CardContent className="stack-tight">
-                {players.map((player) => (
+                {players.map((player, index) => (
                   <div className="player-row" key={player.id}>
                     <Input
-                      aria-label={`${text.nameFor} ${player.name}`}
+                      aria-label={`${text.nameFor} ${displayPlayerName(player.name, index)}`}
                       value={player.name}
+                      placeholder={playerPlaceholder(index)}
                       onChange={(event) => updatePlayerName(player.id, event.target.value)}
                     />
                     <Button type="button" variant="outline" onClick={() => removePlayer(player.id)}>
@@ -453,9 +512,9 @@ export function App() {
                 <CardTitle>{text.scoreboard}</CardTitle>
               </CardHeader>
               <CardContent className="score-grid">
-                {players.map((player) => (
+                {players.map((player, index) => (
                   <div key={player.id} className="score-row">
-                    <span>{player.name}</span>
+                    <span>{displayPlayerName(player.name, index)}</span>
                     <strong>{scores[player.id] ?? 0}</strong>
                   </div>
                 ))}
@@ -475,7 +534,7 @@ export function App() {
                 <p className="kicker">
                   {text.step} {revealIndex + 1} {text.of} {round.players.length}
                 </p>
-                <CardTitle>{round.players[revealIndex].name}</CardTitle>
+                <CardTitle>{displayPlayerName(round.players[revealIndex].name, revealIndex)}</CardTitle>
                 {!showCard && <CardDescription>{text.revealPrompt}</CardDescription>}
               </CardHeader>
               <CardContent>
@@ -545,9 +604,9 @@ export function App() {
                 <p className="muted">{text.pointAtSuspectHelp}</p>
                 <p className="kicker">{text.pointAtSuspect}</p>
                 <div className="chip-grid chip-grid--large">
-                  {round.players.map((player) => (
+                  {round.players.map((player, index) => (
                     <Button key={player.id} type="button" variant="chip" onClick={() => accusePlayer(player.id)}>
-                      {player.name}
+                      {displayPlayerName(player.name, index)}
                     </Button>
                   ))}
                 </div>
@@ -574,7 +633,7 @@ export function App() {
                       <SelectContent>
                         {round.spyIds.map((id) => (
                           <SelectItem key={id} value={id}>
-                            {playersById[id]?.name ?? id}
+                            {displayPlayerName(round.players[roundPlayerIndexById[id] ?? 0]?.name ?? "", roundPlayerIndexById[id] ?? 0)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -617,12 +676,13 @@ export function App() {
                 </p>
 
                 <div className="score-grid">
-                  {round.players.map((player) => {
+                  {round.players.map((player, index) => {
                     const assignment = round.assignments[player.id];
                     return (
                       <div className="score-row" key={player.id}>
                         <span>
-                          {player.name} {assignment.isSpy ? `(${text.spyShort})` : `(${text.roleShort}: ${assignment.role})`}
+                          {displayPlayerName(player.name, index)}{" "}
+                          {assignment.isSpy ? `(${text.spyShort})` : `(${text.roleShort}: ${assignment.role})`}
                         </span>
                         <strong>{scores[player.id] ?? 0}</strong>
                       </div>
