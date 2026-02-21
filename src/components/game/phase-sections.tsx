@@ -165,10 +165,9 @@ export function DealSection({
               ) : (
                 <>
                   <p className="identity-title identity-title--agent">{text.youAreAgent}</p>
-                  <div className="location-callout">
-                    <p className="location-callout__label">{text.rememberLocation}</p>
-                    <p className="location-callout__value">{round.location.name[locale]}</p>
-                  </div>
+                  <p>
+                    {text.location}: <strong>{round.location.name[locale]}</strong>
+                  </p>
                 </>
               )}
             </div>
