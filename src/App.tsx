@@ -17,14 +17,19 @@ const THEME_STORAGE_KEY = "spy-theme";
 
 const TEXT = {
   nb: {
-    languageLabel: "Sprak",
+    languageLabel: "Språk",
     themeLabel: "Tema",
     norwegian: "Norsk",
     english: "Engelsk",
-    dark: "Mork",
+    dark: "Mørk",
     light: "Lys",
     players: "Spillere",
-    playersHelp: "3-12 spillere. Telefonen sendes videre mellom hver visning.",
+    playersIntro: "Les dette før dere starter runden:",
+    rulesTitle: "Regler",
+    rulePlayerCount: "Vær 3-12 spillere.",
+    rulePassPhone: "Send telefonen videre etter hver visning.",
+    ruleNoPeeking: "Kun aktiv spiller skal se skjermen.",
+    ruleDiscussion: "Still spørsmål uten å avsløre lokasjonen.",
     nameFor: "Navn for",
     remove: "Fjern",
     addPlayer: "+ Legg til spiller",
@@ -36,20 +41,20 @@ const TEXT = {
     startRound: "Start runde",
     step: "Steg",
     of: "av",
-    revealPrompt: "Trykk for a se hemmelig informasjon. Ingen andre skal se skjermen.",
+    revealPrompt: "Trykk for å se hemmelig informasjon. Ingen andre skal se skjermen.",
     youAreSpy: "DU ER SPION",
     youAreAgent: "DU ER AGENT",
-    spyInstruction: "Spill cool. Still smarte sporsmal. Prov a gjette lokasjonen.",
+    spyInstruction: "Spill rolig. Still smarte spørsmål. Prøv å gjette lokasjonen.",
     location: "Lokasjon",
     role: "Rolle",
     showCard: "Vis kort",
     hideAndPass: "Skjul og gi videre",
     discussion: "Diskusjon",
-    discussionInstruction: "Alle stiller sporsmal. Finn spionen uten a avslore lokasjonen.",
-    hintLabel: "Hint til neste sporsmal:",
+    discussionInstruction: "Alle stiller spørsmål. Finn spionen uten å avsløre lokasjonen.",
+    hintLabel: "Hint til neste spørsmål:",
     newHint: "Nytt hint",
-    pointAtSuspect: "Pek pa mistenkt",
-    pointAtSuspectHelp: "Nar gruppen er enig, pek ut en spiller direkte.",
+    pointAtSuspect: "Pek på mistenkt",
+    pointAtSuspectHelp: "Når gruppen er enig, pek ut en spiller direkte.",
     spyGuessAction: "Spion gjetter lokasjon",
     endRound: "Avslutt runde",
     lastChance: "Siste sjanse",
@@ -83,7 +88,12 @@ const TEXT = {
     dark: "Dark",
     light: "Light",
     players: "Players",
-    playersHelp: "3-12 players. Pass the phone between each reveal.",
+    playersIntro: "Read this before starting:",
+    rulesTitle: "Rules",
+    rulePlayerCount: "Be 3-12 players.",
+    rulePassPhone: "Pass the phone after each reveal.",
+    ruleNoPeeking: "Only the active player should see the screen.",
+    ruleDiscussion: "Ask questions without exposing the location.",
     nameFor: "Name for",
     remove: "Remove",
     addPlayer: "+ Add player",
@@ -411,8 +421,8 @@ export function App() {
       <section className="app-frame">
         <header className="app-header">
           <div>
-            <p className="kicker">Spy party</p>
-            <h1 className="app-title">Spionspillet</h1>
+            <p className="kicker">Spy</p>
+            <h1 className="app-title">Spy</h1>
           </div>
           <div className="header-controls">
             <Button
@@ -445,9 +455,18 @@ export function App() {
             <Card>
               <CardHeader>
                 <CardTitle>{text.players}</CardTitle>
-                <CardDescription>{text.playersHelp}</CardDescription>
+                <CardDescription>{text.playersIntro}</CardDescription>
               </CardHeader>
               <CardContent className="stack-tight">
+                <div className="rules-box" aria-label={text.rulesTitle}>
+                  <p className="rules-box__title">{text.rulesTitle}</p>
+                  <ul className="rules-list">
+                    <li>{text.rulePlayerCount}</li>
+                    <li>{text.rulePassPhone}</li>
+                    <li>{text.ruleNoPeeking}</li>
+                    <li>{text.ruleDiscussion}</li>
+                  </ul>
+                </div>
                 {players.map((player, index) => (
                   <div className="player-row" key={player.id}>
                     <Input

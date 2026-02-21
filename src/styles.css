@@ -192,6 +192,34 @@ select {
   gap: 0.45rem;
 }
 
+.rules-box {
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+  padding: 0.68rem 0.72rem;
+}
+
+.rules-box__title {
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.4rem;
+}
+
+.rules-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.28rem;
+  color: var(--muted);
+}
+
+.rules-list li::marker {
+  color: var(--accent);
+}
+
 .player-remove {
   flex-shrink: 0;
 }
