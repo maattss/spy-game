@@ -213,6 +213,8 @@ export function App() {
   }, [round]);
 
   const canStartGame = players.length >= 3 && selectedPackIds.length > 0 && spyCount >= 1 && spyCount < players.length;
+  const currentRevealPlayer = round ? round.players[revealIndex] : null;
+  const currentRevealAssignment = currentRevealPlayer && round ? round.assignments[currentRevealPlayer.id] : null;
 
   function toggleLocale() {
     setLocale((current) => (current === "nb" ? "en" : "nb"));
@@ -556,7 +558,15 @@ export function App() {
 
         {phase === "deal" && round && (
           <section className="phase-stack">
-            <Card className="stage-card">
+            <Card
+              className={`stage-card ${
+                showCard && currentRevealAssignment
+                  ? currentRevealAssignment.isSpy
+                    ? "stage-card--spy"
+                    : "stage-card--agent"
+                  : ""
+              }`}
+            >
               <CardHeader>
                 <p className="kicker">
                   {text.step} {revealIndex + 1} {text.of} {round.players.length}
@@ -567,14 +577,16 @@ export function App() {
               <CardContent>
                 {showCard && (
                   <div className="reveal-box">
-                    {round.assignments[round.players[revealIndex].id].isSpy ? (
+                    {currentRevealAssignment?.isSpy ? (
                       <>
                         <Badge variant="danger">{text.youAreSpy}</Badge>
+                        <p className="identity-title identity-title--spy">{text.youAreSpy}</p>
                         <p>{text.spyInstruction}</p>
                       </>
                     ) : (
                       <>
                         <Badge variant="success">{text.youAreAgent}</Badge>
+                        <p className="identity-title identity-title--agent">{text.youAreAgent}</p>
                         <p>
                           {text.location}: <strong>{round.location.name}</strong>
                         </p>

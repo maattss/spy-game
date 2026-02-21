@@ -15,8 +15,8 @@
   --text: #e6edf4;
   --muted: #96a7bb;
   --placeholder: #7f93aa;
-  --border: rgba(230, 237, 244, 0.14);
-  --border-strong: rgba(230, 237, 244, 0.32);
+  --border: rgba(230, 237, 244, 0.09);
+  --border-strong: rgba(230, 237, 244, 0.18);
   --accent: #4ea7f4;
   --accent-strong: #2f83ca;
   --success: #35b994;
@@ -31,8 +31,8 @@
   --text: #0f1724;
   --muted: #4d6075;
   --placeholder: #586d84;
-  --border: rgba(15, 23, 36, 0.15);
-  --border-strong: rgba(15, 23, 36, 0.34);
+  --border: rgba(15, 23, 36, 0.1);
+  --border-strong: rgba(15, 23, 36, 0.18);
   --accent: #1f7fcb;
   --accent-strong: #1668a8;
   --success: #0b8d6d;
@@ -91,8 +91,9 @@ select {
 .app-frame {
   width: min(68rem, 100%);
   border-radius: 1.1rem;
-  border: 1px solid var(--border-strong);
+  border: 1px solid var(--border);
   background: var(--bg-frame);
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.14);
   padding: 0.95rem;
 }
 
@@ -183,6 +184,21 @@ select {
 .stage-card {
   min-height: min(32rem, calc(100dvh - 15rem));
   align-content: start;
+}
+
+.stage-card--spy {
+  border-color: color-mix(in srgb, var(--danger) 55%, var(--border));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--danger) 18%, var(--bg-card)), var(--bg-card));
+}
+
+.stage-card--agent {
+  border-color: color-mix(in srgb, var(--success) 58%, var(--border));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--success) 16%, var(--bg-card)), var(--bg-card));
+}
+
+.stage-card--spy .ui-card__header,
+.stage-card--agent .ui-card__header {
+  border-bottom-color: color-mix(in srgb, currentColor 16%, var(--border));
 }
 
 .player-row {
@@ -285,6 +301,32 @@ select {
 
 .hint-box {
   border-style: dashed;
+}
+
+.stage-card--spy .reveal-box {
+  border-color: color-mix(in srgb, var(--danger) 55%, var(--border));
+  background: color-mix(in srgb, var(--danger) 11%, var(--bg-subtle));
+}
+
+.stage-card--agent .reveal-box {
+  border-color: color-mix(in srgb, var(--success) 58%, var(--border));
+  background: color-mix(in srgb, var(--success) 11%, var(--bg-subtle));
+}
+
+.identity-title {
+  margin-top: 0.15rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  font-size: 1.02rem;
+}
+
+.identity-title--spy {
+  color: color-mix(in srgb, var(--danger) 80%, var(--text));
+}
+
+.identity-title--agent {
+  color: color-mix(in srgb, var(--success) 80%, var(--text));
 }
 
 .timer {
