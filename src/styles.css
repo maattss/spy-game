@@ -245,14 +245,14 @@ select {
   gap: 0.8rem;
 }
 
-.field {
-  display: grid;
-  gap: 0.38rem;
+.setup-card .ui-card__header {
+  padding-top: 0.68rem;
+  padding-bottom: 0.58rem;
 }
 
 .setup-card .ui-card__content {
-  padding-top: 0.78rem;
-  padding-bottom: 0.78rem;
+  padding-top: 0;
+  padding-bottom: 0.68rem;
 }
 
 .setup-card__content {

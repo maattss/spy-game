@@ -6,7 +6,6 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
-import { Label } from "../ui/label";
 
 type DisplayNameFn = (name: string, index: number) => string;
 type PlaceholderFn = (index: number) => string;
@@ -91,17 +90,18 @@ export function SetupSection({
       </Card>
 
       <Card className="setup-card">
+        <CardHeader className="setup-card__header">
+          <CardTitle>{text.spiesCount}</CardTitle>
+        </CardHeader>
         <CardContent className="setup-card__content">
-          <Label className="field">
-            <span>{text.spiesCount}</span>
-            <Input
-              type="number"
-              min={1}
-              max={Math.max(1, players.length - 1)}
-              value={spyCount}
-              onChange={(event) => onSetSpyCount(Number(event.target.value))}
-            />
-          </Label>
+          <Input
+            aria-label={text.spiesCount}
+            type="number"
+            min={1}
+            max={Math.max(1, players.length - 1)}
+            value={spyCount}
+            onChange={(event) => onSetSpyCount(Number(event.target.value))}
+          />
         </CardContent>
       </Card>
 
