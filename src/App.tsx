@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Languages, Repeat2 } from "lucide-react";
+import { Badge } from "./components/ui/badge";
+import { Button } from "./components/ui/button";
+import { Card } from "./components/ui/card";
+import { Checkbox } from "./components/ui/checkbox";
+import { Input } from "./components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./components/ui/select";
 import { HINT_QUESTIONS, PACKS } from "./content";
 import { createRound, normalizeValue } from "./game";
 import type { GamePhase, GuessMode, Locale, Player, RoundResult, RoundState } from "./types";
@@ -362,8 +368,9 @@ export function App() {
             <div>
               <h1>Spionspillet</h1>
             </div>
-            <button
+            <Button
               type="button"
+              variant="ghost"
               className="lang-switch"
               onClick={toggleLocale}
               aria-label={`${text.languageLabel}: ${locale === "nb" ? text.english : text.norwegian}`}
@@ -375,75 +382,78 @@ export function App() {
               </span>
               <span className="lang-switch__next">{locale === "nb" ? text.english : text.norwegian}</span>
               <Repeat2 size={15} />
-            </button>
+            </Button>
           </div>
         </header>
 
         {phase === "setup" && (
           <section className="stack">
-            <div className="card">
+            <Card className="card">
               <h2>{text.players}</h2>
               <p className="muted">{text.playersHelp}</p>
               <div className="stack compact">
                 {players.map((player) => (
                   <div className="row" key={player.id}>
-                    <input
+                    <Input
                       aria-label={`${text.nameFor} ${player.name}`}
                       value={player.name}
                       onChange={(event) => updatePlayerName(player.id, event.target.value)}
+                      className="field-input"
                     />
-                    <button type="button" className="ghost" onClick={() => removePlayer(player.id)}>
+                    <Button type="button" variant="secondary" className="ghost" onClick={() => removePlayer(player.id)}>
                       {text.remove}
-                    </button>
+                    </Button>
                   </div>
                 ))}
               </div>
-              <button type="button" className="ghost" onClick={addPlayer}>
+              <Button type="button" variant="secondary" className="ghost" onClick={addPlayer}>
                 {text.addPlayer}
-              </button>
-            </div>
+              </Button>
+            </Card>
 
-            <div className="card">
+            <Card className="card">
               <h2>{text.setup}</h2>
               <div className="form-grid">
                 <label>
                   <span>{text.spiesCount}</span>
-                  <input
+                  <Input
                     type="number"
                     min={1}
                     max={Math.max(1, players.length - 1)}
                     value={spyCount}
                     onChange={(event) => setSpyCount(Number(event.target.value))}
+                    className="field-input"
                   />
                 </label>
-                <label className="check">
-                  <input
-                    type="checkbox"
+                <label className="check" htmlFor="include-roles">
+                  <Checkbox
+                    id="include-roles"
                     checked={includeRoles}
-                    onChange={(event) => setIncludeRoles(event.target.checked)}
+                    onCheckedChange={(checked) => setIncludeRoles(checked === true)}
                   />
                   <span>{text.includeRoles}</span>
                 </label>
               </div>
-            </div>
+            </Card>
 
-            <div className="card">
+            <Card className="card">
               <h2>{text.locationPacks}</h2>
               <div className="chips">
                 {PACKS.map((pack) => (
-                  <button
+                  <Button
                     key={pack.id}
                     type="button"
+                    variant="secondary"
                     className={selectedPackIds.includes(pack.id) ? "chip active" : "chip"}
                     onClick={() => togglePack(pack.id)}
                   >
                     {pack.name[locale]}
-                  </button>
+                  </Button>
                 ))}
               </div>
-            </div>
+            </Card>
 
-            <div className="card">
+            <Card className="card">
               <h2>{text.scoreboard}</h2>
               <div className="score-grid">
                 {players.map((player) => (
@@ -453,17 +463,17 @@ export function App() {
                   </div>
                 ))}
               </div>
-            </div>
+            </Card>
 
-            <button type="button" className="primary" disabled={!canStartGame} onClick={startRound}>
+            <Button type="button" className="primary" disabled={!canStartGame} onClick={startRound}>
               {text.startRound}
-            </button>
+            </Button>
           </section>
         )}
 
         {phase === "deal" && round && (
           <section className="stack">
-            <div className="card big-card">
+            <Card className="card big-card">
               <p className="eyebrow">
                 {text.step} {revealIndex + 1} {text.of} {round.players.length}
               </p>
@@ -473,12 +483,16 @@ export function App() {
                 <div className="reveal">
                   {round.assignments[round.players[revealIndex].id].isSpy ? (
                     <>
-                      <p className="tag danger">{text.youAreSpy}</p>
+                      <Badge className="tag danger" variant="destructive">
+                        {text.youAreSpy}
+                      </Badge>
                       <p>{text.spyInstruction}</p>
                     </>
                   ) : (
                     <>
-                      <p className="tag safe">{text.youAreAgent}</p>
+                      <Badge className="tag safe" variant="secondary">
+                        {text.youAreAgent}
+                      </Badge>
                       <p>
                         {text.location}: <strong>{round.location.name}</strong>
                       </p>
@@ -491,95 +505,107 @@ export function App() {
               )}
               <div className="actions">
                 {!showCard && (
-                  <button type="button" className="primary" onClick={() => setShowCard(true)}>
+                  <Button type="button" className="primary" onClick={() => setShowCard(true)}>
                     {text.showCard}
-                  </button>
+                  </Button>
                 )}
                 {showCard && (
-                  <button type="button" className="primary" onClick={goToNextReveal}>
+                  <Button type="button" className="primary" onClick={goToNextReveal}>
                     {text.hideAndPass}
-                  </button>
+                  </Button>
                 )}
               </div>
-            </div>
+            </Card>
           </section>
         )}
 
         {phase === "discussion" && round && (
           <section className="stack">
-            <div className="card">
+            <Card className="card">
               <p className="eyebrow">{text.discussion}</p>
               <h2 className="timer">{formatSeconds(remainingSeconds)}</h2>
               <p>{text.discussionInstruction}</p>
               <div className="hint-box">
                 <p className="muted">{text.hintLabel}</p>
                 <strong>{hint}</strong>
-                <button type="button" className="ghost" onClick={() => setHintIndex(randomIndex(hints.length))}>
+                <Button type="button" variant="secondary" className="ghost" onClick={() => setHintIndex(randomIndex(hints.length))}>
                   {text.newHint}
-                </button>
+                </Button>
               </div>
               <div className="actions">
-                <button type="button" className="ghost" onClick={openSpyGuessFromDiscussion}>
+                <Button type="button" variant="secondary" className="ghost" onClick={openSpyGuessFromDiscussion}>
                   {text.spyGuessAction}
-                </button>
-                <button type="button" className="ghost danger" onClick={revealNow}>
+                </Button>
+                <Button type="button" variant="destructive" className="ghost danger" onClick={revealNow}>
                   {text.endRound}
-                </button>
+                </Button>
               </div>
               <div className="stack compact">
                 <p className="muted">{text.pointAtSuspectHelp}</p>
                 <p className="eyebrow">{text.pointAtSuspect}</p>
                 <div className="chips vertical">
                   {round.players.map((player) => (
-                    <button key={player.id} type="button" className="chip" onClick={() => accusePlayer(player.id)}>
+                    <Button
+                      key={player.id}
+                      type="button"
+                      variant="secondary"
+                      className="chip"
+                      onClick={() => accusePlayer(player.id)}
+                    >
                       {player.name}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
-            </div>
+            </Card>
           </section>
         )}
 
         {phase === "spy_guess" && round && (
           <section className="stack">
-            <div className="card big-card">
+            <Card className="card big-card">
               <p className="eyebrow">{guessMode === "caught_spy_guess" ? text.lastChance : text.spyGuessTitle}</p>
               <h2>{text.guessLocation}</h2>
               {round.spyIds.length > 1 && guessMode === "free_guess" && (
                 <label>
                   <span>{text.whichSpyGuesses}</span>
-                  <select value={guessingSpyId} onChange={(event) => setGuessingSpyId(event.target.value)}>
-                    {round.spyIds.map((id) => (
-                      <option key={id} value={id}>
-                        {playersById[id]?.name ?? id}
-                      </option>
-                    ))}
-                  </select>
+                  <Select value={guessingSpyId} onValueChange={setGuessingSpyId}>
+                    <SelectTrigger className="field-trigger">
+                      <SelectValue placeholder={text.whichSpyGuesses} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {round.spyIds.map((id) => (
+                        <SelectItem key={id} value={id}>
+                          {playersById[id]?.name ?? id}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </label>
               )}
-              <input
+              <Input
                 value={spyGuess}
                 onChange={(event) => setSpyGuess(event.target.value)}
                 placeholder={text.guessPlaceholder}
+                className="field-input"
               />
               <div className="actions">
-                <button type="button" className="primary" onClick={submitSpyGuess}>
+                <Button type="button" className="primary" onClick={submitSpyGuess}>
                   {text.submitGuess}
-                </button>
+                </Button>
                 {guessMode === "free_guess" && (
-                  <button type="button" className="ghost" onClick={() => setPhase("discussion")}>
+                  <Button type="button" variant="secondary" className="ghost" onClick={() => setPhase("discussion")}>
                     {text.backToDiscussion}
-                  </button>
+                  </Button>
                 )}
               </div>
-            </div>
+            </Card>
           </section>
         )}
 
         {phase === "result" && round && roundResult && (
           <section className="stack">
-            <div className="card">
+            <Card className="card">
               <p className="eyebrow">{text.result}</p>
               <h2>{roundResult.winner === "spies" ? text.spiesWon : text.agentsWon}</h2>
               <p>{roundResult.reason}</p>
@@ -601,14 +627,14 @@ export function App() {
                 })}
               </div>
               <div className="actions">
-                <button type="button" className="primary" onClick={startRound}>
+                <Button type="button" className="primary" onClick={startRound}>
                   {text.newRound}
-                </button>
-                <button type="button" className="ghost" onClick={endToSetup}>
+                </Button>
+                <Button type="button" variant="secondary" className="ghost" onClick={endToSetup}>
                   {text.toSetup}
-                </button>
+                </Button>
               </div>
-            </div>
+            </Card>
           </section>
         )}
       </section>
