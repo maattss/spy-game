@@ -248,7 +248,12 @@ export function SpyGuessSection({ text, spyGuess, onSetSpyGuess, onSubmitGuess }
         </CardHeader>
 
         <CardContent className="stack-tight">
-          <Input value={spyGuess} onChange={(event) => onSetSpyGuess(event.target.value)} placeholder={text.guessPlaceholder} />
+          <Input
+            aria-label={text.guessLocation}
+            value={spyGuess}
+            onChange={(event) => onSetSpyGuess(event.target.value)}
+            placeholder={text.guessPlaceholder}
+          />
           <Button type="button" onClick={onSubmitGuess}>
             {text.submitGuess}
           </Button>

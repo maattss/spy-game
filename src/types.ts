@@ -1,6 +1,5 @@
 export type GamePhase = "setup" | "deal" | "vote" | "spy_guess" | "result";
 export type Winner = "agents" | "spies";
-export type GuessMode = "free_guess" | "caught_spy_guess";
 export type Locale = "nb" | "en";
 
 export interface LocalizedText {
