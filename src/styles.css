@@ -1,16 +1,42 @@
 @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap");
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
+  --radius: 0.75rem;
+
+  --background: 220 54% 6%;
+  --foreground: 210 100% 96%;
+  --card: 218 50% 12%;
+  --card-foreground: 210 100% 96%;
+  --popover: 219 48% 10%;
+  --popover-foreground: 210 100% 96%;
+  --primary: 210 100% 64%;
+  --primary-foreground: 220 52% 10%;
+  --secondary: 219 34% 20%;
+  --secondary-foreground: 210 100% 96%;
+  --muted: 220 31% 18%;
+  --muted-foreground: 214 34% 72%;
+  --accent: 170 68% 57%;
+  --accent-foreground: 170 70% 10%;
+  --destructive: 340 100% 70%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 213 40% 26%;
+  --input: 213 40% 26%;
+  --ring: 210 100% 64%;
+
   --bg-top: #09101d;
   --bg-bottom: #03070f;
   --panel: rgba(8, 15, 28, 0.9);
-  --card: rgba(11, 22, 40, 0.86);
+  --card-solid: rgba(11, 22, 40, 0.86);
   --card-soft: rgba(8, 17, 33, 0.86);
   --ink: #e8f3ff;
-  --muted: #95aac5;
-  --accent: #4ea2ff;
-  --accent-strong: #257dff;
-  --accent-2: #46d8c3;
+  --muted-text: #95aac5;
+  --accent-blue: #4ea2ff;
+  --accent-blue-strong: #257dff;
+  --accent-teal: #46d8c3;
   --danger: #ff6789;
   --safe: #5ed89f;
   --line: rgba(232, 243, 255, 0.18);
@@ -128,7 +154,7 @@ select {
 }
 
 .eyebrow {
-  color: var(--accent-2);
+  color: var(--accent-teal);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   font-size: 0.73rem;
@@ -136,7 +162,7 @@ select {
 }
 
 .muted {
-  color: var(--muted);
+  color: var(--muted-text);
 }
 
 .stack {
@@ -154,7 +180,7 @@ select {
   display: grid;
   gap: 0.66rem;
   border-radius: 0.88rem;
-  background: linear-gradient(180deg, var(--card), var(--card-soft));
+  background: linear-gradient(180deg, var(--card-solid), var(--card-soft));
   border: 1px solid var(--line);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   padding: 0.96rem;
@@ -183,31 +209,73 @@ select {
 }
 
 .lang-switch {
-  min-width: 11rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 12rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--line-strong) 80%, transparent);
+  background: linear-gradient(
+    120deg,
+    color-mix(in srgb, var(--accent-blue) 17%, transparent),
+    color-mix(in srgb, var(--accent-teal) 21%, transparent)
+  );
+  color: var(--ink);
+  box-shadow: 0 10px 22px rgba(6, 16, 34, 0.42);
 }
 
-.row input {
+.lang-switch__label {
+  display: grid;
+  line-height: 1.05;
+  text-align: left;
+  margin-right: auto;
+}
+
+.lang-switch__label small {
+  font-size: 0.63rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--muted-text) 76%, white);
+}
+
+.lang-switch__label strong {
+  font-size: 0.94rem;
+}
+
+.lang-switch__next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.67rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--ink) 92%, white);
+  background: color-mix(in srgb, var(--line-strong) 72%, transparent);
+}
+
+.row .field-input {
   flex: 1;
 }
 
-input,
-select {
+.field-input,
+.field-trigger {
   width: 100%;
   border: 1px solid var(--line-strong);
   border-radius: 0.6rem;
   background: rgba(4, 10, 21, 0.9);
   color: var(--ink);
-  padding: 0.64rem 0.72rem;
 }
 
-input::placeholder {
-  color: color-mix(in srgb, var(--muted) 86%, white);
+.field-input::placeholder {
+  color: color-mix(in srgb, var(--muted-text) 86%, white);
 }
 
-input:focus,
-select:focus {
-  outline: none;
-  border-color: var(--accent);
+.field-input:focus,
+.field-trigger:focus,
+.field-trigger[data-state="open"] {
+  border-color: var(--accent-blue);
   box-shadow: 0 0 0 2px rgba(78, 162, 255, 0.25);
 }
 
@@ -233,15 +301,8 @@ label span {
   margin: 0;
 }
 
-.check input {
-  width: auto;
-}
-
 button {
   cursor: pointer;
-  border: none;
-  border-radius: 0.62rem;
-  padding: 0.64rem 0.82rem;
   transition: transform 140ms ease, filter 140ms ease, box-shadow 140ms ease;
 }
 
@@ -258,7 +319,7 @@ button:disabled {
 }
 
 .primary {
-  background: linear-gradient(120deg, var(--accent), var(--accent-strong));
+  background: linear-gradient(120deg, var(--accent-blue), var(--accent-blue-strong));
   color: white;
   font-weight: 700;
   box-shadow: 0 10px 20px rgba(37, 125, 255, 0.36);
@@ -290,10 +351,11 @@ button:disabled {
   background: var(--chip);
   color: var(--ink);
   border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+  min-height: 2.4rem;
 }
 
 .chip.active {
-  background: linear-gradient(120deg, var(--accent-2), #78ecd8);
+  background: linear-gradient(120deg, var(--accent-teal), #78ecd8);
   color: #06271f;
   font-weight: 700;
   border-color: transparent;
@@ -321,7 +383,8 @@ button:disabled {
 }
 
 .tag {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   border-radius: 999px;
   padding: 0.2rem 0.68rem;
   color: white;
@@ -366,7 +429,7 @@ button:disabled {
 .score-item strong {
   min-width: 2ch;
   text-align: right;
-  color: var(--accent-2);
+  color: var(--accent-teal);
 }
 
 @media (max-width: 680px) {
@@ -388,6 +451,10 @@ button:disabled {
   }
 
   .row button {
+    width: 100%;
+  }
+
+  .lang-switch {
     width: 100%;
   }
 }
