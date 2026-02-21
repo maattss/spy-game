@@ -16,10 +16,6 @@ export function shuffle<T>(items: readonly T[]): T[] {
   return next;
 }
 
-export function normalizeValue(value: string): string {
-  return value.trim().toLowerCase().replace(/\s+/g, " ");
-}
-
 function getLocationPool(selectedPackIds: string[]): LocationCard[] {
   const packs = PACKS.filter((pack) => selectedPackIds.includes(pack.id));
   return packs.flatMap((pack) => pack.locations);

@@ -17,7 +17,7 @@ SPY er bygget for korte, intense runder med lav terskel:
 1. Sett opp spillere (3-12) og antall spioner.
 2. Del ut hemmelige kort én spiller av gangen.
 3. Send telefonen én ny runde for hemmelig avstemning.
-4. Hvis mistenkt er spion: spionen får én siste gjetning på lokasjon.
+4. Hvis mistenkt er spion: agentene vinner umiddelbart.
 5. Vis resultat og start ny runde.
 
 Regel for tie i avstemning: spionene vinner.
@@ -27,7 +27,6 @@ Regel for tie i avstemning: spionene vinner.
 - 3-12 spillere
 - Flere lokasjonspakker (`classic`, `nordic`, `city`, `travel`)
 - Lokasjoner oversatt til `nb` og `en`
-- Spiongjetning godtar både norsk og engelsk lokasjonsnavn
 - Ingen auto-utfylling av navn (kun placeholders)
 
 ## Hva som er fjernet (bevisst)
@@ -65,7 +64,7 @@ npm run preview  # preview av build
 ```text
 src/
   App.tsx                           # state + spillflyt
-  components/game/phase-sections.tsx # setup/deal/vote/guess/result UI
+  components/game/phase-sections.tsx # setup/deal/vote/result UI
   content.ts                        # lokasjonspakker og oversettelser
   copy.ts                           # app-tekst (nb/en)
   styles.css                        # tema + layout

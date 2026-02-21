@@ -231,38 +231,6 @@ export function VoteSection({ text, round, voteIndex, onVote, displayPlayerName 
   );
 }
 
-type SpyGuessSectionProps = {
-  text: AppText;
-  spyGuess: string;
-  onSetSpyGuess: (value: string) => void;
-  onSubmitGuess: () => void;
-};
-
-export function SpyGuessSection({ text, spyGuess, onSetSpyGuess, onSubmitGuess }: SpyGuessSectionProps) {
-  return (
-    <section className="phase-stack">
-      <Card className="stage-card stage-card--spy">
-        <CardHeader>
-          <p className="kicker">{text.lastChance}</p>
-          <CardTitle>{text.guessLocation}</CardTitle>
-        </CardHeader>
-
-        <CardContent className="stack-tight">
-          <Input
-            aria-label={text.guessLocation}
-            value={spyGuess}
-            onChange={(event) => onSetSpyGuess(event.target.value)}
-            placeholder={text.guessPlaceholder}
-          />
-          <Button type="button" onClick={onSubmitGuess}>
-            {text.submitGuess}
-          </Button>
-        </CardContent>
-      </Card>
-    </section>
-  );
-}
-
 type ResultSectionProps = {
   text: AppText;
   locale: "nb" | "en";

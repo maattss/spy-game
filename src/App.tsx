@@ -2,10 +2,10 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Languages, Moon, Sun } from "lucide-react";
 import { PACKS } from "./content";
 import { COPY } from "./copy";
-import { createRound, normalizeValue } from "./game";
+import { createRound } from "./game";
 import type { GamePhase, Locale, Player, RoundResult, RoundState } from "./types";
 import { Button } from "./components/ui/button";
-import { DealSection, ResultSection, SetupSection, SpyGuessSection, VoteSection } from "./components/game/phase-sections";
+import { DealSection, ResultSection, SetupSection, VoteSection } from "./components/game/phase-sections";
 
 const DEFAULT_PLAYER_COUNT = 4;
 const THEME_STORAGE_KEY = "spy-theme";
@@ -47,9 +47,6 @@ export function App() {
   const [voteIndex, setVoteIndex] = useState(0);
   const [votesByVoter, setVotesByVoter] = useState<Record<string, string>>({});
   const voteLockedRef = useRef(false);
-
-  const [guessingSpyId, setGuessingSpyId] = useState("");
-  const [spyGuess, setSpyGuess] = useState("");
 
   const text = COPY[locale];
   const maxSpyCount = Math.max(1, players.length - 1);
@@ -142,8 +139,6 @@ export function App() {
     setVoteIndex(0);
     setVotesByVoter({});
     voteLockedRef.current = false;
-    setGuessingSpyId(createdRound.spyIds[0] ?? "");
-    setSpyGuess("");
   }
 
   function goToNextReveal() {
@@ -192,9 +187,7 @@ export function App() {
     const suspectAssignment = round.assignments[suspectId];
 
     if (suspectAssignment?.isSpy) {
-      setGuessingSpyId(suspectId);
-      setSpyGuess("");
-      setPhase("spy_guess");
+      finishRound({ winner: "agents", reason: text.reasons.caughtSpy });
       return;
     }
 
@@ -226,26 +219,6 @@ export function App() {
     finalizeVotes(nextVotes);
   }
 
-  function submitSpyGuess() {
-    if (!round || !guessingSpyId) {
-      return;
-    }
-
-    const validLocations = [round.location.name.nb, round.location.name.en].map(normalizeValue);
-    const guess = normalizeValue(spyGuess);
-
-    if (!guess) {
-      return;
-    }
-
-    if (validLocations.includes(guess)) {
-      finishRound({ winner: "spies", reason: text.reasons.spyGuessCorrect });
-      return;
-    }
-
-    finishRound({ winner: "agents", reason: text.reasons.caughtSpyWrongGuess });
-  }
-
   function endToSetup() {
     setPhase("setup");
     setRound(null);
@@ -254,8 +227,6 @@ export function App() {
     setVoteIndex(0);
     setVotesByVoter({});
     voteLockedRef.current = false;
-    setGuessingSpyId("");
-    setSpyGuess("");
   }
 
   useEffect(() => {
@@ -366,10 +337,6 @@ export function App() {
             onVote={submitVote}
             displayPlayerName={displayPlayerName}
           />
-        )}
-
-        {phase === "spy_guess" && round && (
-          <SpyGuessSection text={text} spyGuess={spyGuess} onSetSpyGuess={setSpyGuess} onSubmitGuess={submitSpyGuess} />
         )}
 
         {phase === "result" && round && roundResult && (

@@ -36,10 +36,6 @@ export const COPY = {
     votingTurn: "Stemmer nå",
     votingQuestion: "Hvem tror du er spion?",
     voteFor: "Stem på",
-    lastChance: "Siste sjanse",
-    guessLocation: "Gjett lokasjonen",
-    guessPlaceholder: "Skriv lokasjonen...",
-    submitGuess: "Send gjetning",
     result: "Resultat",
     spiesWon: "Spionene vant",
     agentsWon: "Agentene vant",
@@ -50,8 +46,7 @@ export const COPY = {
     reasons: {
       wrongVote: (name: string) => `${name} fikk flest stemmer, men var ikke spion.`,
       voteTie: "Det ble stemmelikhet. Spionene slipper unna.",
-      spyGuessCorrect: "Spionen gjettet lokasjonen riktig.",
-      caughtSpyWrongGuess: "Spionen ble tatt og gjettet feil.",
+      caughtSpy: "Spionen ble avslørt i avstemningen.",
     },
   },
   en: {
@@ -89,10 +84,6 @@ export const COPY = {
     votingTurn: "Now voting",
     votingQuestion: "Who do you think is the spy?",
     voteFor: "Vote for",
-    lastChance: "Last chance",
-    guessLocation: "Guess the location",
-    guessPlaceholder: "Type the location...",
-    submitGuess: "Submit guess",
     result: "Result",
     spiesWon: "Spies won",
     agentsWon: "Agents won",
@@ -103,8 +94,7 @@ export const COPY = {
     reasons: {
       wrongVote: (name: string) => `${name} got the most votes, but was not a spy.`,
       voteTie: "The vote ended in a tie. The spies got away.",
-      spyGuessCorrect: "The spy guessed the location correctly.",
-      caughtSpyWrongGuess: "The caught spy guessed wrong.",
+      caughtSpy: "The spy was identified in the vote.",
     },
   },
 } as const;
