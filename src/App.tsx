@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Languages, Moon, Sun } from "lucide-react";
+import { Languages, Moon, Sun, X } from "lucide-react";
 import { HINT_QUESTIONS, PACKS } from "./content";
 import { createRound, normalizeValue } from "./game";
 import type { GamePhase, GuessMode, Locale, Player, RoundResult, RoundState } from "./types";
@@ -424,7 +424,7 @@ export function App() {
               aria-label={`${text.languageLabel}: ${locale === "nb" ? text.english : text.norwegian}`}
             >
               <Languages size={16} />
-              <span>{locale === "nb" ? "NO" : "EN"}</span>
+              <span className="header-switch__label">{text.languageLabel}</span>
             </Button>
             <Button
               type="button"
@@ -435,7 +435,7 @@ export function App() {
               aria-label={`${text.themeLabel}: ${theme === "dark" ? text.light : text.dark}`}
             >
               {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-              <span>{theme === "dark" ? text.light : text.dark}</span>
+              <span className="header-switch__label">{text.themeLabel}</span>
             </Button>
           </div>
         </header>
@@ -456,8 +456,16 @@ export function App() {
                       placeholder={playerPlaceholder(index)}
                       onChange={(event) => updatePlayerName(player.id, event.target.value)}
                     />
-                    <Button type="button" variant="outline" onClick={() => removePlayer(player.id)}>
-                      {text.remove}
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="outline"
+                      className="player-remove"
+                      disabled={players.length <= 3}
+                      aria-label={`${text.remove} ${displayPlayerName(player.name, index)}`}
+                      onClick={() => removePlayer(player.id)}
+                    >
+                      <X size={16} />
                     </Button>
                   </div>
                 ))}
@@ -592,15 +600,6 @@ export function App() {
                   </Button>
                 </div>
 
-                <div className="action-grid">
-                  <Button type="button" variant="outline" onClick={openSpyGuessFromDiscussion}>
-                    {text.spyGuessAction}
-                  </Button>
-                  <Button type="button" variant="danger" onClick={revealNow}>
-                    {text.endRound}
-                  </Button>
-                </div>
-
                 <p className="muted">{text.pointAtSuspectHelp}</p>
                 <p className="kicker">{text.pointAtSuspect}</p>
                 <div className="chip-grid chip-grid--large">
@@ -609,6 +608,15 @@ export function App() {
                       {displayPlayerName(player.name, index)}
                     </Button>
                   ))}
+                </div>
+
+                <div className="utility-actions">
+                  <Button type="button" variant="outline" size="sm" onClick={openSpyGuessFromDiscussion}>
+                    {text.spyGuessAction}
+                  </Button>
+                  <Button type="button" variant="danger" size="sm" onClick={revealNow}>
+                    {text.endRound}
+                  </Button>
                 </div>
               </CardContent>
             </Card>

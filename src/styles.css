@@ -14,8 +14,9 @@
   --bg-subtle: #0c131c;
   --text: #e6edf4;
   --muted: #96a7bb;
+  --placeholder: #7f93aa;
   --border: rgba(230, 237, 244, 0.14);
-  --border-strong: rgba(230, 237, 244, 0.3);
+  --border-strong: rgba(230, 237, 244, 0.32);
   --accent: #4ea7f4;
   --accent-strong: #2f83ca;
   --success: #35b994;
@@ -28,9 +29,10 @@
   --bg-card: #fbfdff;
   --bg-subtle: #f1f5f9;
   --text: #0f1724;
-  --muted: #5e6d80;
+  --muted: #4d6075;
+  --placeholder: #586d84;
   --border: rgba(15, 23, 36, 0.15);
-  --border-strong: rgba(15, 23, 36, 0.3);
+  --border-strong: rgba(15, 23, 36, 0.34);
   --accent: #1f7fcb;
   --accent-strong: #1668a8;
   --success: #0b8d6d;
@@ -83,6 +85,7 @@ select {
   padding-left: calc(env(safe-area-inset-left) + 0.9rem);
   display: flex;
   justify-content: center;
+  align-items: flex-start;
 }
 
 .app-frame {
@@ -127,6 +130,10 @@ select {
 
 .header-switch {
   min-width: 0;
+}
+
+.header-switch__label {
+  font-size: 0.84rem;
 }
 
 .phase-stack {
@@ -180,7 +187,13 @@ select {
 
 .player-row {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
   gap: 0.45rem;
+}
+
+.player-remove {
+  flex-shrink: 0;
 }
 
 .form-grid {
@@ -255,6 +268,11 @@ select {
 .action-row {
   display: grid;
   gap: 0.5rem;
+}
+
+.utility-actions {
+  display: grid;
+  gap: 0.45rem;
 }
 
 .ui-button {
@@ -365,7 +383,7 @@ select {
 }
 
 .ui-input::placeholder {
-  color: var(--muted);
+  color: var(--placeholder);
 }
 
 .ui-label {
@@ -460,12 +478,11 @@ select {
     justify-content: space-between;
   }
 
-  .player-row {
-    grid-template-columns: 1fr auto;
-    align-items: center;
+  .action-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .action-grid {
+  .utility-actions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
