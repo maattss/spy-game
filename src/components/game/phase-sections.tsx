@@ -90,11 +90,8 @@ export function SetupSection({
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>{text.setup}</CardTitle>
-        </CardHeader>
-        <CardContent className="form-grid">
+      <Card className="setup-card">
+        <CardContent className="setup-card__content">
           <Label className="field">
             <span>{text.spiesCount}</span>
             <Input
