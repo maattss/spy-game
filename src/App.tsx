@@ -266,7 +266,7 @@ export function App() {
     <main className="app-shell">
       <section className="app-frame">
         <header className="app-header">
-          <div>
+          <div className="app-brand">
             <p className="kicker">{text.brandKicker}</p>
             <h1 className="app-title">Spy</h1>
           </div>

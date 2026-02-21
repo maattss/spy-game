@@ -99,9 +99,14 @@ select {
 
 .app-header {
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
   margin-bottom: 0.95rem;
+}
+
+.app-brand {
+  min-width: 0;
 }
 
 .kicker {
@@ -127,13 +132,17 @@ select {
 .header-controls {
   display: flex;
   gap: 0.45rem;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
 }
 
 .header-switch {
-  min-width: 0;
+  min-width: 2.22rem;
+  padding-inline: 0.52rem;
 }
 
 .header-switch__label {
+  display: none;
   font-size: 0.84rem;
 }
 
@@ -553,10 +562,13 @@ select {
 }
 
 @media (min-width: 560px) {
-  .app-header {
-    align-items: flex-start;
-    flex-direction: row;
-    justify-content: space-between;
+  .header-switch {
+    min-width: 0;
+    padding-inline: 0.72rem;
+  }
+
+  .header-switch__label {
+    display: inline;
   }
 
   .action-grid {
