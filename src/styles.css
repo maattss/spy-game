@@ -263,20 +263,6 @@ select {
   gap: 0.85rem;
 }
 
-.setup-card .ui-card__header {
-  padding-top: 0.68rem;
-  padding-bottom: 0.58rem;
-}
-
-.setup-card .ui-card__content {
-  padding-top: 0.48rem;
-  padding-bottom: 0.68rem;
-}
-
-.setup-card__content {
-  gap: 0;
-}
-
 .check-row {
   display: inline-flex;
   align-items: center;
