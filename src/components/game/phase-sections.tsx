@@ -269,11 +269,12 @@ export function ResultSection({
           <div className="score-grid">
             {round.players.map((player, index) => {
               const assignment = round.assignments[player.id];
+              const roleClass = assignment.isSpy ? "score-row--spy" : "score-row--agent";
               return (
-                <div className="score-row" key={player.id}>
+                <div className={`score-row ${roleClass}`} key={player.id}>
                   <span>
                     {displayPlayerName(player.name, index)}{" "}
-                    {assignment.isSpy ? `(${text.spyShort})` : `(${text.agentShort})`}
+                    <span className="score-row__role">{assignment.isSpy ? `(${text.spyShort})` : `(${text.agentShort})`}</span>
                   </span>
                 </div>
               );

@@ -296,10 +296,20 @@ select {
   padding: 0.52rem 0.62rem;
 }
 
-.score-row strong {
-  color: var(--success);
-  min-width: 2ch;
-  text-align: right;
+.score-row__role {
+  font-weight: 700;
+}
+
+.score-row--agent {
+  border-color: color-mix(in srgb, var(--success) 46%, var(--border));
+  background: color-mix(in srgb, var(--success) 12%, var(--bg-subtle));
+  color: color-mix(in srgb, var(--success) 90%, var(--text));
+}
+
+.score-row--spy {
+  border-color: color-mix(in srgb, var(--danger) 50%, var(--border));
+  background: color-mix(in srgb, var(--danger) 12%, var(--bg-subtle));
+  color: color-mix(in srgb, var(--danger) 90%, var(--text));
 }
 
 .reveal-box {
