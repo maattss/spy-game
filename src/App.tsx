@@ -219,14 +219,14 @@ export function App() {
       return;
     }
 
-    const expectedLocation = normalizeValue(round.location.name);
+    const validLocations = [round.location.name.nb, round.location.name.en].map(normalizeValue);
     const guess = normalizeValue(spyGuess);
 
     if (!guess) {
       return;
     }
 
-    if (guess === expectedLocation) {
+    if (validLocations.includes(guess)) {
       finishRound({ winner: "spies", reason: text.reasons.spyGuessCorrect });
       return;
     }
@@ -310,6 +310,7 @@ export function App() {
         {phase === "deal" && round && currentRevealPlayer && currentRevealAssignment && (
           <DealSection
             text={text}
+            locale={locale}
             round={round}
             revealIndex={revealIndex}
             showCard={showCard}
@@ -337,6 +338,7 @@ export function App() {
         {phase === "result" && round && roundResult && (
           <ResultSection
             text={text}
+            locale={locale}
             round={round}
             roundResult={roundResult}
             onNewRound={startRound}

@@ -14,8 +14,7 @@ export interface Player {
 }
 
 export interface LocationCard {
-  name: string;
-  roles: string[];
+  name: LocalizedText;
 }
 
 export interface LocationPack {

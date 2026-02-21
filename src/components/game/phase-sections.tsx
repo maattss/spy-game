@@ -135,6 +135,7 @@ export function SetupSection({
 
 type DealSectionProps = {
   text: AppText;
+  locale: "nb" | "en";
   round: RoundState;
   revealIndex: number;
   showCard: boolean;
@@ -146,6 +147,7 @@ type DealSectionProps = {
 
 export function DealSection({
   text,
+  locale,
   round,
   revealIndex,
   showCard,
@@ -179,7 +181,7 @@ export function DealSection({
                   <Badge variant="success">{text.youAreAgent}</Badge>
                   <p className="identity-title identity-title--agent">{text.youAreAgent}</p>
                   <p>
-                    {text.location}: <strong>{round.location.name}</strong>
+                    {text.location}: <strong>{round.location.name[locale]}</strong>
                   </p>
                 </>
               )}
@@ -273,6 +275,7 @@ export function SpyGuessSection({ text, spyGuess, onSetSpyGuess, onSubmitGuess }
 
 type ResultSectionProps = {
   text: AppText;
+  locale: "nb" | "en";
   round: RoundState;
   roundResult: RoundResult;
   onNewRound: () => void;
@@ -282,6 +285,7 @@ type ResultSectionProps = {
 
 export function ResultSection({
   text,
+  locale,
   round,
   roundResult,
   onNewRound,
@@ -299,7 +303,7 @@ export function ResultSection({
 
         <CardContent className="stack-tight">
           <p>
-            {text.location}: <strong>{round.location.name}</strong>
+            {text.location}: <strong>{round.location.name[locale]}</strong>
           </p>
 
           <div className="score-grid">
