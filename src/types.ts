@@ -37,5 +37,4 @@ export interface RoundState {
   assignments: Record<string, Assignment>;
   players: Player[];
   spyIds: string[];
-  durationSeconds: number;
 }

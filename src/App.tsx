@@ -8,7 +8,6 @@ import { Button } from "./components/ui/button";
 import { DealSection, ResultSection, SetupSection, SpyGuessSection, VoteSection } from "./components/game/phase-sections";
 
 const DEFAULT_PLAYER_COUNT = 4;
-const ROUND_DURATION_SECONDS = 8 * 60;
 const THEME_STORAGE_KEY = "spy-theme";
 
 type Theme = "dark" | "light";
@@ -53,8 +52,9 @@ export function App() {
   const [spyGuess, setSpyGuess] = useState("");
 
   const text = COPY[locale];
+  const maxSpyCount = Math.max(1, players.length - 1);
 
-  const canStartGame = players.length >= 3 && selectedPackIds.length > 0 && spyCount >= 1 && spyCount < players.length;
+  const canStartGame = players.length >= 3 && selectedPackIds.length > 0 && spyCount >= 1 && spyCount <= maxSpyCount;
 
   const roundPlayerIndexById = useMemo<Record<string, number>>(() => {
     if (!round) {
@@ -115,6 +115,14 @@ export function App() {
     });
   }
 
+  function updateSpyCount(value: number) {
+    if (!Number.isFinite(value)) {
+      return;
+    }
+    const normalized = Math.max(1, Math.min(maxSpyCount, Math.trunc(value)));
+    setSpyCount(normalized);
+  }
+
   function startRound() {
     if (!canStartGame) {
       return;
@@ -124,7 +132,6 @@ export function App() {
       players,
       selectedPackIds,
       spyCount,
-      durationSeconds: ROUND_DURATION_SECONDS,
     });
 
     setRound(createdRound);
@@ -255,6 +262,14 @@ export function App() {
     voteLockedRef.current = false;
   }, [phase, voteIndex]);
 
+  useEffect(() => {
+    setSpyCount((current) => {
+      const value = Number.isFinite(current) ? Math.trunc(current) : 1;
+      const clamped = Math.max(1, Math.min(maxSpyCount, value));
+      return clamped === current ? current : clamped;
+    });
+  }, [maxSpyCount]);
+
   useLayoutEffect(() => {
     document.documentElement.dataset.theme = theme;
     window.localStorage.setItem(THEME_STORAGE_KEY, theme);
@@ -320,7 +335,7 @@ export function App() {
               onUpdatePlayerName={updatePlayerName}
               onRemovePlayer={removePlayer}
               onAddPlayer={addPlayer}
-              onSetSpyCount={setSpyCount}
+              onSetSpyCount={updateSpyCount}
               onTogglePack={togglePack}
               onStartRound={startRound}
               displayPlayerName={displayPlayerName}

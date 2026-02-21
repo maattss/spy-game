@@ -89,7 +89,7 @@ export function SetupSection({
               min={1}
               max={Math.max(1, players.length - 1)}
               value={spyCount}
-              onChange={(event) => onSetSpyCount(Number(event.target.value))}
+              onChange={(event) => onSetSpyCount(event.target.valueAsNumber)}
             />
           </CardContent>
         </Card>

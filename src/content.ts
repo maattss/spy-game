@@ -1,27 +1,4 @@
-import type { Locale, LocationCard, LocationPack } from "./types";
-
-export const HINT_QUESTIONS: Record<Locale, string[]> = {
-  nb: [
-    "Er dette et sted man vanligvis blir lenge?",
-    "Ville du tatt med barn hit?",
-    "Trenger man spesialutstyr her?",
-    "Er dette stedet mest innendørs eller utendørs?",
-    "Er dette et sted de fleste har vært?",
-    "Er dette stedet stille eller travelt?",
-    "Kan man jobbe på dette stedet?",
-    "Er dette stedet oftest knyttet til fritid?",
-  ],
-  en: [
-    "Is this a place where people usually stay for a while?",
-    "Would you bring children here?",
-    "Do you need special equipment here?",
-    "Is this place mostly indoors or outdoors?",
-    "Have most people been here before?",
-    "Is this place usually quiet or busy?",
-    "Can people work at this place?",
-    "Is this place mostly associated with leisure time?",
-  ],
-};
+import type { LocationCard, LocationPack } from "./types";
 
 function loc(nb: string, en: string): LocationCard {
   return { name: { nb, en } };
