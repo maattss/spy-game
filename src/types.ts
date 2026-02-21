@@ -1,6 +1,5 @@
-export type GamePhase = "setup" | "deal" | "discussion" | "spy_guess" | "result";
+export type GamePhase = "setup" | "deal" | "vote" | "result";
 export type Winner = "agents" | "spies";
-export type GuessMode = "free_guess" | "caught_spy_guess";
 export type Locale = "nb" | "en";
 
 export interface LocalizedText {
@@ -14,8 +13,7 @@ export interface Player {
 }
 
 export interface LocationCard {
-  name: string;
-  roles: string[];
+  name: LocalizedText;
 }
 
 export interface LocationPack {
@@ -27,7 +25,6 @@ export interface LocationPack {
 export interface Assignment {
   playerId: string;
   isSpy: boolean;
-  role: string;
 }
 
 export interface RoundResult {
@@ -40,5 +37,4 @@ export interface RoundState {
   assignments: Record<string, Assignment>;
   players: Player[];
   spyIds: string[];
-  durationSeconds: number;
 }

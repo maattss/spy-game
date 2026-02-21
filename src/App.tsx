@@ -1,149 +1,41 @@
-import { useEffect, useMemo, useState } from "react";
-import { Languages, Repeat2 } from "lucide-react";
-import { HINT_QUESTIONS, PACKS } from "./content";
-import { createRound, normalizeValue } from "./game";
-import type { GamePhase, GuessMode, Locale, Player, RoundResult, RoundState } from "./types";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Languages, Moon, Sun } from "lucide-react";
+import { PACKS } from "./content";
+import { COPY } from "./copy";
+import { createRound } from "./game";
+import type { GamePhase, Locale, Player, RoundResult, RoundState } from "./types";
+import { Button } from "./components/ui/button";
+import { DealSection, ResultSection, SetupSection, VoteSection } from "./components/game/phase-sections";
 
-const DEFAULT_PLAYERS = ["Spiller 1", "Spiller 2", "Spiller 3", "Spiller 4"];
-const ROUND_DURATION_SECONDS = 8 * 60;
+const DEFAULT_PLAYER_COUNT = 4;
+const THEME_STORAGE_KEY = "spy-theme";
 
-const TEXT = {
-  nb: {
-    languageLabel: "Sprak",
-    norwegian: "Norsk",
-    english: "Engelsk",
-    players: "Spillere",
-    playersHelp: "3-12 spillere. Telefonen sendes videre mellom hver visning.",
-    nameFor: "Navn for",
-    remove: "Fjern",
-    addPlayer: "+ Legg til spiller",
-    setup: "Oppsett",
-    spiesCount: "Antall spioner",
-    includeRoles: "Bruk roller",
-    locationPacks: "Lokasjonspakker",
-    scoreboard: "Poengtavle",
-    startRound: "Start runde",
-    step: "Steg",
-    of: "av",
-    revealPrompt: "Trykk for a se hemmelig informasjon. Ingen andre skal se skjermen.",
-    youAreSpy: "DU ER SPION",
-    youAreAgent: "DU ER AGENT",
-    spyInstruction: "Spill cool. Still smarte sporsmal. Prov a gjette lokasjonen.",
-    location: "Lokasjon",
-    role: "Rolle",
-    showCard: "Vis kort",
-    hideAndPass: "Skjul og gi videre",
-    discussion: "Diskusjon",
-    discussionInstruction: "Alle stiller sporsmal. Finn spionen uten a avslore lokasjonen.",
-    hintLabel: "Hint til neste sporsmal:",
-    newHint: "Nytt hint",
-    pointAtSuspect: "Pek pa mistenkt",
-    pointAtSuspectHelp: "Nar gruppen er enig, pek ut en spiller direkte.",
-    spyGuessAction: "Spion gjetter lokasjon",
-    endRound: "Avslutt runde",
-    lastChance: "Siste sjanse",
-    spyGuessTitle: "Spionens gjetning",
-    guessLocation: "Gjett lokasjonen",
-    whichSpyGuesses: "Hvilken spion gjetter?",
-    guessPlaceholder: "Skriv lokasjonen...",
-    submitGuess: "Send gjetning",
-    backToDiscussion: "Tilbake til diskusjon",
-    result: "Resultat",
-    spiesWon: "Spionene vant",
-    agentsWon: "Agentene vant",
-    newRound: "Ny runde",
-    toSetup: "Til oppsett",
-    spyShort: "Spion",
-    roleShort: "Rolle",
-    reasons: {
-      timeout: "Tiden gikk ut. Spionene overlevde runden.",
-      wrongVote: (name: string) => `${name} ble pekt ut, men var ikke spion.`,
-      spyGuessCorrect: "Spionen gjettet lokasjonen riktig.",
-      caughtSpyWrongGuess: "Spionen ble tatt og gjettet feil.",
-      freeSpyWrongGuess: "Spionen gjettet feil lokasjon.",
-      manualEnd: "Runden ble avsluttet manuelt.",
-    },
-  },
-  en: {
-    languageLabel: "Language",
-    norwegian: "Norwegian",
-    english: "English",
-    players: "Players",
-    playersHelp: "3-12 players. Pass the phone between each reveal.",
-    nameFor: "Name for",
-    remove: "Remove",
-    addPlayer: "+ Add player",
-    setup: "Setup",
-    spiesCount: "Number of spies",
-    includeRoles: "Use roles",
-    locationPacks: "Location packs",
-    scoreboard: "Scoreboard",
-    startRound: "Start round",
-    step: "Step",
-    of: "of",
-    revealPrompt: "Tap to see your secret information. No one else should look.",
-    youAreSpy: "YOU ARE THE SPY",
-    youAreAgent: "YOU ARE AN AGENT",
-    spyInstruction: "Stay calm. Ask smart questions. Try to guess the location.",
-    location: "Location",
-    role: "Role",
-    showCard: "Show card",
-    hideAndPass: "Hide and pass",
-    discussion: "Discussion",
-    discussionInstruction: "Ask questions. Find the spy without exposing the location.",
-    hintLabel: "Hint for the next question:",
-    newHint: "New hint",
-    pointAtSuspect: "Point at suspect",
-    pointAtSuspectHelp: "When your group agrees, point directly at one player.",
-    spyGuessAction: "Spy guesses location",
-    endRound: "End round",
-    lastChance: "Last chance",
-    spyGuessTitle: "Spy guess",
-    guessLocation: "Guess the location",
-    whichSpyGuesses: "Which spy is guessing?",
-    guessPlaceholder: "Type the location...",
-    submitGuess: "Submit guess",
-    backToDiscussion: "Back to discussion",
-    result: "Result",
-    spiesWon: "Spies won",
-    agentsWon: "Agents won",
-    newRound: "New round",
-    toSetup: "Back to setup",
-    spyShort: "Spy",
-    roleShort: "Role",
-    reasons: {
-      timeout: "Time ran out. The spies survived the round.",
-      wrongVote: (name: string) => `${name} was pointed out, but was not a spy.`,
-      spyGuessCorrect: "The spy guessed the location correctly.",
-      caughtSpyWrongGuess: "The caught spy guessed wrong.",
-      freeSpyWrongGuess: "The spy guessed the wrong location.",
-      manualEnd: "The round was ended manually.",
-    },
-  },
-} as const;
+type Theme = "dark" | "light";
 
 function newPlayer(name: string): Player {
   return { id: crypto.randomUUID(), name };
 }
 
-function formatSeconds(total: number): string {
-  const safeTotal = Math.max(0, total);
-  const minutes = Math.floor(safeTotal / 60);
-  const seconds = safeTotal % 60;
-  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+function buildDefaultPlayers(): Player[] {
+  return Array.from({ length: DEFAULT_PLAYER_COUNT }, () => newPlayer(""));
 }
 
-function randomIndex(length: number): number {
-  return Math.floor(Math.random() * length);
+function getInitialTheme(): Theme {
+  if (typeof window === "undefined") {
+    return "dark";
+  }
+
+  const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+  return storedTheme === "light" || storedTheme === "dark" ? storedTheme : "dark";
 }
 
 export function App() {
   const [locale, setLocale] = useState<Locale>("nb");
-  const [players, setPlayers] = useState<Player[]>(() => DEFAULT_PLAYERS.map((name) => newPlayer(name)));
-  const [scores, setScores] = useState<Record<string, number>>({});
-  const [selectedPackIds, setSelectedPackIds] = useState<string[]>(() => [PACKS[0].id]);
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
+
+  const [players, setPlayers] = useState<Player[]>(buildDefaultPlayers);
+  const [selectedPackIds, setSelectedPackIds] = useState<string[]>(() => [PACKS[0]?.id ?? "classic"]);
   const [spyCount, setSpyCount] = useState(1);
-  const [includeRoles, setIncludeRoles] = useState(true);
 
   const [phase, setPhase] = useState<GamePhase>("setup");
   const [round, setRound] = useState<RoundState | null>(null);
@@ -152,52 +44,52 @@ export function App() {
   const [revealIndex, setRevealIndex] = useState(0);
   const [showCard, setShowCard] = useState(false);
 
-  const [remainingSeconds, setRemainingSeconds] = useState(0);
-  const [hintIndex, setHintIndex] = useState(0);
+  const [voteIndex, setVoteIndex] = useState(0);
+  const [votesByVoter, setVotesByVoter] = useState<Record<string, string>>({});
+  const voteLockedRef = useRef(false);
 
-  const [guessMode, setGuessMode] = useState<GuessMode>("free_guess");
-  const [guessingSpyId, setGuessingSpyId] = useState<string>("");
-  const [spyGuess, setSpyGuess] = useState("");
+  const text = COPY[locale];
+  const maxSpyCount = Math.max(1, players.length - 1);
 
-  const text = TEXT[locale];
-  const hints = HINT_QUESTIONS[locale];
-  const hint = hints[hintIndex % hints.length];
+  const canStartGame = players.length >= 3 && selectedPackIds.length > 0 && spyCount >= 1 && spyCount <= maxSpyCount;
 
-  const playersById = useMemo(() => {
-    return Object.fromEntries(players.map((player) => [player.id, player]));
-  }, [players]);
+  const roundPlayerIndexById = useMemo<Record<string, number>>(() => {
+    if (!round) {
+      return {};
+    }
+    return Object.fromEntries(round.players.map((player, index) => [player.id, index]));
+  }, [round]);
 
-  const canStartGame = players.length >= 3 && selectedPackIds.length > 0 && spyCount >= 1 && spyCount < players.length;
+  const currentRevealPlayer = round?.players[revealIndex] ?? null;
+  const currentRevealAssignment = currentRevealPlayer ? round?.assignments[currentRevealPlayer.id] : null;
+
+  function playerPlaceholder(index: number): string {
+    return locale === "nb" ? `Spiller ${index + 1}` : `Player ${index + 1}`;
+  }
+
+  function displayPlayerName(name: string, index: number): string {
+    const trimmedName = name.trim();
+    return trimmedName.length > 0 ? trimmedName : playerPlaceholder(index);
+  }
 
   function toggleLocale() {
     setLocale((current) => (current === "nb" ? "en" : "nb"));
   }
 
-  useEffect(() => {
-    if (phase !== "discussion") {
-      return undefined;
-    }
-    const timer = window.setInterval(() => {
-      setRemainingSeconds((value) => value - 1);
-    }, 1000);
-    return () => window.clearInterval(timer);
-  }, [phase]);
+  function toggleTheme() {
+    setTheme((current) => (current === "dark" ? "light" : "dark"));
+  }
 
-  useEffect(() => {
-    if (phase === "discussion" && remainingSeconds <= 0 && round) {
-      finishRound({
-        winner: "spies",
-        reason: text.reasons.timeout,
-      });
-    }
-  }, [phase, remainingSeconds, round, text.reasons.timeout]);
+  function finishRound(result: RoundResult) {
+    setRoundResult(result);
+    setPhase("result");
+  }
 
   function addPlayer() {
     if (players.length >= 12) {
       return;
     }
-    const defaultName = locale === "nb" ? `Spiller ${players.length + 1}` : `Player ${players.length + 1}`;
-    setPlayers((current) => [...current, newPlayer(defaultName)]);
+    setPlayers((current) => [...current, newPlayer("")]);
   }
 
   function removePlayer(id: string) {
@@ -205,11 +97,6 @@ export function App() {
       return;
     }
     setPlayers((current) => current.filter((player) => player.id !== id));
-    setScores((current) => {
-      const next = { ...current };
-      delete next[id];
-      return next;
-    });
   }
 
   function updatePlayerName(id: string, name: string) {
@@ -219,123 +106,117 @@ export function App() {
   function togglePack(packId: string) {
     setSelectedPackIds((current) => {
       if (current.includes(packId)) {
-        if (current.length === 1) {
-          return current;
-        }
-        return current.filter((id) => id !== packId);
+        return current.length === 1 ? current : current.filter((id) => id !== packId);
       }
       return [...current, packId];
     });
+  }
+
+  function updateSpyCount(value: number) {
+    if (!Number.isFinite(value)) {
+      return;
+    }
+    const normalized = Math.max(1, Math.min(maxSpyCount, Math.trunc(value)));
+    setSpyCount(normalized);
   }
 
   function startRound() {
     if (!canStartGame) {
       return;
     }
+
     const createdRound = createRound({
       players,
       selectedPackIds,
       spyCount,
-      durationSeconds: ROUND_DURATION_SECONDS,
-      includeRoles,
     });
+
     setRound(createdRound);
-    setPhase("deal");
     setRoundResult(null);
+    setPhase("deal");
     setRevealIndex(0);
     setShowCard(false);
-    setRemainingSeconds(createdRound.durationSeconds);
-    setHintIndex(randomIndex(hints.length));
-    setSpyGuess("");
-    setGuessMode("free_guess");
-    setGuessingSpyId(createdRound.spyIds[0]);
+    setVoteIndex(0);
+    setVotesByVoter({});
+    voteLockedRef.current = false;
   }
 
   function goToNextReveal() {
     if (!round) {
       return;
     }
+
     if (revealIndex >= round.players.length - 1) {
-      setPhase("discussion");
+      setPhase("vote");
       setShowCard(false);
+      setVoteIndex(0);
+      setVotesByVoter({});
+      voteLockedRef.current = false;
       return;
     }
+
     setRevealIndex((value) => value + 1);
     setShowCard(false);
   }
 
-  function accusePlayer(targetId: string) {
+  function finalizeVotes(votes: Record<string, string>) {
     if (!round) {
       return;
     }
-    const assignment = round.assignments[targetId];
-    if (assignment.isSpy) {
-      setGuessMode("caught_spy_guess");
-      setGuessingSpyId(targetId);
-      setPhase("spy_guess");
-      setSpyGuess("");
+
+    const counts: Record<string, number> = {};
+    for (const targetId of Object.values(votes)) {
+      counts[targetId] = (counts[targetId] ?? 0) + 1;
+    }
+
+    const entries = Object.entries(counts);
+    if (entries.length === 0) {
+      finishRound({ winner: "spies", reason: text.reasons.voteTie });
       return;
     }
-    finishRound({
-      winner: "spies",
-      reason:
-        text.reasons.wrongVote(playersById[targetId]?.name ?? (locale === "nb" ? "Ukjent spiller" : "Unknown player")),
-    });
+
+    const maxVotes = Math.max(...entries.map(([, count]) => count));
+    const topCandidates = entries.filter(([, count]) => count === maxVotes).map(([id]) => id);
+
+    if (topCandidates.length !== 1) {
+      finishRound({ winner: "spies", reason: text.reasons.voteTie });
+      return;
+    }
+
+    const suspectId = topCandidates[0];
+    const suspectAssignment = round.assignments[suspectId];
+
+    if (suspectAssignment?.isSpy) {
+      finishRound({ winner: "agents", reason: text.reasons.caughtSpy });
+      return;
+    }
+
+    const suspectIndex = roundPlayerIndexById[suspectId] ?? 0;
+    const suspectName = displayPlayerName(round.players[suspectIndex]?.name ?? "", suspectIndex);
+    finishRound({ winner: "spies", reason: text.reasons.wrongVote(suspectName) });
   }
 
-  function openSpyGuessFromDiscussion() {
-    if (!round) {
+  function submitVote(targetId: string) {
+    if (!round || voteLockedRef.current) {
       return;
     }
-    setGuessMode("free_guess");
-    setGuessingSpyId(round.spyIds[0]);
-    setSpyGuess("");
-    setPhase("spy_guess");
-  }
+    voteLockedRef.current = true;
 
-  function submitSpyGuess() {
-    if (!round) {
+    const voter = round.players[voteIndex];
+    if (!voter) {
+      voteLockedRef.current = false;
       return;
     }
-    const locationName = normalizeValue(round.location.name);
-    const guess = normalizeValue(spyGuess);
-    if (!guess) {
-      return;
-    }
-    if (guess === locationName) {
-      finishRound({
-        winner: "spies",
-        reason: text.reasons.spyGuessCorrect,
-      });
-      return;
-    }
-    finishRound({
-      winner: "agents",
-      reason: guessMode === "caught_spy_guess" ? text.reasons.caughtSpyWrongGuess : text.reasons.freeSpyWrongGuess,
-    });
-  }
 
-  function finishRound(result: RoundResult) {
-    if (!round) {
+    const nextVotes = { ...votesByVoter, [voter.id]: targetId };
+    setVotesByVoter(nextVotes);
+
+    if (voteIndex < round.players.length - 1) {
+      setVoteIndex((value) => value + 1);
       return;
     }
-    setRoundResult(result);
-    setPhase("result");
-    setScores((current) => {
-      const next = { ...current };
-      for (const player of round.players) {
-        const assignment = round.assignments[player.id];
-        const gainsPoint =
-          (result.winner === "spies" && assignment.isSpy) ||
-          (result.winner === "agents" && !assignment.isSpy);
-        if (gainsPoint) {
-          next[player.id] = (next[player.id] ?? 0) + 1;
-        } else {
-          next[player.id] = next[player.id] ?? 0;
-        }
-      }
-      return next;
-    });
+
+    finalizeVotes(nextVotes);
   }
 
   function endToSetup() {
@@ -343,273 +224,131 @@ export function App() {
     setRound(null);
     setRoundResult(null);
     setShowCard(false);
+    setVoteIndex(0);
+    setVotesByVoter({});
+    voteLockedRef.current = false;
   }
 
-  function revealNow() {
-    finishRound({
-      winner: "agents",
-      reason: text.reasons.manualEnd,
+  useEffect(() => {
+    voteLockedRef.current = false;
+  }, [phase, voteIndex]);
+
+  useEffect(() => {
+    setSpyCount((current) => {
+      const value = Number.isFinite(current) ? Math.trunc(current) : 1;
+      const clamped = Math.max(1, Math.min(maxSpyCount, value));
+      return clamped === current ? current : clamped;
     });
-  }
+  }, [maxSpyCount]);
+
+  useLayoutEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    const themeColor = theme === "dark" ? "#030507" : "#f4f7fb";
+    document.querySelector("meta[name='theme-color']")?.setAttribute("content", themeColor);
+  }, [theme]);
 
   return (
-    <main className="shell">
-      <div className="ambient ambient-a" />
-      <div className="ambient ambient-b" />
-      <section className="panel">
-        <header className="panel__header">
-          <div className="row header-row">
-            <div>
-              <h1>Spionspillet</h1>
-            </div>
-            <button
+    <main className="app-shell">
+      <section className="app-frame">
+        <header className="app-header">
+          <div className="app-brand">
+            <p className="kicker">{text.brandKicker}</p>
+            <h1 className="app-title">Spy</h1>
+          </div>
+
+          <div className="header-controls">
+            <Button
               type="button"
-              className="lang-switch"
+              variant="secondary"
+              size="sm"
+              className="header-switch"
               onClick={toggleLocale}
               aria-label={`${text.languageLabel}: ${locale === "nb" ? text.english : text.norwegian}`}
             >
-              <Languages size={18} />
-              <span className="lang-switch__label">
-                <small>{text.languageLabel}</small>
-                <strong>{locale === "nb" ? text.norwegian : text.english}</strong>
-              </span>
-              <span className="lang-switch__next">{locale === "nb" ? text.english : text.norwegian}</span>
-              <Repeat2 size={15} />
-            </button>
+              <Languages size={16} />
+              <span className="header-switch__label">{text.languageLabel}</span>
+            </Button>
+
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="header-switch"
+              onClick={toggleTheme}
+              aria-label={`${text.themeLabel}: ${theme === "dark" ? text.light : text.dark}`}
+            >
+              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+              <span className="header-switch__label">{text.themeLabel}</span>
+            </Button>
           </div>
         </header>
 
         {phase === "setup" && (
-          <section className="stack">
-            <div className="card">
-              <h2>{text.players}</h2>
-              <p className="muted">{text.playersHelp}</p>
-              <div className="stack compact">
-                {players.map((player) => (
-                  <div className="row" key={player.id}>
-                    <input
-                      aria-label={`${text.nameFor} ${player.name}`}
-                      value={player.name}
-                      onChange={(event) => updatePlayerName(player.id, event.target.value)}
-                    />
-                    <button type="button" className="ghost" onClick={() => removePlayer(player.id)}>
-                      {text.remove}
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <button type="button" className="ghost" onClick={addPlayer}>
-                {text.addPlayer}
-              </button>
+          <>
+            <div className="rules-box app-rules" aria-label={text.rulesTitle}>
+              <p className="rules-box__title">{text.playersIntro}</p>
+              <ul className="rules-list">
+                <li>{text.rulePlayerCount}</li>
+                <li>{text.rulePassPhone}</li>
+                <li>{text.ruleNoPeeking}</li>
+                <li>{text.ruleDiscussion}</li>
+              </ul>
             </div>
 
-            <div className="card">
-              <h2>{text.setup}</h2>
-              <div className="form-grid">
-                <label>
-                  <span>{text.spiesCount}</span>
-                  <input
-                    type="number"
-                    min={1}
-                    max={Math.max(1, players.length - 1)}
-                    value={spyCount}
-                    onChange={(event) => setSpyCount(Number(event.target.value))}
-                  />
-                </label>
-                <label className="check">
-                  <input
-                    type="checkbox"
-                    checked={includeRoles}
-                    onChange={(event) => setIncludeRoles(event.target.checked)}
-                  />
-                  <span>{text.includeRoles}</span>
-                </label>
-              </div>
-            </div>
-
-            <div className="card">
-              <h2>{text.locationPacks}</h2>
-              <div className="chips">
-                {PACKS.map((pack) => (
-                  <button
-                    key={pack.id}
-                    type="button"
-                    className={selectedPackIds.includes(pack.id) ? "chip active" : "chip"}
-                    onClick={() => togglePack(pack.id)}
-                  >
-                    {pack.name[locale]}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="card">
-              <h2>{text.scoreboard}</h2>
-              <div className="score-grid">
-                {players.map((player) => (
-                  <div key={player.id} className="score-item">
-                    <span>{player.name}</span>
-                    <strong>{scores[player.id] ?? 0}</strong>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <button type="button" className="primary" disabled={!canStartGame} onClick={startRound}>
-              {text.startRound}
-            </button>
-          </section>
+            <SetupSection
+              text={text}
+              locale={locale}
+              players={players}
+              selectedPackIds={selectedPackIds}
+              spyCount={spyCount}
+              canStartGame={canStartGame}
+              onUpdatePlayerName={updatePlayerName}
+              onRemovePlayer={removePlayer}
+              onAddPlayer={addPlayer}
+              onSetSpyCount={updateSpyCount}
+              onTogglePack={togglePack}
+              onStartRound={startRound}
+              displayPlayerName={displayPlayerName}
+              playerPlaceholder={playerPlaceholder}
+            />
+          </>
         )}
 
-        {phase === "deal" && round && (
-          <section className="stack">
-            <div className="card big-card">
-              <p className="eyebrow">
-                {text.step} {revealIndex + 1} {text.of} {round.players.length}
-              </p>
-              <h2>{round.players[revealIndex].name}</h2>
-              {!showCard && <p>{text.revealPrompt}</p>}
-              {showCard && (
-                <div className="reveal">
-                  {round.assignments[round.players[revealIndex].id].isSpy ? (
-                    <>
-                      <p className="tag danger">{text.youAreSpy}</p>
-                      <p>{text.spyInstruction}</p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="tag safe">{text.youAreAgent}</p>
-                      <p>
-                        {text.location}: <strong>{round.location.name}</strong>
-                      </p>
-                      <p>
-                        {text.role}: <strong>{round.assignments[round.players[revealIndex].id].role}</strong>
-                      </p>
-                    </>
-                  )}
-                </div>
-              )}
-              <div className="actions">
-                {!showCard && (
-                  <button type="button" className="primary" onClick={() => setShowCard(true)}>
-                    {text.showCard}
-                  </button>
-                )}
-                {showCard && (
-                  <button type="button" className="primary" onClick={goToNextReveal}>
-                    {text.hideAndPass}
-                  </button>
-                )}
-              </div>
-            </div>
-          </section>
+        {phase === "deal" && round && currentRevealPlayer && currentRevealAssignment && (
+          <DealSection
+            text={text}
+            locale={locale}
+            round={round}
+            revealIndex={revealIndex}
+            showCard={showCard}
+            revealPlayerName={displayPlayerName(currentRevealPlayer.name, revealIndex)}
+            isSpy={currentRevealAssignment.isSpy}
+            onShowCard={() => setShowCard(true)}
+            onNextReveal={goToNextReveal}
+          />
         )}
 
-        {phase === "discussion" && round && (
-          <section className="stack">
-            <div className="card">
-              <p className="eyebrow">{text.discussion}</p>
-              <h2 className="timer">{formatSeconds(remainingSeconds)}</h2>
-              <p>{text.discussionInstruction}</p>
-              <div className="hint-box">
-                <p className="muted">{text.hintLabel}</p>
-                <strong>{hint}</strong>
-                <button type="button" className="ghost" onClick={() => setHintIndex(randomIndex(hints.length))}>
-                  {text.newHint}
-                </button>
-              </div>
-              <div className="actions">
-                <button type="button" className="ghost" onClick={openSpyGuessFromDiscussion}>
-                  {text.spyGuessAction}
-                </button>
-                <button type="button" className="ghost danger" onClick={revealNow}>
-                  {text.endRound}
-                </button>
-              </div>
-              <div className="stack compact">
-                <p className="muted">{text.pointAtSuspectHelp}</p>
-                <p className="eyebrow">{text.pointAtSuspect}</p>
-                <div className="chips vertical">
-                  {round.players.map((player) => (
-                    <button key={player.id} type="button" className="chip" onClick={() => accusePlayer(player.id)}>
-                      {player.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {phase === "spy_guess" && round && (
-          <section className="stack">
-            <div className="card big-card">
-              <p className="eyebrow">{guessMode === "caught_spy_guess" ? text.lastChance : text.spyGuessTitle}</p>
-              <h2>{text.guessLocation}</h2>
-              {round.spyIds.length > 1 && guessMode === "free_guess" && (
-                <label>
-                  <span>{text.whichSpyGuesses}</span>
-                  <select value={guessingSpyId} onChange={(event) => setGuessingSpyId(event.target.value)}>
-                    {round.spyIds.map((id) => (
-                      <option key={id} value={id}>
-                        {playersById[id]?.name ?? id}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )}
-              <input
-                value={spyGuess}
-                onChange={(event) => setSpyGuess(event.target.value)}
-                placeholder={text.guessPlaceholder}
-              />
-              <div className="actions">
-                <button type="button" className="primary" onClick={submitSpyGuess}>
-                  {text.submitGuess}
-                </button>
-                {guessMode === "free_guess" && (
-                  <button type="button" className="ghost" onClick={() => setPhase("discussion")}>
-                    {text.backToDiscussion}
-                  </button>
-                )}
-              </div>
-            </div>
-          </section>
+        {phase === "vote" && round && (
+          <VoteSection
+            text={text}
+            round={round}
+            voteIndex={voteIndex}
+            onVote={submitVote}
+            displayPlayerName={displayPlayerName}
+          />
         )}
 
         {phase === "result" && round && roundResult && (
-          <section className="stack">
-            <div className="card">
-              <p className="eyebrow">{text.result}</p>
-              <h2>{roundResult.winner === "spies" ? text.spiesWon : text.agentsWon}</h2>
-              <p>{roundResult.reason}</p>
-              <p>
-                {text.location}: <strong>{round.location.name}</strong>
-              </p>
-              <div className="score-grid">
-                {round.players.map((player) => {
-                  const assignment = round.assignments[player.id];
-                  return (
-                    <div className="score-item" key={player.id}>
-                      <span>
-                        {player.name}{" "}
-                        {assignment.isSpy ? `(${text.spyShort})` : `(${text.roleShort}: ${assignment.role})`}
-                      </span>
-                      <strong>{scores[player.id] ?? 0}</strong>
-                    </div>
-                  );
-                })}
-              </div>
-              <div className="actions">
-                <button type="button" className="primary" onClick={startRound}>
-                  {text.newRound}
-                </button>
-                <button type="button" className="ghost" onClick={endToSetup}>
-                  {text.toSetup}
-                </button>
-              </div>
-            </div>
-          </section>
+          <ResultSection
+            text={text}
+            locale={locale}
+            round={round}
+            roundResult={roundResult}
+            onNewRound={startRound}
+            onBackToSetup={endToSetup}
+            displayPlayerName={displayPlayerName}
+          />
         )}
       </section>
     </main>
