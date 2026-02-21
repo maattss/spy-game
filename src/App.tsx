@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Languages, Moon, Sun } from "lucide-react";
 import { PACKS } from "./content";
 import { COPY } from "./copy";
@@ -47,6 +47,7 @@ export function App() {
 
   const [voteIndex, setVoteIndex] = useState(0);
   const [votesByVoter, setVotesByVoter] = useState<Record<string, string>>({});
+  const voteLockedRef = useRef(false);
 
   const [guessingSpyId, setGuessingSpyId] = useState("");
   const [spyGuess, setSpyGuess] = useState("");
@@ -133,6 +134,7 @@ export function App() {
     setShowCard(false);
     setVoteIndex(0);
     setVotesByVoter({});
+    voteLockedRef.current = false;
     setGuessingSpyId(createdRound.spyIds[0] ?? "");
     setSpyGuess("");
   }
@@ -147,6 +149,7 @@ export function App() {
       setShowCard(false);
       setVoteIndex(0);
       setVotesByVoter({});
+      voteLockedRef.current = false;
       return;
     }
 
@@ -194,12 +197,14 @@ export function App() {
   }
 
   function submitVote(targetId: string) {
-    if (!round) {
+    if (!round || voteLockedRef.current) {
       return;
     }
+    voteLockedRef.current = true;
 
     const voter = round.players[voteIndex];
     if (!voter) {
+      voteLockedRef.current = false;
       return;
     }
 
@@ -241,11 +246,16 @@ export function App() {
     setShowCard(false);
     setVoteIndex(0);
     setVotesByVoter({});
+    voteLockedRef.current = false;
     setGuessingSpyId("");
     setSpyGuess("");
   }
 
   useEffect(() => {
+    voteLockedRef.current = false;
+  }, [phase, voteIndex]);
+
+  useLayoutEffect(() => {
     document.documentElement.dataset.theme = theme;
     window.localStorage.setItem(THEME_STORAGE_KEY, theme);
     const themeColor = theme === "dark" ? "#030507" : "#f4f7fb";

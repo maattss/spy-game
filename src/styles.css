@@ -260,7 +260,7 @@ select {
 }
 
 .setup-card .ui-card__content {
-  padding-top: 0;
+  padding-top: 0.48rem;
   padding-bottom: 0.68rem;
 }
 
