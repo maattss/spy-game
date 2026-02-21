@@ -250,12 +250,14 @@ export function ResultSection({
   onBackToSetup,
   displayPlayerName,
 }: ResultSectionProps) {
+  const spyWinnerLabel = round.spyIds.length === 1 ? text.spyWon : text.spiesWon;
+
   return (
     <section className="phase-stack">
       <Card>
         <CardHeader>
           <p className="kicker">{text.result}</p>
-          <CardTitle>{roundResult.winner === "spies" ? text.spiesWon : text.agentsWon}</CardTitle>
+          <CardTitle>{roundResult.winner === "spies" ? spyWinnerLabel : text.agentsWon}</CardTitle>
           <CardDescription>{roundResult.reason}</CardDescription>
         </CardHeader>
 
