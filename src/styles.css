@@ -183,7 +183,51 @@ select {
 }
 
 .lang-switch {
-  min-width: 11rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 12rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid color-mix(in srgb, var(--line-strong) 80%, transparent);
+  background: linear-gradient(
+    120deg,
+    color-mix(in srgb, var(--accent) 17%, transparent),
+    color-mix(in srgb, var(--accent-2) 21%, transparent)
+  );
+  color: var(--ink);
+  box-shadow: 0 10px 22px rgba(6, 16, 34, 0.42);
+}
+
+.lang-switch svg {
+  flex-shrink: 0;
+}
+
+.lang-switch__label {
+  display: grid;
+  line-height: 1.05;
+  text-align: left;
+  margin-right: auto;
+}
+
+.lang-switch__label small {
+  font-size: 0.63rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--muted) 76%, white);
+}
+
+.lang-switch__label strong {
+  font-size: 0.94rem;
+}
+
+.lang-switch__next {
+  padding: 0.12rem 0.46rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--line) 82%, transparent);
+  background: color-mix(in srgb, var(--chip) 88%, transparent);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
 }
 
 .row input {

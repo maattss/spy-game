@@ -1,17 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
+import { Languages, Repeat2 } from "lucide-react";
 import { HINT_QUESTIONS, PACKS } from "./content";
 import { createRound, normalizeValue } from "./game";
 import type { GamePhase, GuessMode, Locale, Player, RoundResult, RoundState } from "./types";
 
 const DEFAULT_PLAYERS = ["Spiller 1", "Spiller 2", "Spiller 3", "Spiller 4"];
+const ROUND_DURATION_SECONDS = 8 * 60;
 
 const TEXT = {
   nb: {
     languageLabel: "Sprak",
     norwegian: "Norsk",
     english: "Engelsk",
-    partyGame: "Party game",
-    subtitle: "Web-basert social deduction inspirert av Spy-konseptet.",
     players: "Spillere",
     playersHelp: "3-12 spillere. Telefonen sendes videre mellom hver visning.",
     nameFor: "Navn for",
@@ -19,7 +19,6 @@ const TEXT = {
     addPlayer: "+ Legg til spiller",
     setup: "Oppsett",
     spiesCount: "Antall spioner",
-    roundMinutes: "Rundetid (min)",
     includeRoles: "Bruk roller",
     locationPacks: "Lokasjonspakker",
     scoreboard: "Poengtavle",
@@ -69,8 +68,6 @@ const TEXT = {
     languageLabel: "Language",
     norwegian: "Norwegian",
     english: "English",
-    partyGame: "Party game",
-    subtitle: "Web-based social deduction inspired by the Spy concept.",
     players: "Players",
     playersHelp: "3-12 players. Pass the phone between each reveal.",
     nameFor: "Name for",
@@ -78,7 +75,6 @@ const TEXT = {
     addPlayer: "+ Add player",
     setup: "Setup",
     spiesCount: "Number of spies",
-    roundMinutes: "Round time (min)",
     includeRoles: "Use roles",
     locationPacks: "Location packs",
     scoreboard: "Scoreboard",
@@ -147,7 +143,6 @@ export function App() {
   const [scores, setScores] = useState<Record<string, number>>({});
   const [selectedPackIds, setSelectedPackIds] = useState<string[]>(() => [PACKS[0].id]);
   const [spyCount, setSpyCount] = useState(1);
-  const [roundMinutes, setRoundMinutes] = useState(8);
   const [includeRoles, setIncludeRoles] = useState(true);
 
   const [phase, setPhase] = useState<GamePhase>("setup");
@@ -173,6 +168,10 @@ export function App() {
   }, [players]);
 
   const canStartGame = players.length >= 3 && selectedPackIds.length > 0 && spyCount >= 1 && spyCount < players.length;
+
+  function toggleLocale() {
+    setLocale((current) => (current === "nb" ? "en" : "nb"));
+  }
 
   useEffect(() => {
     if (phase !== "discussion") {
@@ -237,7 +236,7 @@ export function App() {
       players,
       selectedPackIds,
       spyCount,
-      durationSeconds: roundMinutes * 60,
+      durationSeconds: ROUND_DURATION_SECONDS,
       includeRoles,
     });
     setRound(createdRound);
@@ -361,17 +360,22 @@ export function App() {
         <header className="panel__header">
           <div className="row header-row">
             <div>
-              <p className="eyebrow">{text.partyGame}</p>
-              <h1>Spy Web</h1>
-              <p className="muted">{text.subtitle}</p>
+              <h1>Spionspillet</h1>
             </div>
-            <label className="lang-switch">
-              <span>{text.languageLabel}</span>
-              <select value={locale} onChange={(event) => setLocale(event.target.value as Locale)}>
-                <option value="nb">{text.norwegian}</option>
-                <option value="en">{text.english}</option>
-              </select>
-            </label>
+            <button
+              type="button"
+              className="lang-switch"
+              onClick={toggleLocale}
+              aria-label={`${text.languageLabel}: ${locale === "nb" ? text.english : text.norwegian}`}
+            >
+              <Languages size={18} />
+              <span className="lang-switch__label">
+                <small>{text.languageLabel}</small>
+                <strong>{locale === "nb" ? text.norwegian : text.english}</strong>
+              </span>
+              <span className="lang-switch__next">{locale === "nb" ? text.english : text.norwegian}</span>
+              <Repeat2 size={15} />
+            </button>
           </div>
         </header>
 
@@ -410,16 +414,6 @@ export function App() {
                     max={Math.max(1, players.length - 1)}
                     value={spyCount}
                     onChange={(event) => setSpyCount(Number(event.target.value))}
-                  />
-                </label>
-                <label>
-                  <span>{text.roundMinutes}</span>
-                  <input
-                    type="number"
-                    min={2}
-                    max={20}
-                    value={roundMinutes}
-                    onChange={(event) => setRoundMinutes(Number(event.target.value))}
                   />
                 </label>
                 <label className="check">
