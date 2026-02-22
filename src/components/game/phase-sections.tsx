@@ -137,10 +137,14 @@ export function SetupSection({
                   key={pack.id}
                   type="button"
                   variant={isSelected ? "chipActive" : "chip"}
+                  className="pack-chip"
                   aria-pressed={isSelected}
                   onClick={() => onTogglePack(pack.id)}
                 >
-                  {pack.emoji} {pack.name[locale]}
+                  <span className="pack-chip__emoji" aria-hidden="true">
+                    {pack.emoji}
+                  </span>
+                  <span className="pack-chip__label">{pack.name[locale]}</span>
                 </Button>
               );
             })}
