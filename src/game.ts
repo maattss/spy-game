@@ -17,7 +17,8 @@ export function shuffle<T>(items: readonly T[]): T[] {
 }
 
 function getLocationPool(selectedPackIds: string[]): LocationCard[] {
-  const packs = PACKS.filter((pack) => selectedPackIds.includes(pack.id));
+  const selectedIds = new Set(selectedPackIds);
+  const packs = PACKS.filter((pack) => selectedIds.has(pack.id));
   return packs.flatMap((pack) => pack.locations);
 }
 
@@ -37,9 +38,10 @@ export function createRound(input: CreateRoundInput): RoundState {
   const location = locationPool[Math.floor(Math.random() * locationPool.length)];
   const shuffledPlayers = shuffle(players);
   const spyIds = shuffledPlayers.slice(0, spyCount).map((player) => player.id);
+  const spyIdSet = new Set(spyIds);
   const assignments: Record<string, Assignment> = {};
   for (const player of players) {
-    const isSpy = spyIds.includes(player.id);
+    const isSpy = spyIdSet.has(player.id);
     assignments[player.id] = {
       playerId: player.id,
       isSpy,

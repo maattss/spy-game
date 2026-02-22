@@ -89,25 +89,77 @@ const TRAVEL_LOCATIONS: LocationCard[] = [
   loc("Kystlandsby", "Coastal Village"),
 ];
 
+const WEEKEND_LOCATIONS: LocationCard[] = [
+  loc("Escape room", "Escape Room"),
+  loc("Karaokebar", "Karaoke Bar"),
+  loc("Bowlinghall", "Bowling Alley"),
+  loc("Brettspillkafe", "Board Game Cafe"),
+  loc("Streetfood-marked", "Street Food Market"),
+  loc("Nattbuss", "Night Bus"),
+  loc("Takbar", "Rooftop Bar"),
+  loc("Festivalcamp", "Festival Camp"),
+  loc("Late-night diner", "Late-Night Diner"),
+  loc("Drive-in kino", "Drive-in Cinema"),
+  loc("Trampolinepark", "Trampoline Park"),
+  loc("Klatrehall", "Climbing Gym"),
+  loc("Minigolfbane", "Mini Golf Course"),
+  loc("Badstuflate", "Floating Sauna"),
+  loc("Badeland", "Water Resort"),
+];
+
+const SPICY_LOCATIONS: LocationCard[] = [
+  loc("VIP-lounge", "VIP Lounge"),
+  loc("Auksjonshus", "Auction House"),
+  loc("Backstage", "Backstage Area"),
+  loc("Hemmelig takfest", "Secret Rooftop Party"),
+  loc("Startup-pitch", "Startup Pitch Room"),
+  loc("Lukket styremote", "Closed Board Meeting"),
+  loc("Ambassademiddag", "Embassy Dinner"),
+  loc("Pokerrom", "Private Poker Room"),
+  loc("Motevisning", "Fashion Show"),
+  loc("Filmfestival-juryrom", "Film Festival Jury Room"),
+  loc("Luksusyacht", "Luxury Yacht"),
+  loc("Presserom", "Press Briefing Room"),
+  loc("Kryptokonferanse", "Crypto Conference"),
+  loc("Green room", "Green Room"),
+  loc("Etterfest", "Afterparty"),
+];
+
 export const PACKS: LocationPack[] = [
   {
     id: "classic",
+    emoji: "🕵️",
     name: { nb: "Klassisk", en: "Classic" },
     locations: CLASSIC_LOCATIONS,
   },
   {
     id: "nordic",
+    emoji: "❄️",
     name: { nb: "Nordisk", en: "Nordic" },
     locations: NORDIC_LOCATIONS,
   },
   {
     id: "city",
+    emoji: "🏙️",
     name: { nb: "Byliv", en: "City Life" },
     locations: CITY_LOCATIONS,
   },
   {
     id: "travel",
+    emoji: "✈️",
     name: { nb: "Reise", en: "Travel" },
     locations: TRAVEL_LOCATIONS,
+  },
+  {
+    id: "weekend",
+    emoji: "🎉",
+    name: { nb: "Helgemodus", en: "Weekend Vibes" },
+    locations: WEEKEND_LOCATIONS,
+  },
+  {
+    id: "spicy",
+    emoji: "🌶️",
+    name: { nb: "Spicy Mode", en: "Spicy Mode" },
+    locations: SPICY_LOCATIONS,
   },
 ];

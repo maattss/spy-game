@@ -18,6 +18,7 @@ export interface LocationCard {
 
 export interface LocationPack {
   id: string;
+  emoji: string;
   name: LocalizedText;
   locations: LocationCard[];
 }

@@ -8,7 +8,10 @@ import { Button } from "./components/ui/button";
 import { DealSection, ResultSection, SetupSection, VoteSection } from "./components/game/phase-sections";
 
 const DEFAULT_PLAYER_COUNT = 4;
+const MIN_PLAYER_COUNT = 3;
+const MAX_PLAYER_COUNT = 12;
 const THEME_STORAGE_KEY = "spy-theme";
+const VOTE_ADVANCE_DELAY_MS = 220;
 
 type Theme = "dark" | "light";
 
@@ -46,12 +49,15 @@ export function App() {
 
   const [voteIndex, setVoteIndex] = useState(0);
   const [votesByVoter, setVotesByVoter] = useState<Record<string, string>>({});
+  const [activeVoteTargetId, setActiveVoteTargetId] = useState<string | null>(null);
   const voteLockedRef = useRef(false);
+  const voteAdvanceTimeoutRef = useRef<number | null>(null);
 
   const text = COPY[locale];
   const maxSpyCount = Math.max(1, players.length - 1);
 
-  const canStartGame = players.length >= 3 && selectedPackIds.length > 0 && spyCount >= 1 && spyCount <= maxSpyCount;
+  const canStartGame =
+    players.length >= MIN_PLAYER_COUNT && selectedPackIds.length > 0 && spyCount >= 1 && spyCount <= maxSpyCount;
 
   const roundPlayerIndexById = useMemo<Record<string, number>>(() => {
     if (!round) {
@@ -86,14 +92,14 @@ export function App() {
   }
 
   function addPlayer() {
-    if (players.length >= 12) {
+    if (players.length >= MAX_PLAYER_COUNT) {
       return;
     }
     setPlayers((current) => [...current, newPlayer("")]);
   }
 
   function removePlayer(id: string) {
-    if (players.length <= 3) {
+    if (players.length <= MIN_PLAYER_COUNT) {
       return;
     }
     setPlayers((current) => current.filter((player) => player.id !== id));
@@ -120,6 +126,14 @@ export function App() {
     setSpyCount(normalized);
   }
 
+  function clearVoteAdvanceTimeout() {
+    if (voteAdvanceTimeoutRef.current === null) {
+      return;
+    }
+    window.clearTimeout(voteAdvanceTimeoutRef.current);
+    voteAdvanceTimeoutRef.current = null;
+  }
+
   function startRound() {
     if (!canStartGame) {
       return;
@@ -138,7 +152,9 @@ export function App() {
     setShowCard(false);
     setVoteIndex(0);
     setVotesByVoter({});
+    setActiveVoteTargetId(null);
     voteLockedRef.current = false;
+    clearVoteAdvanceTimeout();
   }
 
   function goToNextReveal() {
@@ -151,7 +167,9 @@ export function App() {
       setShowCard(false);
       setVoteIndex(0);
       setVotesByVoter({});
+      setActiveVoteTargetId(null);
       voteLockedRef.current = false;
+      clearVoteAdvanceTimeout();
       return;
     }
 
@@ -210,13 +228,19 @@ export function App() {
 
     const nextVotes = { ...votesByVoter, [voter.id]: targetId };
     setVotesByVoter(nextVotes);
+    setActiveVoteTargetId(targetId);
 
-    if (voteIndex < round.players.length - 1) {
-      setVoteIndex((value) => value + 1);
-      return;
-    }
+    clearVoteAdvanceTimeout();
+    voteAdvanceTimeoutRef.current = window.setTimeout(() => {
+      voteAdvanceTimeoutRef.current = null;
 
-    finalizeVotes(nextVotes);
+      if (voteIndex < round.players.length - 1) {
+        setVoteIndex((value) => value + 1);
+        return;
+      }
+
+      finalizeVotes(nextVotes);
+    }, VOTE_ADVANCE_DELAY_MS);
   }
 
   function endToSetup() {
@@ -226,12 +250,27 @@ export function App() {
     setShowCard(false);
     setVoteIndex(0);
     setVotesByVoter({});
+    setActiveVoteTargetId(null);
     voteLockedRef.current = false;
+    clearVoteAdvanceTimeout();
   }
 
   useEffect(() => {
     voteLockedRef.current = false;
+    setActiveVoteTargetId(null);
   }, [phase, voteIndex]);
+
+  useEffect(() => {
+    if (phase !== "vote") {
+      clearVoteAdvanceTimeout();
+    }
+  }, [phase]);
+
+  useEffect(() => {
+    return () => {
+      clearVoteAdvanceTimeout();
+    };
+  }, []);
 
   useEffect(() => {
     setSpyCount((current) => {
@@ -303,6 +342,7 @@ export function App() {
               selectedPackIds={selectedPackIds}
               spyCount={spyCount}
               canStartGame={canStartGame}
+              minPlayerCount={MIN_PLAYER_COUNT}
               onUpdatePlayerName={updatePlayerName}
               onRemovePlayer={removePlayer}
               onAddPlayer={addPlayer}
@@ -335,6 +375,7 @@ export function App() {
             round={round}
             voteIndex={voteIndex}
             onVote={submitVote}
+            activeVoteTargetId={activeVoteTargetId}
             displayPlayerName={displayPlayerName}
           />
         )}
