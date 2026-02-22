@@ -111,10 +111,7 @@ export function App() {
 
   function togglePack(packId: string) {
     setSelectedPackIds((current) => {
-      if (current.includes(packId)) {
-        return current.length === 1 ? current : current.filter((id) => id !== packId);
-      }
-      return [...current, packId];
+      return current[0] === packId ? current : [packId];
     });
   }
 
