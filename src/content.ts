@@ -135,7 +135,7 @@ export const PACKS: LocationPack[] = [
   {
     id: "city",
     emoji: "🏙️",
-    name: { nb: "By", en: "City Life" },
+    name: { nb: "By", en: "City" },
     locations: CITY_LOCATIONS,
   },
   {
@@ -147,7 +147,7 @@ export const PACKS: LocationPack[] = [
   {
     id: "weekend",
     emoji: "🪩",
-    name: { nb: "Helg", en: "Weekend Vibes" },
+    name: { nb: "Helg", en: "Weekend" },
     locations: WEEKEND_LOCATIONS,
   },
   {
