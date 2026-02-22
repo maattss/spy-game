@@ -1,57 +1,68 @@
-# SPY
+# 🕵️ SPY
 
-Et raskt sosialt deduksjonsspill for én telefon.
-Alle får en lokasjon. Spionen får ingenting. Ingen må røpe seg.
+> *Alle vet lokasjonen. Spionen gjør det ikke. Ingen vet hvem spionen er.*
 
-## Konsept
+Et kjapt og intenst sosialt deduksjonsspill for én telefon — perfekt for vennegjenger, familiesammenkomster og alle som liker å lyve med stil.
 
-SPY er bygget for korte, intense runder med lav terskel:
+---
 
-- Mobil-first UI
-- Norsk og engelsk språk
-- Mørk og lys tema
-- Tydelig "pass telefonen videre"-flyt
+## 🎮 Slik spiller dere
 
-## Spillflyt
+Send telefonen rundt. Alle får vite lokasjonen. Alle, bortsett fra **spionen**.
 
-1. Sett opp spillere (3-12) og antall spioner.
-2. Del ut hemmelige kort én spiller av gangen.
-3. Send telefonen én ny runde for hemmelig avstemning.
-4. Hvis mistenkt er spion: agentene vinner umiddelbart.
-5. Vis resultat og start ny runde.
+1. 👥 **Sett opp** spillere (3–12) og velg antall spioner
+2. 🃏 **Del ut** hemmelige kort — én spiller av gangen, ingen kikking!
+3. 🗣️ **Diskuter** hvem som virker mistenkelig
+4. 🗳️ **Stem** — hvem tror du er spion?
+5. 🏆 **Avslør** resultatet og start en ny runde
 
-Regel for tie i avstemning: spionene vinner.
+> **Stemmelikhet?** Spionene vinner. De er tross alt proffer.
 
-## Hva som er med nå
+---
 
-- 3-12 spillere
-- Flere lokasjonspakker (`classic`, `norway`, `city`, `travel`, `weekend`, `spicy`)
-- Lokasjoner oversatt til `nb` og `en`
-- Ingen auto-utfylling av navn (kun placeholders)
+## 📦 Lokasjonspakker
 
-## Hva som er fjernet (bevisst)
+| Pakke | Innhold |
+|-------|---------|
+| 🕵️ **Klassisk** | Fly, bank, sykehus, kino og mer |
+| ❄️ **Norge** | Fjellhytte, stavkirke, vaffelstue og typisk norsk |
+| 🏙️ **By** | Kafé, T-bane, rådhus og byliv |
+| ✈️ **Reise** | Flyplass, cruisehavn, nasjonalpark og eventyr |
+| 🪩 **Helg** | Escape room, karaokebar, trampolinepark og moro |
+| 🌶️ **Spicy Mode** | Forhandlingsrom, juryrom, lukket styremøte og høy spenning |
 
-- Roller/jobbtitler
-- Diskusjonsfase/timer
-- Poengtavle/score
+---
 
-## Teknologi
+## ✨ Designvalg
 
-- React 19
-- TypeScript 5
-- Vite 7
-- Radix UI primitives + shadcn-style komponenter
+SPY er laget for å være **raskt**, **lettfattelig** og **mobilsentrisk**:
 
-## Kom i gang
+- 📱 Mobil-first UI — ingen installasjon, bare åpne i nettleseren
+- 🌍 Norsk og engelsk språk
+- 🌙 Mørk og lys tema
+- ➡️ Tydelig "pass telefonen videre"-flyt
+
+**Bevisst utelatt** (for å holde det enkelt): roller/jobbtitler, diskusjonstimer og poengtavle.
+
+---
+
+## 🛠️ Teknologi
+
+- [React 19](https://react.dev/)
+- [TypeScript 5](https://www.typescriptlang.org/)
+- [Vite 7](https://vitejs.dev/)
+- [Radix UI](https://www.radix-ui.com/) primitives + shadcn-style komponenter
+
+---
+
+## 🚀 Kom i gang
 
 ```bash
 npm install
 npm run dev
 ```
 
-Appen starter typisk på [http://localhost:5173](http://localhost:5173).
-
-## Scripts
+Appen starter på [http://localhost:5173](http://localhost:5173). Inviter venner. Ha det gøy.
 
 ```bash
 npm run dev      # lokal utvikling
@@ -59,13 +70,15 @@ npm run build    # produksjonsbuild
 npm run preview  # preview av build
 ```
 
-## Prosjektstruktur
+---
+
+## 📁 Prosjektstruktur
 
 ```text
 src/
-  App.tsx                           # state + spillflyt
+  App.tsx                            # state + spillflyt
   components/game/phase-sections.tsx # setup/deal/vote/result UI
-  content.ts                        # lokasjonspakker og oversettelser
-  copy.ts                           # app-tekst (nb/en)
-  styles.css                        # tema + layout
+  content.ts                         # lokasjonspakker og oversettelser
+  copy.ts                            # app-tekst (nb/en)
+  styles.css                         # tema + layout
 ```
