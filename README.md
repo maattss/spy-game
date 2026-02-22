@@ -25,7 +25,7 @@ Regel for tie i avstemning: spionene vinner.
 ## Hva som er med nå
 
 - 3-12 spillere
-- Flere lokasjonspakker (`classic`, `nordic`, `city`, `travel`)
+- Flere lokasjonspakker (`classic`, `norway`, `city`, `travel`, `weekend`, `spicy`)
 - Lokasjoner oversatt til `nb` og `en`
 - Ingen auto-utfylling av navn (kun placeholders)
 

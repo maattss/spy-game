@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { Minus, Plus, X } from "lucide-react";
 import { PACKS } from "../../content";
 import type { AppText } from "../../copy";
 import type { Player, RoundResult, RoundState } from "../../types";
@@ -16,6 +16,7 @@ type SetupSectionProps = {
   selectedPackIds: string[];
   spyCount: number;
   canStartGame: boolean;
+  minPlayerCount: number;
   onUpdatePlayerName: (id: string, name: string) => void;
   onRemovePlayer: (id: string) => void;
   onAddPlayer: () => void;
@@ -33,6 +34,7 @@ export function SetupSection({
   selectedPackIds,
   spyCount,
   canStartGame,
+  minPlayerCount,
   onUpdatePlayerName,
   onRemovePlayer,
   onAddPlayer,
@@ -42,6 +44,7 @@ export function SetupSection({
   displayPlayerName,
   playerPlaceholder,
 }: SetupSectionProps) {
+  const maxSpyCount = Math.max(1, players.length - 1);
   return (
     <section className="phase-stack phase-stack--setup">
       <Card>
@@ -62,7 +65,7 @@ export function SetupSection({
                 size="icon"
                 variant="outline"
                 className="player-remove"
-                disabled={players.length <= 3}
+                disabled={players.length <= minPlayerCount}
                 aria-label={`${text.remove} ${displayPlayerName(player.name, index)}`}
                 onClick={() => onRemovePlayer(player.id)}
               >
@@ -83,14 +86,42 @@ export function SetupSection({
             <CardTitle>{text.spiesCount}</CardTitle>
           </CardHeader>
           <CardContent className="setup-card__content">
-            <Input
-              aria-label={text.spiesCount}
-              type="number"
-              min={1}
-              max={Math.max(1, players.length - 1)}
-              value={spyCount}
-              onChange={(event) => onSetSpyCount(event.target.valueAsNumber)}
-            />
+            <div className="spy-count-stepper">
+              <Button
+                type="button"
+                size="icon"
+                variant="outline"
+                disabled={spyCount <= 1}
+                aria-label={text.decreaseSpyCount}
+                onClick={() => onSetSpyCount(spyCount - 1)}
+              >
+                <Minus size={16} />
+              </Button>
+
+              <Input
+                aria-label={text.spiesCount}
+                className="spy-count-input"
+                type="number"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                min={1}
+                max={maxSpyCount}
+                step={1}
+                value={spyCount}
+                onChange={(event) => onSetSpyCount(event.target.valueAsNumber)}
+              />
+
+              <Button
+                type="button"
+                size="icon"
+                variant="outline"
+                disabled={spyCount >= maxSpyCount}
+                aria-label={text.increaseSpyCount}
+                onClick={() => onSetSpyCount(spyCount + 1)}
+              >
+                <Plus size={16} />
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
@@ -99,16 +130,24 @@ export function SetupSection({
             <CardTitle>{text.locationPacks}</CardTitle>
           </CardHeader>
           <CardContent className="chip-grid">
-            {PACKS.map((pack) => (
-              <Button
-                key={pack.id}
-                type="button"
-                variant={selectedPackIds.includes(pack.id) ? "chipActive" : "chip"}
-                onClick={() => onTogglePack(pack.id)}
-              >
-                {pack.name[locale]}
-              </Button>
-            ))}
+            {PACKS.map((pack) => {
+              const isSelected = selectedPackIds.includes(pack.id);
+              return (
+                <Button
+                  key={pack.id}
+                  type="button"
+                  variant={isSelected ? "chipActive" : "chip"}
+                  className="pack-chip"
+                  aria-pressed={isSelected}
+                  onClick={() => onTogglePack(pack.id)}
+                >
+                  <span className="pack-chip__emoji" aria-hidden="true">
+                    {pack.emoji}
+                  </span>
+                  <span className="pack-chip__label">{pack.name[locale]}</span>
+                </Button>
+              );
+            })}
           </CardContent>
         </Card>
       </div>
@@ -154,7 +193,7 @@ export function DealSection({
           {!showCard && <CardDescription>{text.revealPrompt}</CardDescription>}
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="stage-card__content">
           {showCard && (
             <div className="reveal-box">
               {isSpy ? (
@@ -173,7 +212,7 @@ export function DealSection({
             </div>
           )}
 
-          <div className="action-row">
+          <div className="action-row stage-card__actions">
             {!showCard && (
               <Button type="button" size="full" onClick={onShowCard}>
                 {text.showCard}
@@ -196,10 +235,11 @@ type VoteSectionProps = {
   round: RoundState;
   voteIndex: number;
   onVote: (targetId: string) => void;
+  activeVoteTargetId: string | null;
   displayPlayerName: DisplayNameFn;
 };
 
-export function VoteSection({ text, round, voteIndex, onVote, displayPlayerName }: VoteSectionProps) {
+export function VoteSection({ text, round, voteIndex, onVote, activeVoteTargetId, displayPlayerName }: VoteSectionProps) {
   const currentVoter = round.players[voteIndex];
   return (
     <section className="phase-stack">
@@ -213,14 +253,21 @@ export function VoteSection({ text, round, voteIndex, onVote, displayPlayerName 
         </CardHeader>
 
         <CardContent className="stack-tight">
-          <p>
+          <p aria-live="polite">
             {text.votingTurn}: <strong>{displayPlayerName(currentVoter?.name ?? "", voteIndex)}</strong>
           </p>
           <p className="kicker">{text.votingQuestion}</p>
 
           <div className="chip-grid chip-grid--large">
             {round.players.map((player, index) => (
-              <Button key={player.id} type="button" variant="chip" onClick={() => onVote(player.id)}>
+              <Button
+                key={player.id}
+                type="button"
+                variant="chip"
+                className={`vote-option ${activeVoteTargetId === player.id ? "vote-option--active" : ""}`}
+                aria-pressed={activeVoteTargetId === player.id}
+                onClick={() => onVote(player.id)}
+              >
                 {text.voteFor} {displayPlayerName(player.name, index)}
               </Button>
             ))}
