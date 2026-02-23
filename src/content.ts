@@ -128,7 +128,7 @@ export const PACKS: LocationPack[] = [
   },
   {
     id: "norway",
-    emoji: "❄️",
+    emoji: "🇳🇴",
     name: { nb: "Norge", en: "Norway" },
     locations: NORWAY_LOCATIONS,
   },
