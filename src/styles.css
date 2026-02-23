@@ -610,14 +610,13 @@ select {
 
 .pack-chip {
   min-width: 0;
+  line-height: 1.25;
 }
 
 .pack-chip__emoji {
   width: 1.25em;
   flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  text-align: center;
 }
 
 .pack-chip__label {
