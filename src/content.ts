@@ -153,7 +153,7 @@ export const PACKS: LocationPack[] = [
   {
     id: "spicy",
     emoji: "🌶️",
-    name: { nb: "Spicy Mode", en: "Spicy Mode" },
+    name: { nb: "Ekspert", en: "Expert" },
     locations: SPICY_LOCATIONS,
   },
 ];
