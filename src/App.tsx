@@ -39,6 +39,8 @@ export function App() {
   const [players, setPlayers] = useState<Player[]>(buildDefaultPlayers);
   const [selectedPackIds, setSelectedPackIds] = useState<string[]>(() => [PACKS[0]?.id ?? "classic"]);
   const [spyCount, setSpyCount] = useState(1);
+  const [guiVotingEnabled, setGuiVotingEnabled] = useState(true);
+  const [nextStarterPlayerIndex, setNextStarterPlayerIndex] = useState(0);
 
   const [phase, setPhase] = useState<GamePhase>("setup");
   const [round, setRound] = useState<RoundState | null>(null);
@@ -135,23 +137,26 @@ export function App() {
     if (!canStartGame) {
       return;
     }
+    const normalizedStarterPlayerIndex = players.length > 0 ? nextStarterPlayerIndex % players.length : 0;
 
     const createdRound = createRound({
       players,
       selectedPackIds,
       spyCount,
+      starterPlayerIndex: normalizedStarterPlayerIndex,
     });
 
     setRound(createdRound);
     setRoundResult(null);
     setPhase("deal");
-    setRevealIndex(0);
+    setRevealIndex(createdRound.starterPlayerIndex);
     setShowCard(false);
-    setVoteIndex(0);
+    setVoteIndex(createdRound.starterPlayerIndex);
     setVotesByVoter({});
     setActiveVoteTargetId(null);
     voteLockedRef.current = false;
     clearVoteAdvanceTimeout();
+    setNextStarterPlayerIndex((value) => (players.length > 0 ? (value + 1) % players.length : 0));
   }
 
   function goToNextReveal() {
@@ -159,18 +164,23 @@ export function App() {
       return;
     }
 
-    if (revealIndex >= round.players.length - 1) {
-      setPhase("vote");
-      setShowCard(false);
-      setVoteIndex(0);
-      setVotesByVoter({});
-      setActiveVoteTargetId(null);
-      voteLockedRef.current = false;
-      clearVoteAdvanceTimeout();
+    const nextRevealIndex = (revealIndex + 1) % round.players.length;
+    if (nextRevealIndex === round.starterPlayerIndex) {
+      if (!guiVotingEnabled) {
+        finishRound({ winner: "manual", reason: text.reasons.manualVoting });
+      } else {
+        setPhase("vote");
+        setShowCard(false);
+        setVoteIndex(round.starterPlayerIndex);
+        setVotesByVoter({});
+        setActiveVoteTargetId(null);
+        voteLockedRef.current = false;
+        clearVoteAdvanceTimeout();
+      }
       return;
     }
 
-    setRevealIndex((value) => value + 1);
+    setRevealIndex(nextRevealIndex);
     setShowCard(false);
   }
 
@@ -231,8 +241,9 @@ export function App() {
     voteAdvanceTimeoutRef.current = window.setTimeout(() => {
       voteAdvanceTimeoutRef.current = null;
 
-      if (voteIndex < round.players.length - 1) {
-        setVoteIndex((value) => value + 1);
+      const nextVoteIndex = (voteIndex + 1) % round.players.length;
+      if (nextVoteIndex !== round.starterPlayerIndex) {
+        setVoteIndex(nextVoteIndex);
         return;
       }
 
@@ -338,12 +349,14 @@ export function App() {
               players={players}
               selectedPackIds={selectedPackIds}
               spyCount={spyCount}
+              guiVotingEnabled={guiVotingEnabled}
               canStartGame={canStartGame}
               minPlayerCount={MIN_PLAYER_COUNT}
               onUpdatePlayerName={updatePlayerName}
               onRemovePlayer={removePlayer}
               onAddPlayer={addPlayer}
               onSetSpyCount={updateSpyCount}
+              onSetGuiVotingEnabled={setGuiVotingEnabled}
               onTogglePack={togglePack}
               onStartRound={startRound}
               displayPlayerName={displayPlayerName}
