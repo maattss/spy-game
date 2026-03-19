@@ -302,6 +302,31 @@ export function VoteSection({ text, round, voteIndex, onVote, activeVoteTargetId
   );
 }
 
+type ManualVoteSectionProps = {
+  text: AppText;
+  onShowResult: () => void;
+};
+
+export function ManualVoteSection({ text, onShowResult }: ManualVoteSectionProps) {
+  return (
+    <section className="phase-stack">
+      <Card>
+        <CardHeader>
+          <p className="kicker">{text.voting}</p>
+          <CardTitle>{text.manualVoteTitle}</CardTitle>
+          <CardDescription>{text.manualVoteInstruction}</CardDescription>
+        </CardHeader>
+
+        <CardContent>
+          <Button type="button" size="full" onClick={onShowResult}>
+            {text.showResult}
+          </Button>
+        </CardContent>
+      </Card>
+    </section>
+  );
+}
+
 type ResultSectionProps = {
   text: AppText;
   locale: "nb" | "en";

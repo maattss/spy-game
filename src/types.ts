@@ -1,4 +1,4 @@
-export type GamePhase = "setup" | "deal" | "vote" | "result";
+export type GamePhase = "setup" | "deal" | "vote" | "manual-vote" | "result";
 export type Winner = "agents" | "spies" | "manual";
 export type Locale = "nb" | "en";
 

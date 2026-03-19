@@ -5,7 +5,7 @@ import { COPY } from "./copy";
 import { createRound } from "./game";
 import type { GamePhase, Locale, Player, RoundResult, RoundState } from "./types";
 import { Button } from "./components/ui/button";
-import { DealSection, ResultSection, SetupSection, VoteSection } from "./components/game/phase-sections";
+import { DealSection, ManualVoteSection, ResultSection, SetupSection, VoteSection } from "./components/game/phase-sections";
 
 const DEFAULT_PLAYER_COUNT = 4;
 const MIN_PLAYER_COUNT = 3;
@@ -167,7 +167,7 @@ export function App() {
     const nextRevealIndex = (revealIndex + 1) % round.players.length;
     if (nextRevealIndex === round.starterPlayerIndex) {
       if (pointVotingEnabled) {
-        finishRound({ winner: "manual", reason: text.reasons.manualVoting });
+        setPhase("manual-vote");
       } else {
         setPhase("vote");
         setShowCard(false);
@@ -387,6 +387,13 @@ export function App() {
             onVote={submitVote}
             activeVoteTargetId={activeVoteTargetId}
             displayPlayerName={displayPlayerName}
+          />
+        )}
+
+        {phase === "manual-vote" && (
+          <ManualVoteSection
+            text={text}
+            onShowResult={() => finishRound({ winner: "manual", reason: text.reasons.manualVoting })}
           />
         )}
 
