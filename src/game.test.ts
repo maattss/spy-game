@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { createRound, shuffle } from "./game";
-import type { Player } from "./types";
+import { createRound, determineRoundWinner, shuffle } from "./game";
+import type { Assignment, Player } from "./types";
 
 const PLAYERS: Player[] = [
   { id: "p1", name: "Alice" },
@@ -80,3 +80,177 @@ describe("createRound – spion er random", () => {
     }
   });
 });
+
+describe("createRound – error cases", () => {
+  it("kaster feil hvis ingen lokasjoner er valgt", () => {
+    expect(() => createRound({ ...DEFAULT_INPUT, selectedPackIds: [] })).toThrow("Ingen lokasjoner er valgt.");
+  });
+
+  it("kaster feil hvis færre enn 3 spillere", () => {
+    expect(() =>
+      createRound({
+        ...DEFAULT_INPUT,
+        players: PLAYERS.slice(0, 2),
+      }),
+    ).toThrow("Minst 3 spillere kreves.");
+  });
+
+  it("kaster feil hvis spyCount er 0", () => {
+    expect(() => createRound({ ...DEFAULT_INPUT, spyCount: 0 })).toThrow("Ugyldig antall spioner.");
+  });
+
+  it("kaster feil hvis spyCount >= players.length", () => {
+    expect(() => createRound({ ...DEFAULT_INPUT, spyCount: 5 })).toThrow("Ugyldig antall spioner.");
+  });
+
+  it("kaster feil hvis starterPlayerIndex er negativ", () => {
+    expect(() => createRound({ ...DEFAULT_INPUT, starterPlayerIndex: -1 })).toThrow("Ugyldig startspiller.");
+  });
+
+  it("kaster feil hvis starterPlayerIndex >= players.length", () => {
+    expect(() => createRound({ ...DEFAULT_INPUT, starterPlayerIndex: 5 })).toThrow("Ugyldig startspiller.");
+  });
+
+  it("kaster feil hvis starterPlayerIndex ikke er et heltall", () => {
+    expect(() => createRound({ ...DEFAULT_INPUT, starterPlayerIndex: 1.5 })).toThrow("Ugyldig startspiller.");
+  });
+});
+
+describe("createRound – edge cases", () => {
+  it("fungerer med nøyaktig 3 spillere", () => {
+    const threePlayers = PLAYERS.slice(0, 3);
+    const round = createRound({
+      ...DEFAULT_INPUT,
+      players: threePlayers,
+      spyCount: 1,
+    });
+
+    expect(round.players).toHaveLength(3);
+    expect(round.spyIds).toHaveLength(1);
+  });
+
+  it("fungerer med maksimalt antall spioner (players.length - 1)", () => {
+    const round = createRound({
+      ...DEFAULT_INPUT,
+      spyCount: PLAYERS.length - 1,
+    });
+
+    expect(round.spyIds).toHaveLength(PLAYERS.length - 1);
+  });
+
+  it("fungerer med flere spioner", () => {
+    const round = createRound({
+      ...DEFAULT_INPUT,
+      spyCount: 2,
+    });
+
+    expect(round.spyIds).toHaveLength(2);
+    expect(new Set(round.spyIds).size).toBe(2); // Ensure unique spies
+  });
+});
+
+describe("determineRoundWinner", () => {
+  const assignments: Record<string, Assignment> = {
+    p1: { playerId: "p1", isSpy: true },
+    p2: { playerId: "p2", isSpy: false },
+    p3: { playerId: "p3", isSpy: false },
+    p4: { playerId: "p4", isSpy: false },
+  };
+
+  it("agenter vinner hvis de stemmer på spionen", () => {
+    const votes = {
+      p2: "p1",
+      p3: "p1",
+      p4: "p1",
+    };
+
+    const result = determineRoundWinner(votes, assignments);
+
+    expect(result.winner).toBe("agents");
+    expect(result.suspectId).toBe("p1");
+  });
+
+  it("spioner vinner hvis de stemmer på en uskyldige", () => {
+    const votes = {
+      p1: "p2",
+      p3: "p2",
+      p4: "p2",
+    };
+
+    const result = determineRoundWinner(votes, assignments);
+
+    expect(result.winner).toBe("spies");
+    expect(result.suspectId).toBe("p2");
+  });
+
+  it("spioner vinner ved stemme-likhet", () => {
+    const votes = {
+      p1: "p2",
+      p2: "p3",
+      p3: "p4",
+    };
+
+    const result = determineRoundWinner(votes, assignments);
+
+    expect(result.winner).toBe("spies");
+    expect(result.suspectId).toBeNull();
+  });
+
+  it("spioner vinner hvis ingen stemmer (tom votes)", () => {
+    const votes = {};
+
+    const result = determineRoundWinner(votes, assignments);
+
+    expect(result.winner).toBe("spies");
+    expect(result.suspectId).toBeNull();
+  });
+
+  it("spioner vinner hvis det er to kandidater med like mange stemmer", () => {
+    const votes = {
+      p1: "p2",
+      p2: "p3",
+      p3: "p2",
+      p4: "p3",
+    };
+
+    const result = determineRoundWinner(votes, assignments);
+
+    expect(result.winner).toBe("spies");
+    expect(result.suspectId).toBeNull();
+  });
+
+  it("agenter kan vinne med bare én stemme hvis den er på spionen", () => {
+    const votes = {
+      p2: "p1",
+    };
+
+    const result = determineRoundWinner(votes, assignments);
+
+    expect(result.winner).toBe("agents");
+    expect(result.suspectId).toBe("p1");
+  });
+
+  it("fungerer med flere spioner", () => {
+    const multiSpyAssignments: Record<string, Assignment> = {
+      p1: { playerId: "p1", isSpy: true },
+      p2: { playerId: "p2", isSpy: true },
+      p3: { playerId: "p3", isSpy: false },
+      p4: { playerId: "p4", isSpy: false },
+      p5: { playerId: "p5", isSpy: false },
+    };
+
+    const votes = {
+      p1: "p3",
+      p2: "p3",
+      p3: "p1",
+      p4: "p1",
+      p5: "p1",
+    };
+
+    const result = determineRoundWinner(votes, multiSpyAssignments);
+
+    expect(result.winner).toBe("agents");
+    expect(result.suspectId).toBe("p1");
+  });
+});
+

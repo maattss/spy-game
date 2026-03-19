@@ -5,6 +5,7 @@ import type { Player, RoundResult, RoundState } from "../../types";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 
 type DisplayNameFn = (name: string, index: number) => string;
@@ -139,10 +140,10 @@ export function SetupSection({
             <CardTitle>{text.voting}</CardTitle>
           </CardHeader>
           <CardContent>
-            <label className="check-row">
+            <Label className="check-row">
               <Switch checked={pointVotingEnabled} onCheckedChange={onSetPointVotingEnabled} />
               <span>{text.pointVoting}</span>
-            </label>
+            </Label>
           </CardContent>
         </Card>
 

@@ -60,3 +60,41 @@ export function createRound(input: CreateRoundInput): RoundState {
     starterPlayerIndex,
   };
 }
+
+export type VoteWinner = "spies" | "agents";
+
+export interface DetermineWinnerResult {
+  winner: VoteWinner;
+  suspectId: string | null;
+}
+
+export function determineRoundWinner(
+  votes: Record<string, string>,
+  assignments: Record<string, Assignment>,
+): DetermineWinnerResult {
+  const counts: Record<string, number> = {};
+  for (const targetId of Object.values(votes)) {
+    counts[targetId] = (counts[targetId] ?? 0) + 1;
+  }
+
+  const entries = Object.entries(counts);
+  if (entries.length === 0) {
+    return { winner: "spies", suspectId: null };
+  }
+
+  const maxVotes = Math.max(...entries.map(([, count]) => count));
+  const topCandidates = entries.filter(([, count]) => count === maxVotes).map(([id]) => id);
+
+  if (topCandidates.length !== 1) {
+    return { winner: "spies", suspectId: null };
+  }
+
+  const suspectId = topCandidates[0];
+  const suspectAssignment = assignments[suspectId];
+
+  if (suspectAssignment?.isSpy) {
+    return { winner: "agents", suspectId };
+  }
+
+  return { winner: "spies", suspectId };
+}
