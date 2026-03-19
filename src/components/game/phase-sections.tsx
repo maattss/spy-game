@@ -143,7 +143,6 @@ export function SetupSection({
               <Switch checked={pointVotingEnabled} onCheckedChange={onSetPointVotingEnabled} />
               <span>{text.pointVoting}</span>
             </label>
-            {pointVotingEnabled && <p className="muted">{text.manualVotingHint}</p>}
           </CardContent>
         </Card>
 
