@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Languages, Moon, Sun } from "lucide-react";
 import { PACKS } from "./content";
 import { COPY } from "./copy";
-import { createRound } from "./game";
+import { createRound, determineRoundWinner } from "./game";
 import type { GamePhase, Locale, Player, RoundResult, RoundState } from "./types";
 import { Button } from "./components/ui/button";
 import { DealSection, ManualVoteSection, ResultSection, SetupSection, VoteSection } from "./components/game/phase-sections";
@@ -189,34 +189,19 @@ export function App() {
       return;
     }
 
-    const counts: Record<string, number> = {};
-    for (const targetId of Object.values(votes)) {
-      counts[targetId] = (counts[targetId] ?? 0) + 1;
-    }
+    const result = determineRoundWinner(votes, round.assignments);
 
-    const entries = Object.entries(counts);
-    if (entries.length === 0) {
-      finishRound({ winner: "spies", reason: text.reasons.voteTie });
-      return;
-    }
-
-    const maxVotes = Math.max(...entries.map(([, count]) => count));
-    const topCandidates = entries.filter(([, count]) => count === maxVotes).map(([id]) => id);
-
-    if (topCandidates.length !== 1) {
-      finishRound({ winner: "spies", reason: text.reasons.voteTie });
-      return;
-    }
-
-    const suspectId = topCandidates[0];
-    const suspectAssignment = round.assignments[suspectId];
-
-    if (suspectAssignment?.isSpy) {
+    if (result.winner === "agents") {
       finishRound({ winner: "agents", reason: text.reasons.caughtSpy });
       return;
     }
 
-    const suspectIndex = roundPlayerIndexById[suspectId] ?? 0;
+    if (result.suspectId === null) {
+      finishRound({ winner: "spies", reason: text.reasons.voteTie });
+      return;
+    }
+
+    const suspectIndex = roundPlayerIndexById[result.suspectId] ?? 0;
     const suspectName = displayPlayerName(round.players[suspectIndex]?.name ?? "", suspectIndex);
     finishRound({ winner: "spies", reason: text.reasons.wrongVote(suspectName) });
   }
