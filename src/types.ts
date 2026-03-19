@@ -1,5 +1,5 @@
-export type GamePhase = "setup" | "deal" | "vote" | "result";
-export type Winner = "agents" | "spies";
+export type GamePhase = "setup" | "deal" | "vote" | "manual-vote" | "result";
+export type Winner = "agents" | "spies" | "manual";
 export type Locale = "nb" | "en";
 
 export interface LocalizedText {
@@ -38,4 +38,5 @@ export interface RoundState {
   assignments: Record<string, Assignment>;
   players: Player[];
   spyIds: string[];
+  starterPlayerIndex: number;
 }

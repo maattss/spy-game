@@ -534,6 +534,51 @@ select {
   place-items: center;
 }
 
+.ui-switch {
+  width: 2.55rem;
+  height: 1.5rem;
+  padding: 0.13rem;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-subtle);
+  transition: background-color 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+  position: relative;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.ui-switch[data-state="checked"] {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
+
+.ui-switch__thumb {
+  display: block;
+  width: 1.12rem;
+  height: 1.12rem;
+  border-radius: 999px;
+  background: var(--bg-frame);
+  transition: transform 140ms ease;
+  will-change: transform;
+  transform: translateX(0);
+}
+
+.ui-switch[data-state="checked"] .ui-switch__thumb {
+  transform: translateX(1.02rem);
+}
+
+.ui-switch:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 36%, transparent);
+}
+
+.ui-switch[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
 .ui-select__content {
   z-index: 50;
   border-radius: var(--radius-sm);

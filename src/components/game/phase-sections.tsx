@@ -5,9 +5,14 @@ import type { Player, RoundResult, RoundState } from "../../types";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
+import { Switch } from "../ui/switch";
 
 type DisplayNameFn = (name: string, index: number) => string;
 type PlaceholderFn = (index: number) => string;
+type RelativeStepNumberFn = (currentIndex: number, starterIndex: number, totalPlayers: number) => number;
+
+const getRelativeStepNumber: RelativeStepNumberFn = (currentIndex, starterIndex, totalPlayers) =>
+  ((currentIndex - starterIndex + totalPlayers) % totalPlayers) + 1;
 
 type SetupSectionProps = {
   text: AppText;
@@ -15,12 +20,14 @@ type SetupSectionProps = {
   players: Player[];
   selectedPackIds: string[];
   spyCount: number;
+  pointVotingEnabled: boolean;
   canStartGame: boolean;
   minPlayerCount: number;
   onUpdatePlayerName: (id: string, name: string) => void;
   onRemovePlayer: (id: string) => void;
   onAddPlayer: () => void;
   onSetSpyCount: (value: number) => void;
+  onSetPointVotingEnabled: (value: boolean) => void;
   onTogglePack: (id: string) => void;
   onStartRound: () => void;
   displayPlayerName: DisplayNameFn;
@@ -33,12 +40,14 @@ export function SetupSection({
   players,
   selectedPackIds,
   spyCount,
+  pointVotingEnabled,
   canStartGame,
   minPlayerCount,
   onUpdatePlayerName,
   onRemovePlayer,
   onAddPlayer,
   onSetSpyCount,
+  onSetPointVotingEnabled,
   onTogglePack,
   onStartRound,
   displayPlayerName,
@@ -127,6 +136,18 @@ export function SetupSection({
 
         <Card>
           <CardHeader>
+            <CardTitle>{text.voting}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <label className="check-row">
+              <Switch checked={pointVotingEnabled} onCheckedChange={onSetPointVotingEnabled} />
+              <span>{text.pointVoting}</span>
+            </label>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
             <CardTitle>{text.locationPacks}</CardTitle>
           </CardHeader>
           <CardContent className="chip-grid">
@@ -182,12 +203,13 @@ export function DealSection({
   onShowCard,
   onNextReveal,
 }: DealSectionProps) {
+  const revealStep = getRelativeStepNumber(revealIndex, round.starterPlayerIndex, round.players.length);
   return (
     <section className="phase-stack">
       <Card className={`stage-card ${showCard ? (isSpy ? "stage-card--spy" : "stage-card--agent") : ""}`}>
         <CardHeader>
           <p className="kicker">
-            {text.step} {revealIndex + 1} {text.of} {round.players.length}
+            {text.step} {revealStep} {text.of} {round.players.length}
           </p>
           <CardTitle>{revealPlayerName}</CardTitle>
           {!showCard && <CardDescription>{text.revealPrompt}</CardDescription>}
@@ -241,13 +263,14 @@ type VoteSectionProps = {
 
 export function VoteSection({ text, round, voteIndex, onVote, activeVoteTargetId, displayPlayerName }: VoteSectionProps) {
   const currentVoter = round.players[voteIndex];
+  const voteStep = getRelativeStepNumber(voteIndex, round.starterPlayerIndex, round.players.length);
   return (
     <section className="phase-stack">
       <Card>
         <CardHeader>
           <p className="kicker">{text.voting}</p>
           <CardTitle>
-            {text.step} {voteIndex + 1} {text.of} {round.players.length}
+            {text.step} {voteStep} {text.of} {round.players.length}
           </CardTitle>
           <CardDescription>{text.votingInstruction}</CardDescription>
         </CardHeader>
@@ -272,6 +295,31 @@ export function VoteSection({ text, round, voteIndex, onVote, activeVoteTargetId
               </Button>
             ))}
           </div>
+        </CardContent>
+      </Card>
+    </section>
+  );
+}
+
+type ManualVoteSectionProps = {
+  text: AppText;
+  onShowResult: () => void;
+};
+
+export function ManualVoteSection({ text, onShowResult }: ManualVoteSectionProps) {
+  return (
+    <section className="phase-stack">
+      <Card>
+        <CardHeader>
+          <p className="kicker">{text.voting}</p>
+          <CardTitle>{text.manualVoteTitle}</CardTitle>
+          <CardDescription>{text.manualVoteInstruction}</CardDescription>
+        </CardHeader>
+
+        <CardContent>
+          <Button type="button" size="full" onClick={onShowResult}>
+            {text.showResult}
+          </Button>
         </CardContent>
       </Card>
     </section>
@@ -304,7 +352,9 @@ export function ResultSection({
       <Card>
         <CardHeader>
           <p className="kicker">{text.result}</p>
-          <CardTitle>{roundResult.winner === "spies" ? spyWinnerLabel : text.agentsWon}</CardTitle>
+          <CardTitle>
+            {roundResult.winner === "spies" ? spyWinnerLabel : roundResult.winner === "agents" ? text.agentsWon : text.manualRound}
+          </CardTitle>
           <CardDescription>{roundResult.reason}</CardDescription>
         </CardHeader>
 

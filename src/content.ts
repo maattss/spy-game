@@ -41,22 +41,22 @@ const NORWAY_LOCATIONS: LocationCard[] = [
   loc("Vaffelstue", "Waffle Cabin"),
 ];
 
-const CITY_LOCATIONS: LocationCard[] = [
-  loc("T-banestasjon", "Metro Station"),
-  loc("Kjøpesenter", "Shopping Mall"),
-  loc("Treningssenter", "Gym"),
-  loc("Kafé", "Cafe"),
-  loc("Rådhus", "City Hall"),
-  loc("Rettsal", "Courtroom"),
-  loc("Brannstasjon", "Fire Station"),
-  loc("Veterinærklinikk", "Veterinary Clinic"),
-  loc("Frisørsalong", "Hair Salon"),
-  loc("Apotek", "Pharmacy"),
-  loc("Postkontor", "Post Office"),
-  loc("Busstopp", "Bus Stop"),
-  loc("Legekontor", "Doctor's Office"),
-  loc("Bypark", "City Park"),
-  loc("Bakeri", "Bakery"),
+const AFTERSKI_LOCATIONS: LocationCard[] = [
+  loc("Skibar", "Ski Bar"),
+  loc("Heiskø", "Ski Lift Queue"),
+  loc("Låven afterski", "Barn Après-Ski"),
+  loc("Skistall", "Ski Rack"),
+  loc("Bålplass", "Bonfire Area"),
+  loc("Varmestue", "Warming Hut"),
+  loc("Afterski-scene", "Après-Ski Stage"),
+  loc("Uteservering i snøen", "Snow Patio"),
+  loc("Boblebad", "Hot Tub"),
+  loc("Hyttefest", "Cabin Party"),
+  loc("Snowpark", "Terrain Park"),
+  loc("Skikafé", "Ski Cafe"),
+  loc("Skiutleie", "Ski Rental"),
+  loc("After-run lounge", "After-Run Lounge"),
+  loc("Fjellpub", "Mountain Pub"),
 ];
 
 const TRAVEL_LOCATIONS: LocationCard[] = [
@@ -133,10 +133,10 @@ export const PACKS: LocationPack[] = [
     locations: NORWAY_LOCATIONS,
   },
   {
-    id: "city",
-    emoji: "🏙️",
-    name: { nb: "By", en: "City" },
-    locations: CITY_LOCATIONS,
+    id: "afterski",
+    emoji: "🎿",
+    name: { nb: "Afterski", en: "Après-Ski" },
+    locations: AFTERSKI_LOCATIONS,
   },
   {
     id: "travel",

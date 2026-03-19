@@ -13,7 +13,7 @@ Send telefonen rundt. Alle får vite lokasjonen. Alle, bortsett fra **spionen**.
 1. 👥 **Sett opp** spillere (3–12) og velg antall spioner
 2. 🃏 **Del ut** hemmelige kort — én spiller av gangen, ingen kikking!
 3. 🗣️ **Diskuter** hvem som virker mistenkelig
-4. 🗳️ **Stem** — hvem tror du er spion?
+4. 🗳️ **Stem** — i appen eller ved peking i gruppa
 5. 🏆 **Avslør** resultatet og start en ny runde
 
 > **Stemmelikhet?** Spionene vinner. De er tross alt proffer.
@@ -26,7 +26,7 @@ Send telefonen rundt. Alle får vite lokasjonen. Alle, bortsett fra **spionen**.
 |-------|---------|
 | 🕵️ **Klassisk** | Fly, bank, sykehus, kino og mer |
 | ❄️ **Norge** | Fjellhytte, stavkirke, vaffelstue og typisk norsk |
-| 🏙️ **By** | Kafé, T-bane, rådhus og byliv |
+| 🎿 **Afterski** | Skibar, heiskø, hyttefest og fjellstemning |
 | ✈️ **Reise** | Flyplass, cruisehavn, nasjonalpark og eventyr |
 | 🪩 **Helg** | Escape room, karaokebar, trampolinepark og moro |
 | 🌶️ **Spicy Mode** | Forhandlingsrom, juryrom, lukket styremøte og høy spenning |
@@ -41,6 +41,7 @@ SPY er laget for å være **raskt**, **lettfattelig** og **mobilsentrisk**:
 - 🌍 Norsk og engelsk språk
 - 🌙 Mørk og lys tema
 - ➡️ Tydelig "pass telefonen videre"-flyt
+- 🔁 Roterende startspiller mellom runder
 
 **Bevisst utelatt** (for å holde det enkelt): roller/jobbtitler, diskusjonstimer og poengtavle.
 

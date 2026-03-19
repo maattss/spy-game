@@ -5,6 +5,7 @@ interface CreateRoundInput {
   players: Player[];
   selectedPackIds: string[];
   spyCount: number;
+  starterPlayerIndex: number;
 }
 
 export function shuffle<T>(items: readonly T[]): T[] {
@@ -23,7 +24,7 @@ function getLocationPool(selectedPackIds: string[]): LocationCard[] {
 }
 
 export function createRound(input: CreateRoundInput): RoundState {
-  const { players, selectedPackIds, spyCount } = input;
+  const { players, selectedPackIds, spyCount, starterPlayerIndex } = input;
   const locationPool = getLocationPool(selectedPackIds);
   if (locationPool.length === 0) {
     throw new Error("Ingen lokasjoner er valgt.");
@@ -33,6 +34,9 @@ export function createRound(input: CreateRoundInput): RoundState {
   }
   if (spyCount < 1 || spyCount >= players.length) {
     throw new Error("Ugyldig antall spioner.");
+  }
+  if (!Number.isInteger(starterPlayerIndex) || starterPlayerIndex < 0 || starterPlayerIndex >= players.length) {
+    throw new Error("Ugyldig startspiller.");
   }
 
   const location = locationPool[Math.floor(Math.random() * locationPool.length)];
@@ -53,5 +57,6 @@ export function createRound(input: CreateRoundInput): RoundState {
     assignments,
     players,
     spyIds,
+    starterPlayerIndex,
   };
 }
