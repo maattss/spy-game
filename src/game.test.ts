@@ -14,6 +14,7 @@ const DEFAULT_INPUT = {
   players: PLAYERS,
   selectedPackIds: ["classic"],
   spyCount: 1,
+  starterPlayerIndex: 0,
 };
 
 describe("shuffle", () => {
