@@ -13,7 +13,7 @@ Send telefonen rundt. Alle får vite lokasjonen. Alle, bortsett fra **spionen**.
 1. 👥 **Sett opp** spillere (3–12) og velg antall spioner
 2. 🃏 **Del ut** hemmelige kort — én spiller av gangen, ingen kikking!
 3. 🗣️ **Diskuter** hvem som virker mistenkelig
-4. 🗳️ **Stem** — via GUI (valgfritt) eller muntlig i gruppa
+4. 🗳️ **Stem** — i appen eller ved peking i gruppa
 5. 🏆 **Avslør** resultatet og start en ny runde
 
 > **Stemmelikhet?** Spionene vinner. De er tross alt proffer.

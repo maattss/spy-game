@@ -39,7 +39,7 @@ export function App() {
   const [players, setPlayers] = useState<Player[]>(buildDefaultPlayers);
   const [selectedPackIds, setSelectedPackIds] = useState<string[]>(() => [PACKS[0]?.id ?? "classic"]);
   const [spyCount, setSpyCount] = useState(1);
-  const [guiVotingEnabled, setGuiVotingEnabled] = useState(true);
+  const [pointVotingEnabled, setPointVotingEnabled] = useState(false);
   const [nextStarterPlayerIndex, setNextStarterPlayerIndex] = useState(0);
 
   const [phase, setPhase] = useState<GamePhase>("setup");
@@ -166,7 +166,7 @@ export function App() {
 
     const nextRevealIndex = (revealIndex + 1) % round.players.length;
     if (nextRevealIndex === round.starterPlayerIndex) {
-      if (!guiVotingEnabled) {
+      if (pointVotingEnabled) {
         finishRound({ winner: "manual", reason: text.reasons.manualVoting });
       } else {
         setPhase("vote");
@@ -349,14 +349,14 @@ export function App() {
               players={players}
               selectedPackIds={selectedPackIds}
               spyCount={spyCount}
-              guiVotingEnabled={guiVotingEnabled}
+              pointVotingEnabled={pointVotingEnabled}
               canStartGame={canStartGame}
               minPlayerCount={MIN_PLAYER_COUNT}
               onUpdatePlayerName={updatePlayerName}
               onRemovePlayer={removePlayer}
               onAddPlayer={addPlayer}
               onSetSpyCount={updateSpyCount}
-              onSetGuiVotingEnabled={setGuiVotingEnabled}
+              onSetPointVotingEnabled={setPointVotingEnabled}
               onTogglePack={togglePack}
               onStartRound={startRound}
               displayPlayerName={displayPlayerName}

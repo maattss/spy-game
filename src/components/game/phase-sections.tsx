@@ -4,8 +4,8 @@ import type { AppText } from "../../copy";
 import type { Player, RoundResult, RoundState } from "../../types";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { Checkbox } from "../ui/checkbox";
 import { Input } from "../ui/input";
+import { Switch } from "../ui/switch";
 
 type DisplayNameFn = (name: string, index: number) => string;
 type PlaceholderFn = (index: number) => string;
@@ -20,14 +20,14 @@ type SetupSectionProps = {
   players: Player[];
   selectedPackIds: string[];
   spyCount: number;
-  guiVotingEnabled: boolean;
+  pointVotingEnabled: boolean;
   canStartGame: boolean;
   minPlayerCount: number;
   onUpdatePlayerName: (id: string, name: string) => void;
   onRemovePlayer: (id: string) => void;
   onAddPlayer: () => void;
   onSetSpyCount: (value: number) => void;
-  onSetGuiVotingEnabled: (value: boolean) => void;
+  onSetPointVotingEnabled: (value: boolean) => void;
   onTogglePack: (id: string) => void;
   onStartRound: () => void;
   displayPlayerName: DisplayNameFn;
@@ -40,14 +40,14 @@ export function SetupSection({
   players,
   selectedPackIds,
   spyCount,
-  guiVotingEnabled,
+  pointVotingEnabled,
   canStartGame,
   minPlayerCount,
   onUpdatePlayerName,
   onRemovePlayer,
   onAddPlayer,
   onSetSpyCount,
-  onSetGuiVotingEnabled,
+  onSetPointVotingEnabled,
   onTogglePack,
   onStartRound,
   displayPlayerName,
@@ -140,10 +140,10 @@ export function SetupSection({
           </CardHeader>
           <CardContent>
             <label className="check-row">
-              <Checkbox checked={guiVotingEnabled} onCheckedChange={(checked) => onSetGuiVotingEnabled(checked === true)} />
-              <span>{text.guiVoting}</span>
+              <Switch checked={pointVotingEnabled} onCheckedChange={onSetPointVotingEnabled} />
+              <span>{text.pointVoting}</span>
             </label>
-            {!guiVotingEnabled && <p className="muted">{text.manualVotingHint}</p>}
+            {pointVotingEnabled && <p className="muted">{text.manualVotingHint}</p>}
           </CardContent>
         </Card>
 

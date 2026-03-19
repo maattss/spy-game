@@ -534,6 +534,37 @@ select {
   place-items: center;
 }
 
+.ui-switch {
+  width: 2.2rem;
+  height: 1.3rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-subtle);
+  transition: background-color 140ms ease, border-color 140ms ease;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.ui-switch[data-state="checked"] {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+}
+
+.ui-switch__thumb {
+  display: block;
+  width: 1rem;
+  height: 1rem;
+  margin-left: 0.12rem;
+  border-radius: 999px;
+  background: white;
+  transition: transform 140ms ease;
+  will-change: transform;
+}
+
+.ui-switch[data-state="checked"] .ui-switch__thumb {
+  transform: translateX(0.88rem);
+}
+
 .ui-select__content {
   z-index: 50;
   border-radius: var(--radius-sm);
