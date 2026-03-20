@@ -117,12 +117,14 @@ export function App() {
   }
 
   function togglePack(packId: string) {
-    if (selectedPackIds[0] !== packId) {
+    const nextPackIds = selectedPackIds[0] === packId ? selectedPackIds : [packId];
+    const hasPackSelectionChanged =
+      nextPackIds.length !== selectedPackIds.length || nextPackIds.some((id, index) => id !== selectedPackIds[index]);
+
+    if (hasPackSelectionChanged) {
       setUsedLocationKeys([]);
     }
-    setSelectedPackIds((current) => {
-      return current[0] === packId ? current : [packId];
-    });
+    setSelectedPackIds(nextPackIds);
   }
 
   function updateSpyCount(value: number) {
@@ -146,8 +148,9 @@ export function App() {
       return;
     }
     const normalizedStarterPlayerIndex = players.length > 0 ? nextStarterPlayerIndex % players.length : 0;
+    const usedLocationKeySet = new Set(usedLocationKeys);
     const hasUsedAllSelectedLocations =
-      selectedLocations.length > 0 && selectedLocations.every((location) => usedLocationKeys.includes(getLocationKey(location)));
+      selectedLocations.length > 0 && selectedLocations.every((location) => usedLocationKeySet.has(getLocationKey(location)));
 
     const createdRound = createRound({
       players,
@@ -157,9 +160,12 @@ export function App() {
       excludedLocationKeys: usedLocationKeys,
     });
     const nextLocationKey = getLocationKey(createdRound.location);
+    const nextUsedLocationKeys = hasUsedAllSelectedLocations
+      ? [nextLocationKey]
+      : [...usedLocationKeys, nextLocationKey];
 
     setRound(createdRound);
-    setUsedLocationKeys(hasUsedAllSelectedLocations ? [nextLocationKey] : [...new Set([...usedLocationKeys, nextLocationKey])]);
+    setUsedLocationKeys(nextUsedLocationKeys);
     setRoundResult(null);
     setPhase("deal");
     setRevealIndex(createdRound.starterPlayerIndex);

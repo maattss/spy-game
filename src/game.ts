@@ -25,7 +25,7 @@ function getLocationPool(selectedPackIds: string[]): LocationCard[] {
 }
 
 export function getLocationKey(location: LocationCard): string {
-  return `${location.name.nb}__${location.name.en}`;
+  return `${location.name.nb}\u0000${location.name.en}`;
 }
 
 export function createRound(input: CreateRoundInput): RoundState {
