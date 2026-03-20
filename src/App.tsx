@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Languages, Moon, Sun } from "lucide-react";
 import { PACKS } from "./content";
 import { COPY } from "./copy";
-import { createRound, determineRoundWinner } from "./game";
+import { createRound, determineRoundWinner, getLocationKey } from "./game";
 import type { GamePhase, Locale, Player, RoundResult, RoundState } from "./types";
 import { Button } from "./components/ui/button";
 import { DealSection, ManualVoteSection, ResultSection, SetupSection, VoteSection } from "./components/game/phase-sections";
@@ -41,6 +41,7 @@ export function App() {
   const [spyCount, setSpyCount] = useState(1);
   const [pointVotingEnabled, setPointVotingEnabled] = useState(false);
   const [nextStarterPlayerIndex, setNextStarterPlayerIndex] = useState(0);
+  const [usedLocationKeys, setUsedLocationKeys] = useState<string[]>([]);
 
   const [phase, setPhase] = useState<GamePhase>("setup");
   const [round, setRound] = useState<RoundState | null>(null);
@@ -67,6 +68,10 @@ export function App() {
     }
     return Object.fromEntries(round.players.map((player, index) => [player.id, index]));
   }, [round]);
+  const selectedLocations = useMemo(
+    () => PACKS.filter((pack) => selectedPackIds.includes(pack.id)).flatMap((pack) => pack.locations),
+    [selectedPackIds],
+  );
 
   const currentRevealPlayer = round?.players[revealIndex] ?? null;
   const currentRevealAssignment = currentRevealPlayer ? round?.assignments[currentRevealPlayer.id] : null;
@@ -112,6 +117,9 @@ export function App() {
   }
 
   function togglePack(packId: string) {
+    if (selectedPackIds[0] !== packId) {
+      setUsedLocationKeys([]);
+    }
     setSelectedPackIds((current) => {
       return current[0] === packId ? current : [packId];
     });
@@ -138,15 +146,20 @@ export function App() {
       return;
     }
     const normalizedStarterPlayerIndex = players.length > 0 ? nextStarterPlayerIndex % players.length : 0;
+    const hasUsedAllSelectedLocations =
+      selectedLocations.length > 0 && selectedLocations.every((location) => usedLocationKeys.includes(getLocationKey(location)));
 
     const createdRound = createRound({
       players,
       selectedPackIds,
       spyCount,
       starterPlayerIndex: normalizedStarterPlayerIndex,
+      excludedLocationKeys: usedLocationKeys,
     });
+    const nextLocationKey = getLocationKey(createdRound.location);
 
     setRound(createdRound);
+    setUsedLocationKeys(hasUsedAllSelectedLocations ? [nextLocationKey] : [...new Set([...usedLocationKeys, nextLocationKey])]);
     setRoundResult(null);
     setPhase("deal");
     setRevealIndex(createdRound.starterPlayerIndex);
@@ -240,6 +253,7 @@ export function App() {
     setPhase("setup");
     setRound(null);
     setRoundResult(null);
+    setUsedLocationKeys([]);
     setShowCard(false);
     setVoteIndex(0);
     setVotesByVoter({});

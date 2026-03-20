@@ -6,6 +6,7 @@ interface CreateRoundInput {
   selectedPackIds: string[];
   spyCount: number;
   starterPlayerIndex: number;
+  excludedLocationKeys?: string[];
 }
 
 export function shuffle<T>(items: readonly T[]): T[] {
@@ -23,8 +24,12 @@ function getLocationPool(selectedPackIds: string[]): LocationCard[] {
   return packs.flatMap((pack) => pack.locations);
 }
 
+export function getLocationKey(location: LocationCard): string {
+  return `${location.name.nb}__${location.name.en}`;
+}
+
 export function createRound(input: CreateRoundInput): RoundState {
-  const { players, selectedPackIds, spyCount, starterPlayerIndex } = input;
+  const { players, selectedPackIds, spyCount, starterPlayerIndex, excludedLocationKeys = [] } = input;
   const locationPool = getLocationPool(selectedPackIds);
   if (locationPool.length === 0) {
     throw new Error("Ingen lokasjoner er valgt.");
@@ -39,7 +44,10 @@ export function createRound(input: CreateRoundInput): RoundState {
     throw new Error("Ugyldig startspiller.");
   }
 
-  const location = locationPool[Math.floor(Math.random() * locationPool.length)];
+  const excludedLocationKeySet = new Set(excludedLocationKeys);
+  const availableLocations = locationPool.filter((locationCard) => !excludedLocationKeySet.has(getLocationKey(locationCard)));
+  const candidateLocations = availableLocations.length > 0 ? availableLocations : locationPool;
+  const location = candidateLocations[Math.floor(Math.random() * candidateLocations.length)];
   const shuffledPlayers = shuffle(players);
   const spyIds = shuffledPlayers.slice(0, spyCount).map((player) => player.id);
   const spyIdSet = new Set(spyIds);
