@@ -42,21 +42,23 @@ const NORWAY_LOCATIONS: LocationCard[] = [
 ];
 
 const AFTERSKI_LOCATIONS: LocationCard[] = [
-  loc("Skibar", "Ski Bar"),
-  loc("Heiskø", "Ski Lift Queue"),
-  loc("Låven afterski", "Barn Après-Ski"),
-  loc("Skistall", "Ski Rack"),
-  loc("Bålplass", "Bonfire Area"),
-  loc("Varmestue", "Warming Hut"),
+  loc("Dr. Holms-bar", "Dr. Holms Bar"),
+  loc("Havsdalen", "Havsdalen"),
+  loc("Vestlia", "Vestlia"),
+  loc("Kikutstua", "Kikut Cabin"),
+  loc("Heiskøen", "Ski Lift Queue"),
+  loc("Skibussen", "Ski Bus"),
+  loc("Solterrassen", "Sun Terrace"),
+  loc("Peisestua", "Fireplace Lounge"),
+  loc("Varmestua", "Warming Cabin"),
   loc("Afterski-scene", "Après-Ski Stage"),
-  loc("Uteservering i snøen", "Snow Patio"),
-  loc("Boblebad", "Hot Tub"),
+  loc("Vaffelhytta", "Waffle Cabin"),
   loc("Hyttefest", "Cabin Party"),
-  loc("Snowpark", "Terrain Park"),
-  loc("Skikafé", "Ski Cafe"),
-  loc("Skiutleie", "Ski Rental"),
-  loc("After-run lounge", "After-Run Lounge"),
-  loc("Fjellpub", "Mountain Pub"),
+  loc("Slalåmbakken", "Downhill Slope"),
+  loc("Skikaféen", "Ski Cafe"),
+  loc("Skileie", "Ski Rental"),
+  loc("Langrennsløypa", "Cross-Country Trail"),
+  loc("Høyfjellshotellet", "Mountain Hotel"),
 ];
 
 const TRAVEL_LOCATIONS: LocationCard[] = [
@@ -70,8 +72,8 @@ const TRAVEL_LOCATIONS: LocationCard[] = [
   loc("Fergekai", "Ferry Terminal"),
   loc("Hostell", "Hostel"),
   loc("Campingplass", "Campground"),
-  loc("Strandresort", "Beach Resort"),
-  loc("Temapark", "Theme Park"),
+  loc("Strandhotell", "Beach Hotel"),
+  loc("Fornøyelsespark", "Theme Park"),
   loc("Utsiktstårn", "Observation Tower"),
   loc("Markedsplass", "Market Square"),
   loc("Nasjonalpark", "National Park"),
@@ -80,14 +82,14 @@ const TRAVEL_LOCATIONS: LocationCard[] = [
 ];
 
 const WEEKEND_LOCATIONS: LocationCard[] = [
-  loc("Escape room", "Escape Room"),
+  loc("Rømningsrom", "Escape Room"),
   loc("Karaokebar", "Karaoke Bar"),
   loc("Bowlinghall", "Bowling Alley"),
   loc("Brettspillkafé", "Board Game Cafe"),
   loc("Nattklubb", "Night Club"),
   loc("Konsertarena", "Concert Venue"),
   loc("Takterrasse", "Rooftop Bar"),
-  loc("Streetfood-marked", "Street Food Market"),
+  loc("Matmarked", "Street Food Market"),
   loc("Festivalcamp", "Festival Camp"),
   loc("Minigolfbane", "Mini Golf Course"),
   loc("Paintballbane", "Paintball Arena"),
@@ -100,15 +102,15 @@ const WEEKEND_LOCATIONS: LocationCard[] = [
 ];
 
 const SPICY_LOCATIONS: LocationCard[] = [
-  loc("VIP-lounge", "VIP Lounge"),
+  loc("VIP-salong", "VIP Lounge"),
   loc("Forhandlingsrom", "Negotiation Room"),
   loc("Kommandosentral", "Command Center"),
-  loc("Due diligence-rom", "Due Diligence Room"),
-  loc("Compliance-rom", "Compliance Review Room"),
+  loc("Gjennomgangsrom", "Due Diligence Room"),
+  loc("Etterlevelsesrom", "Compliance Review Room"),
   loc("Juryrom", "Jury Deliberation Room"),
   loc("Kriseledelsesrom", "Crisis Management Room"),
-  loc("Backstage", "Backstage Area"),
-  loc("Green room", "Green Room"),
+  loc("Bakscenen", "Backstage Area"),
+  loc("Artistgarderoben", "Green Room"),
   loc("Auksjonshusets bakrom", "Auction Back Office"),
   loc("Diplomatisk mottaksrom", "Diplomatic Reception Room"),
   loc("Lukket styremøte", "Closed Board Meeting"),
@@ -116,7 +118,7 @@ const SPICY_LOCATIONS: LocationCard[] = [
   loc("Sikkerhetsarkiv", "Security Archive"),
   loc("Pressesenter", "Press Operations Center"),
   loc("Datahall", "Data Center Hall"),
-  loc("Observability war room", "Observability War Room"),
+  loc("Beredskapsrom", "Observability War Room"),
 ];
 
 export const PACKS: LocationPack[] = [

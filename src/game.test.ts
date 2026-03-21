@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { createRound, determineRoundWinner, shuffle } from "./game";
+import { PACKS } from "./content";
+import { COPY } from "./copy";
+import { createRound, determineRoundWinner, getLocationKey, shuffle } from "./game";
 import type { Assignment, Player } from "./types";
 
 const PLAYERS: Player[] = [
@@ -81,6 +83,35 @@ describe("createRound – spion er random", () => {
   });
 });
 
+describe("createRound – lokasjonsvalg", () => {
+  it("velger en lokasjon som ikke er brukt ennå når det finnes ledige alternativer", () => {
+    const classicPack = PACKS.find((pack) => pack.id === "classic");
+
+    expect(classicPack).toBeDefined();
+
+    const [availableLocation, ...excludedLocations] = classicPack!.locations;
+    const round = createRound({
+      ...DEFAULT_INPUT,
+      excludedLocationKeys: excludedLocations.map(getLocationKey),
+    });
+
+    expect(getLocationKey(round.location)).toBe(getLocationKey(availableLocation));
+  });
+
+  it("tillater ny trekning når alle lokasjoner allerede er brukt", () => {
+    const classicPack = PACKS.find((pack) => pack.id === "classic");
+
+    expect(classicPack).toBeDefined();
+
+    const round = createRound({
+      ...DEFAULT_INPUT,
+      excludedLocationKeys: classicPack!.locations.map(getLocationKey),
+    });
+
+    expect(classicPack!.locations.map(getLocationKey)).toContain(getLocationKey(round.location));
+  });
+});
+
 describe("createRound – error cases", () => {
   it("kaster feil hvis ingen lokasjoner er valgt", () => {
     expect(() => createRound({ ...DEFAULT_INPUT, selectedPackIds: [] })).toThrow("Ingen lokasjoner er valgt.");
@@ -113,6 +144,23 @@ describe("createRound – error cases", () => {
 
   it("kaster feil hvis starterPlayerIndex ikke er et heltall", () => {
     expect(() => createRound({ ...DEFAULT_INPUT, starterPlayerIndex: 1.5 })).toThrow("Ugyldig startspiller.");
+  });
+});
+
+describe("innhold og tekst", () => {
+  it("har Geilo-inspirerte afterski-lokasjoner", () => {
+    const afterskiPack = PACKS.find((pack) => pack.id === "afterski");
+
+    expect(afterskiPack).toBeDefined();
+    expect(afterskiPack!.locations.map((location) => location.name.nb)).toEqual(
+      expect.arrayContaining(["Dr. Holms-bar", "Havsdalen", "Vestlia"]),
+    );
+  });
+
+  it("ber alle si ordet før de peker ut spionen", () => {
+    expect(COPY.nb.manualVoteTitle).toBe("Pek ut spionen");
+    expect(COPY.nb.manualVoteInstruction).toContain("Alle sier ordet sitt høyt");
+    expect(COPY.nb.manualVoteInstruction).toContain("peker alle samtidig");
   });
 });
 
@@ -253,4 +301,3 @@ describe("determineRoundWinner", () => {
     expect(result.suspectId).toBe("p1");
   });
 });
-

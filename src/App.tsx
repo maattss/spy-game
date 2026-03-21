@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Languages, Moon, Sun } from "lucide-react";
 import { PACKS } from "./content";
 import { COPY } from "./copy";
-import { createRound, determineRoundWinner } from "./game";
+import { createRound, determineRoundWinner, getLocationKey } from "./game";
 import type { GamePhase, Locale, Player, RoundResult, RoundState } from "./types";
 import { Button } from "./components/ui/button";
 import { DealSection, ManualVoteSection, ResultSection, SetupSection, VoteSection } from "./components/game/phase-sections";
@@ -41,6 +41,7 @@ export function App() {
   const [spyCount, setSpyCount] = useState(1);
   const [pointVotingEnabled, setPointVotingEnabled] = useState(false);
   const [nextStarterPlayerIndex, setNextStarterPlayerIndex] = useState(0);
+  const [usedLocationKeys, setUsedLocationKeys] = useState<string[]>([]);
 
   const [phase, setPhase] = useState<GamePhase>("setup");
   const [round, setRound] = useState<RoundState | null>(null);
@@ -67,6 +68,10 @@ export function App() {
     }
     return Object.fromEntries(round.players.map((player, index) => [player.id, index]));
   }, [round]);
+  const selectedLocations = useMemo(
+    () => PACKS.filter((pack) => selectedPackIds.includes(pack.id)).flatMap((pack) => pack.locations),
+    [selectedPackIds],
+  );
 
   const currentRevealPlayer = round?.players[revealIndex] ?? null;
   const currentRevealAssignment = currentRevealPlayer ? round?.assignments[currentRevealPlayer.id] : null;
@@ -112,9 +117,14 @@ export function App() {
   }
 
   function togglePack(packId: string) {
-    setSelectedPackIds((current) => {
-      return current[0] === packId ? current : [packId];
-    });
+    const nextPackIds = selectedPackIds[0] === packId ? selectedPackIds : [packId];
+    const hasPackSelectionChanged =
+      nextPackIds.length !== selectedPackIds.length || nextPackIds.some((id, index) => id !== selectedPackIds[index]);
+
+    if (hasPackSelectionChanged) {
+      setUsedLocationKeys([]);
+    }
+    setSelectedPackIds(nextPackIds);
   }
 
   function updateSpyCount(value: number) {
@@ -138,15 +148,24 @@ export function App() {
       return;
     }
     const normalizedStarterPlayerIndex = players.length > 0 ? nextStarterPlayerIndex % players.length : 0;
+    const usedLocationKeySet = new Set(usedLocationKeys);
+    const hasUsedAllSelectedLocations =
+      selectedLocations.length > 0 && selectedLocations.every((location) => usedLocationKeySet.has(getLocationKey(location)));
 
     const createdRound = createRound({
       players,
       selectedPackIds,
       spyCount,
       starterPlayerIndex: normalizedStarterPlayerIndex,
+      excludedLocationKeys: usedLocationKeys,
     });
+    const nextLocationKey = getLocationKey(createdRound.location);
+    const nextUsedLocationKeys = hasUsedAllSelectedLocations
+      ? [nextLocationKey]
+      : [...usedLocationKeys, nextLocationKey];
 
     setRound(createdRound);
+    setUsedLocationKeys(nextUsedLocationKeys);
     setRoundResult(null);
     setPhase("deal");
     setRevealIndex(createdRound.starterPlayerIndex);
@@ -240,6 +259,7 @@ export function App() {
     setPhase("setup");
     setRound(null);
     setRoundResult(null);
+    setUsedLocationKeys([]);
     setShowCard(false);
     setVoteIndex(0);
     setVotesByVoter({});
