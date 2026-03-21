@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Languages, Moon, Sun } from "lucide-react";
+import { Eye, Languages, Moon, Sun } from "lucide-react";
 import { PACKS } from "./content";
 import { COPY } from "./copy";
 import { createRound, determineRoundWinner, getLocationKey } from "./game";
@@ -11,9 +11,11 @@ const DEFAULT_PLAYER_COUNT = 4;
 const MIN_PLAYER_COUNT = 3;
 const MAX_PLAYER_COUNT = 12;
 const THEME_STORAGE_KEY = "spy-theme";
+const VISION_STORAGE_KEY = "spy-vision";
 const VOTE_ADVANCE_DELAY_MS = 220;
 
 type Theme = "dark" | "light";
+type VisionMode = "default" | "enhanced";
 
 function newPlayer(name: string): Player {
   return { id: crypto.randomUUID(), name };
@@ -32,9 +34,18 @@ function getInitialTheme(): Theme {
   return storedTheme === "light" || storedTheme === "dark" ? storedTheme : "dark";
 }
 
+function getInitialVisionMode(): VisionMode {
+  if (typeof window === "undefined") {
+    return "default";
+  }
+
+  return window.localStorage.getItem(VISION_STORAGE_KEY) === "enhanced" ? "enhanced" : "default";
+}
+
 export function App() {
   const [locale, setLocale] = useState<Locale>("nb");
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  const [visionMode, setVisionMode] = useState<VisionMode>(getInitialVisionMode);
 
   const [players, setPlayers] = useState<Player[]>(buildDefaultPlayers);
   const [selectedPackIds, setSelectedPackIds] = useState<string[]>(() => [PACKS[0]?.id ?? "classic"]);
@@ -91,6 +102,10 @@ export function App() {
 
   function toggleTheme() {
     setTheme((current) => (current === "dark" ? "light" : "dark"));
+  }
+
+  function toggleVisionMode() {
+    setVisionMode((current) => (current === "default" ? "enhanced" : "default"));
   }
 
   function finishRound(result: RoundResult) {
@@ -300,6 +315,11 @@ export function App() {
     document.querySelector("meta[name='theme-color']")?.setAttribute("content", themeColor);
   }, [theme]);
 
+  useLayoutEffect(() => {
+    document.documentElement.dataset.vision = visionMode;
+    window.localStorage.setItem(VISION_STORAGE_KEY, visionMode);
+  }, [visionMode]);
+
   return (
     <main className="app-shell">
       <section className="app-frame">
@@ -332,6 +352,19 @@ export function App() {
             >
               {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
               <span className="header-switch__label">{text.themeLabel}</span>
+            </Button>
+
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className={`header-switch${visionMode === "enhanced" ? " header-switch--active" : ""}`}
+              onClick={toggleVisionMode}
+              aria-label={`${text.visionLabel}: ${visionMode === "enhanced" ? text.off : text.on}`}
+              aria-pressed={visionMode === "enhanced"}
+            >
+              <Eye size={16} />
+              <span className="header-switch__label">{text.visionLabel}</span>
             </Button>
           </div>
         </header>
