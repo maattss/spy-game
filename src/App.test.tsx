@@ -30,10 +30,16 @@ describe("App header controls", () => {
       expect(html).toContain('aria-pressed="true"');
       expect(html).toContain("header-switch header-switch--active");
     } finally {
-      Object.defineProperty(globalThis, "window", {
-        configurable: true,
-        value: originalWindow,
-      });
+      if (typeof originalWindow === "undefined") {
+        // Remove the window property if it did not originally exist
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+        delete (globalThis as any).window;
+      } else {
+        Object.defineProperty(globalThis, "window", {
+          configurable: true,
+          value: originalWindow,
+        });
+      }
     }
   });
 });
