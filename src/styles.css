@@ -63,12 +63,11 @@ body,
 }
 
 html {
-  font-size: 16px;
   background-color: var(--bg-page);
 }
 
 html[data-vision="enhanced"] {
-  font-size: 20px;
+  font-size: 125%;
 }
 
 body {
