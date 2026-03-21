@@ -360,6 +360,7 @@ export function App() {
               size="sm"
               className={visionMode === "enhanced" ? "header-switch header-switch--active" : "header-switch"}
               onClick={toggleVisionMode}
+              aria-label={text.visionLabel}
               aria-pressed={visionMode === "enhanced"}
             >
               <Eye size={16} />

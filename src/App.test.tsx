@@ -9,6 +9,7 @@ describe("App header controls", () => {
     expect(html).toContain("Språk");
     expect(html).toContain("Tema");
     expect(html).toContain("Stor tekst");
+    expect(html).toContain('aria-label="Stor tekst"');
     expect(html).toContain('aria-pressed="false"');
   });
 
@@ -27,6 +28,7 @@ describe("App header controls", () => {
     try {
       const html = renderToStaticMarkup(<App />);
 
+      expect(html).toContain('aria-label="Stor tekst"');
       expect(html).toContain('aria-pressed="true"');
       expect(html).toContain("header-switch header-switch--active");
     } finally {
