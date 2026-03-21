@@ -358,9 +358,8 @@ export function App() {
               type="button"
               variant="secondary"
               size="sm"
-              className={`header-switch${visionMode === "enhanced" ? " header-switch--active" : ""}`}
+              className={visionMode === "enhanced" ? "header-switch header-switch--active" : "header-switch"}
               onClick={toggleVisionMode}
-              aria-label={`${text.visionLabel}: ${visionMode === "enhanced" ? text.off : text.on}`}
               aria-pressed={visionMode === "enhanced"}
             >
               <Eye size={16} />

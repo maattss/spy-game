@@ -11,4 +11,29 @@ describe("App header controls", () => {
     expect(html).toContain("Stor tekst");
     expect(html).toContain('aria-pressed="false"');
   });
+
+  it("renders the large text toggle as active when the preference is stored", () => {
+    const originalWindow = globalThis.window;
+
+    Object.defineProperty(globalThis, "window", {
+      configurable: true,
+      value: {
+        localStorage: {
+          getItem: (key: string) => (key === "spy-vision" ? "enhanced" : null),
+        },
+      },
+    });
+
+    try {
+      const html = renderToStaticMarkup(<App />);
+
+      expect(html).toContain('aria-pressed="true"');
+      expect(html).toContain("header-switch header-switch--active");
+    } finally {
+      Object.defineProperty(globalThis, "window", {
+        configurable: true,
+        value: originalWindow,
+      });
+    }
+  });
 });

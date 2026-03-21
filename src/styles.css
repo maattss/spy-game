@@ -4,7 +4,6 @@
   --radius-lg: 1rem;
   --radius-md: 0.8rem;
   --radius-sm: 0.65rem;
-  font-size: 16px;
 }
 
 :root,
@@ -40,10 +39,6 @@
   --danger: #c9483f;
 }
 
-:root[data-vision="enhanced"] {
-  font-size: 18px;
-}
-
 :root[data-theme="dark"][data-vision="enhanced"] {
   --muted: #c0cedd;
   --border: rgba(230, 237, 244, 0.2);
@@ -68,7 +63,12 @@ body,
 }
 
 html {
+  font-size: 16px;
   background-color: var(--bg-page);
+}
+
+html[data-vision="enhanced"] {
+  font-size: 20px;
 }
 
 body {
