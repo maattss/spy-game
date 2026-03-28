@@ -725,6 +725,20 @@ select {
   }
 }
 
+@media (min-width: 1200px) {
+  html {
+    font-size: 20px;
+  }
+
+  .app-shell {
+    align-items: center;
+  }
+
+  .app-frame {
+    width: min(90rem, 98%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;
