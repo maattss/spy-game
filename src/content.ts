@@ -81,7 +81,7 @@ const NORWAY_LOCATIONS: LocationCard[] = [
   loc("Svalbard", "Svalbard"),
   loc("Sognefjorden", "Sognefjord"),
   loc("Røros", "Røros"),
-  loc("Alesund", "Ålesund"),
+  loc("Ålesund", "Ålesund"),
   loc("Bergen", "Bergen"),
   loc("Trondheim", "Trondheim"),
   loc("Tromsø", "Tromsø"),
