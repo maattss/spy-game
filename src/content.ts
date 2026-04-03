@@ -214,7 +214,7 @@ const WEEKEND_LOCATIONS: LocationCard[] = [
   loc("Dart-turnering", "Darts Tournament"),
   loc("Biljardbar", "Pool Hall"),
   loc("Diskotek", "Disco"),
-  loc("Spakvelg", "Spa Weekend"),
+  loc("Spahelg", "Spa Weekend"),
   loc("Yogaretreat", "Yoga Retreat"),
   loc("Vinslottet", "Wine Castle"),
   loc("Pizzakveld", "Pizza Night"),
