@@ -51,7 +51,7 @@ const CLASSIC_LOCATIONS: LocationCard[] = [
   loc("Taxiholdeplass", "Taxi Stand"),
   loc("Parkeringshus", "Parking Garage"),
   loc("Bilverksted", "Car Workshop"),
-  loc("Vaskemaskin", "Laundromat"),
+  loc("Vaskeri", "Laundromat"),
   loc("Hundepark", "Dog Park"),
   loc("Fotballbane", "Football Field"),
   loc("Tennisbane", "Tennis Court"),
