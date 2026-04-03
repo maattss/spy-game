@@ -148,12 +148,12 @@ describe("createRound – error cases", () => {
 });
 
 describe("innhold og tekst", () => {
-  it("har Geilo-inspirerte afterski-lokasjoner", () => {
+  it("har afterski-lokasjoner", () => {
     const afterskiPack = PACKS.find((pack) => pack.id === "afterski");
 
     expect(afterskiPack).toBeDefined();
     expect(afterskiPack!.locations.map((location) => location.name.nb)).toEqual(
-      expect.arrayContaining(["Dr. Holms-bar", "Havsdalen", "Vestlia"]),
+      expect.arrayContaining(["Skiheisen", "Gondolen", "Skibaren"]),
     );
   });
 
