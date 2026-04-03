@@ -138,7 +138,7 @@ const AFTERSKI_LOCATIONS: LocationCard[] = [
   loc("Scenen", "Stage"),
   loc("Lobbyen", "Lobby"),
   loc("Resepsjonen", "Reception"),
-  loc("Spaen", "Spa"),
+  loc("Spaet", "Spa"),
   loc("Badstuen", "Sauna"),
   loc("Boblebad", "Hot Tub"),
   loc("Svømmebassenget", "Pool"),
