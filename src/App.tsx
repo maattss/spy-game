@@ -11,6 +11,7 @@ const DEFAULT_PLAYER_COUNT = 4;
 const MIN_PLAYER_COUNT = 3;
 const MAX_PLAYER_COUNT = 12;
 const THEME_STORAGE_KEY = "spy-theme";
+const USED_LOCATIONS_STORAGE_KEY_PREFIX = "spy-used-locations-";
 const VOTE_ADVANCE_DELAY_MS = 220;
 
 type Theme = "dark" | "light";
@@ -32,6 +33,40 @@ function getInitialTheme(): Theme {
   return storedTheme === "light" || storedTheme === "dark" ? storedTheme : "dark";
 }
 
+function usedLocationsStorageKey(packIds: string[]): string {
+  return USED_LOCATIONS_STORAGE_KEY_PREFIX + [...packIds].sort().join(",");
+}
+
+function loadUsedLocationKeys(packIds: string[]): string[] {
+  if (typeof window === "undefined") {
+    return [];
+  }
+  try {
+    const raw = window.localStorage.getItem(usedLocationsStorageKey(packIds));
+    if (!raw) {
+      return [];
+    }
+    const parsed: unknown = JSON.parse(raw);
+    if (Array.isArray(parsed) && parsed.every((item) => typeof item === "string")) {
+      return parsed as string[];
+    }
+  } catch {
+    // Ignore malformed data
+  }
+  return [];
+}
+
+function saveUsedLocationKeys(packIds: string[], keys: string[]): void {
+  if (typeof window === "undefined") {
+    return;
+  }
+  try {
+    window.localStorage.setItem(usedLocationsStorageKey(packIds), JSON.stringify(keys));
+  } catch {
+    // Ignore quota errors
+  }
+}
+
 export function App() {
   const [locale, setLocale] = useState<Locale>("nb");
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
@@ -41,7 +76,7 @@ export function App() {
   const [spyCount, setSpyCount] = useState(1);
   const [pointVotingEnabled, setPointVotingEnabled] = useState(false);
   const [nextStarterPlayerIndex, setNextStarterPlayerIndex] = useState(0);
-  const [usedLocationKeys, setUsedLocationKeys] = useState<string[]>([]);
+  const [usedLocationKeys, setUsedLocationKeys] = useState<string[]>(() => loadUsedLocationKeys([PACKS[0]?.id ?? "classic"]));
 
   const [phase, setPhase] = useState<GamePhase>("setup");
   const [round, setRound] = useState<RoundState | null>(null);
@@ -122,7 +157,7 @@ export function App() {
       nextPackIds.length !== selectedPackIds.length || nextPackIds.some((id, index) => id !== selectedPackIds[index]);
 
     if (hasPackSelectionChanged) {
-      setUsedLocationKeys([]);
+      setUsedLocationKeys(loadUsedLocationKeys(nextPackIds));
     }
     setSelectedPackIds(nextPackIds);
   }
@@ -166,6 +201,7 @@ export function App() {
 
     setRound(createdRound);
     setUsedLocationKeys(nextUsedLocationKeys);
+    saveUsedLocationKeys(selectedPackIds, nextUsedLocationKeys);
     setRoundResult(null);
     setPhase("deal");
     setRevealIndex(createdRound.starterPlayerIndex);
@@ -259,7 +295,6 @@ export function App() {
     setPhase("setup");
     setRound(null);
     setRoundResult(null);
-    setUsedLocationKeys([]);
     setShowCard(false);
     setVoteIndex(0);
     setVotesByVoter({});
