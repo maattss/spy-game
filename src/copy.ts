@@ -2,7 +2,7 @@ import type { Locale } from "./types";
 
 export const COPY = {
   nb: {
-    brandKicker: "Et sosialt lagspill",
+    brandKicker: "Finn spionen",
     languageLabel: "Språk",
     themeLabel: "Tema",
     norwegian: "Norsk",
@@ -60,7 +60,7 @@ export const COPY = {
     },
   },
   en: {
-    brandKicker: "Social deduction game",
+    brandKicker: "Find the spy",
     languageLabel: "Language",
     themeLabel: "Theme",
     norwegian: "Norwegian",
