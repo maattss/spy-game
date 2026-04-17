@@ -13,6 +13,7 @@ const MAX_PLAYER_COUNT = 12;
 const THEME_STORAGE_KEY = "spy-theme";
 const USED_LOCATIONS_STORAGE_KEY_PREFIX = "spy-used-locations-";
 const VOTE_ADVANCE_DELAY_MS = 220;
+const DEFAULT_PACK_IDS = [PACKS[0]?.id ?? "classic"];
 
 type Theme = "dark" | "light";
 
@@ -72,11 +73,11 @@ export function App() {
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
 
   const [players, setPlayers] = useState<Player[]>(buildDefaultPlayers);
-  const [selectedPackIds, setSelectedPackIds] = useState<string[]>(() => [PACKS[0]?.id ?? "classic"]);
+  const [selectedPackIds, setSelectedPackIds] = useState<string[]>(() => DEFAULT_PACK_IDS);
   const [spyCount, setSpyCount] = useState(1);
   const [pointVotingEnabled, setPointVotingEnabled] = useState(false);
   const [nextStarterPlayerIndex, setNextStarterPlayerIndex] = useState(0);
-  const [usedLocationKeys, setUsedLocationKeys] = useState<string[]>(() => loadUsedLocationKeys([PACKS[0]?.id ?? "classic"]));
+  const [usedLocationKeys, setUsedLocationKeys] = useState<string[]>(() => loadUsedLocationKeys(DEFAULT_PACK_IDS));
 
   const [phase, setPhase] = useState<GamePhase>("setup");
   const [round, setRound] = useState<RoundState | null>(null);
