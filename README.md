@@ -25,11 +25,12 @@ Send telefonen rundt. Alle får vite lokasjonen. Alle, bortsett fra **spionen**.
 | Pakke | Innhold |
 |-------|---------|
 | 🕵️ **Klassisk** | Fly, bank, sykehus, kino og mer |
-| ❄️ **Norge** | Fjellhytte, stavkirke, vaffelstue og typisk norsk |
+| 🇳🇴 **Norge** | Preikestolen, Bryggen, Holmenkollen og norske landemerker |
 | 🎿 **Afterski** | Skibar, heiskø, hyttefest og fjellstemning |
-| ✈️ **Reise** | Flyplass, cruisehavn, nasjonalpark og eventyr |
+| ⭐ **Kjendis** | Røde løperen, filmset, VIP-loge og glamour |
+| 🇳🇴 **17. mai** | Barnetoget, bunaden, flaggheising og nasjonaldagsfest |
 | 🪩 **Helg** | Escape room, karaokebar, trampolinepark og moro |
-| 🌶️ **Spicy Mode** | Forhandlingsrom, juryrom, lukket styremøte og høy spenning |
+| 🌶️ **Ekspert** | Forhandlingsrom, juryrom, lukket styremøte og høy spenning |
 
 ---
 
