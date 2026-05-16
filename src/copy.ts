@@ -2,7 +2,7 @@ import type { Locale } from "./types";
 
 export const COPY = {
   nb: {
-    brandKicker: "Finn spionen",
+    brandKicker: "Gratulerer med dagen!",
     languageLabel: "Språk",
     themeLabel: "Tema",
     norwegian: "Norsk",
@@ -60,7 +60,7 @@ export const COPY = {
     },
   },
   en: {
-    brandKicker: "Find the spy",
+    brandKicker: "Happy Constitution Day!",
     languageLabel: "Language",
     themeLabel: "Theme",
     norwegian: "Norwegian",

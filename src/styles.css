@@ -17,10 +17,10 @@
   --placeholder: #7f93aa;
   --border: rgba(230, 237, 244, 0.09);
   --border-strong: rgba(230, 237, 244, 0.18);
-  --accent: #4ea7f4;
-  --accent-strong: #2f83ca;
-  --success: #35b994;
-  --danger: #f26f66;
+  --accent: #ba3a3a;
+  --accent-strong: #9b2626;
+  --success: #4a7cc9;
+  --danger: #ba3a3a;
 }
 
 :root[data-theme="light"] {
@@ -33,10 +33,10 @@
   --placeholder: #586d84;
   --border: rgba(15, 23, 36, 0.1);
   --border-strong: rgba(15, 23, 36, 0.18);
-  --accent: #1f7fcb;
-  --accent-strong: #1668a8;
-  --success: #0b8d6d;
-  --danger: #c9483f;
+  --accent: #ba3a3a;
+  --accent-strong: #9b2626;
+  --success: #2b5ea7;
+  --danger: #ba3a3a;
 }
 
 * {
@@ -114,7 +114,7 @@ select {
   letter-spacing: 0.12em;
   font-size: 0.72rem;
   font-weight: 700;
-  color: var(--success);
+  color: var(--accent);
 }
 
 .app-title,

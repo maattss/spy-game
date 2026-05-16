@@ -342,7 +342,7 @@ export function App() {
         <header className="app-header">
           <div className="app-brand">
             <p className="kicker">{text.brandKicker}</p>
-            <h1 className="app-title">Spy</h1>
+            <h1 className="app-title">🇳🇴 Spy</h1>
           </div>
 
           <div className="header-controls">
