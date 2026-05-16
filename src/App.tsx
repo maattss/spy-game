@@ -15,7 +15,7 @@ const USED_LOCATIONS_STORAGE_KEY_PREFIX = "spy-used-locations-";
 const VOTE_ADVANCE_DELAY_MS = 220;
 const DEFAULT_PACK_IDS = [PACKS[0]?.id ?? "classic"];
 
-type Theme = "dark" | "light";
+type Theme = "dark" | "light" | "norway";
 
 function newPlayer(name: string): Player {
   return { id: crypto.randomUUID(), name };
@@ -31,7 +31,7 @@ function getInitialTheme(): Theme {
   }
 
   const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
-  return storedTheme === "light" || storedTheme === "dark" ? storedTheme : "dark";
+  return storedTheme === "light" || storedTheme === "dark" || storedTheme === "norway" ? storedTheme : "dark";
 }
 
 function usedLocationsStorageKey(packIds: string[]): string {
@@ -126,7 +126,11 @@ export function App() {
   }
 
   function toggleTheme() {
-    setTheme((current) => (current === "dark" ? "light" : "dark"));
+    setTheme((current) => {
+      if (current === "dark") return "light";
+      if (current === "light") return "norway";
+      return "dark";
+    });
   }
 
   function finishRound(result: RoundResult) {
@@ -332,7 +336,7 @@ export function App() {
   useLayoutEffect(() => {
     document.documentElement.dataset.theme = theme;
     window.localStorage.setItem(THEME_STORAGE_KEY, theme);
-    const themeColor = theme === "dark" ? "#030507" : "#f4f7fb";
+    const themeColor = theme === "dark" ? "#030507" : theme === "light" ? "#f4f7fb" : "#00205B";
     document.querySelector("meta[name='theme-color']")?.setAttribute("content", themeColor);
   }, [theme]);
 
@@ -364,7 +368,7 @@ export function App() {
               size="sm"
               className="header-switch"
               onClick={toggleTheme}
-              aria-label={`${text.themeLabel}: ${theme === "dark" ? text.light : text.dark}`}
+              aria-label={`${text.themeLabel}: ${theme === "dark" ? text.dark : theme === "light" ? text.light : text.norway}`}
             >
               {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
               <span className="header-switch__label">{text.themeLabel}</span>
