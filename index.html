@@ -9,7 +9,7 @@
     />
     <meta name="keywords" content="spionspill, spy game, sosialt deduksjonsspill, partyspill, SPY" />
     <meta name="robots" content="index, follow" />
-    <meta name="theme-color" content="#070a12" />
+    <meta name="theme-color" content="#0c0e11" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content="SPY — Spionspill / Spy Game på nettet" />
     <meta
@@ -40,14 +40,14 @@
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <script>
       (() => {
-        const COLORS = { dark: "#070a12", light: "#f2f4f8", norway: "#001a4d" };
+        const COLORS = { dark: "#0c0e11", light: "#f5f6f8" };
         const apply = (theme) => {
           document.documentElement.dataset.theme = theme;
           document.querySelector("meta[name='theme-color']")?.setAttribute("content", COLORS[theme]);
         };
         try {
           const stored = window.localStorage.getItem("spy-theme");
-          apply(stored === "light" || stored === "norway" ? stored : "dark");
+          apply(stored === "light" ? "light" : "dark");
         } catch {
           apply("dark");
         }

@@ -14,7 +14,7 @@ const THEME_STORAGE_KEY = "spy-theme";
 const USED_LOCATIONS_STORAGE_KEY_PREFIX = "spy-used-locations-";
 const DEFAULT_PACK_IDS = [PACKS[0]?.id ?? "classic"];
 
-type Theme = "dark" | "light" | "norway";
+type Theme = "dark" | "light";
 
 function newPlayer(name: string): Player {
   return { id: crypto.randomUUID(), name };
@@ -30,7 +30,7 @@ function getInitialTheme(): Theme {
   }
 
   const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
-  return storedTheme === "light" || storedTheme === "dark" || storedTheme === "norway" ? storedTheme : "dark";
+  return storedTheme === "light" ? "light" : "dark";
 }
 
 function usedLocationsStorageKey(packIds: string[]): string {
@@ -111,11 +111,7 @@ export function App() {
   }
 
   function toggleTheme() {
-    setTheme((current) => {
-      if (current === "dark") return "light";
-      if (current === "light") return "norway";
-      return "dark";
-    });
+    setTheme((current) => (current === "dark" ? "light" : "dark"));
   }
 
   function addPlayer() {
@@ -218,7 +214,7 @@ export function App() {
   useLayoutEffect(() => {
     document.documentElement.dataset.theme = theme;
     window.localStorage.setItem(THEME_STORAGE_KEY, theme);
-    const themeColor = theme === "dark" ? "#070a12" : theme === "light" ? "#f2f4f8" : "#001a4d";
+    const themeColor = theme === "dark" ? "#0c0e11" : "#f5f6f8";
     document.querySelector("meta[name='theme-color']")?.setAttribute("content", themeColor);
   }, [theme]);
 
@@ -254,7 +250,7 @@ export function App() {
               variant="secondary"
               size="icon"
               onClick={toggleTheme}
-              aria-label={`${text.themeLabel}: ${theme === "dark" ? text.light : theme === "light" ? text.norway : text.dark}`}
+              aria-label={`${text.themeLabel}: ${theme === "dark" ? text.light : text.dark}`}
             >
               {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
             </Button>

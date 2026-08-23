@@ -9,7 +9,6 @@ export const COPY = {
     english: "Engelsk",
     dark: "Mørk",
     light: "Lys",
-    norway: "Norge",
 
     howToPlay: "Slik spiller dere",
     ruleDeal: "Send telefonen rundt. Alle ser kortet sitt alene.",
@@ -66,7 +65,6 @@ export const COPY = {
     english: "English",
     dark: "Dark",
     light: "Light",
-    norway: "Norway",
 
     howToPlay: "How to play",
     ruleDeal: "Pass the phone around. Everyone sees their card alone.",

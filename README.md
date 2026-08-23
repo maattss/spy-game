@@ -41,7 +41,7 @@ SPY er laget for å være **raskt**, **lettfattelig** og **mobilsentrisk**:
 - 📱 Mobil-first UI — ingen installasjon, bare åpne i nettleseren
 - 🃏 Kortet snus med en 3D-flip, og innholdet fjernes før telefonen gis videre
 - 🌍 Norsk og engelsk språk
-- 🌙 Mørk, lys og Norge-tema
+- 🌙 Mørkt og lyst tema
 - ➡️ Tydelig "pass telefonen videre"-flyt
 - 🔁 Roterende startspiller mellom runder
 
