@@ -1,5 +1,4 @@
-export type GamePhase = "setup" | "deal" | "vote" | "manual-vote" | "result";
-export type Winner = "agents" | "spies" | "manual";
+export type GamePhase = "setup" | "deal" | "point" | "result";
 export type Locale = "nb" | "en";
 
 export interface LocalizedText {
@@ -26,11 +25,6 @@ export interface LocationPack {
 export interface Assignment {
   playerId: string;
   isSpy: boolean;
-}
-
-export interface RoundResult {
-  winner: Winner;
-  reason: string;
 }
 
 export interface RoundState {

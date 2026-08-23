@@ -13,10 +13,10 @@ Send telefonen rundt. Alle får vite lokasjonen. Alle, bortsett fra **spionen**.
 1. 👥 **Sett opp** spillere (3–12) og velg antall spioner
 2. 🃏 **Del ut** hemmelige kort — én spiller av gangen, ingen kikking!
 3. 🗣️ **Diskuter** hvem som virker mistenkelig
-4. 🗳️ **Stem** — i appen eller ved peking i gruppa
-5. 🏆 **Avslør** resultatet og start en ny runde
+4. 👉 **Pek ut spionen** — tell ned fra tre og pek samtidig
+5. 🏆 **Vis fasit** og start en ny runde
 
-> **Stemmelikhet?** Spionene vinner. De er tross alt proffer.
+> **Avstemning i appen?** Nei. Dere peker i gruppa — det er sånn det gjøres.
 
 ---
 
@@ -39,12 +39,14 @@ Send telefonen rundt. Alle får vite lokasjonen. Alle, bortsett fra **spionen**.
 SPY er laget for å være **raskt**, **lettfattelig** og **mobilsentrisk**:
 
 - 📱 Mobil-first UI — ingen installasjon, bare åpne i nettleseren
+- 🃏 Kortet snus med en 3D-flip, og innholdet fjernes før telefonen gis videre
 - 🌍 Norsk og engelsk språk
-- 🌙 Mørk og lys tema
+- 🌙 Mørk, lys og Norge-tema
 - ➡️ Tydelig "pass telefonen videre"-flyt
 - 🔁 Roterende startspiller mellom runder
 
-**Bevisst utelatt** (for å holde det enkelt): roller/jobbtitler, diskusjonstimer og poengtavle.
+**Bevisst utelatt** (for å holde det enkelt): avstemning i appen, roller/jobbtitler,
+diskusjonstimer og poengtavle. Spionen pekes ut i gruppa — appen viser bare fasiten.
 
 ---
 
@@ -79,7 +81,7 @@ npm run preview  # preview av build
 ```text
 src/
   App.tsx                            # state + spillflyt
-  components/game/phase-sections.tsx # setup/deal/vote/result UI
+  components/game/phase-sections.tsx # setup/deal/point/result UI
   content.ts                         # lokasjonspakker og oversettelser
   copy.ts                            # app-tekst (nb/en)
   styles.css                         # tema + layout

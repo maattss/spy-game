@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { PACKS } from "./content";
 import { COPY } from "./copy";
-import { createRound, determineRoundWinner, getLocationKey, shuffle } from "./game";
-import type { Assignment, Player } from "./types";
+import { createRound, getLocationKey, shuffle } from "./game";
+import type { Player } from "./types";
 
 const PLAYERS: Player[] = [
   { id: "p1", name: "Alice" },
@@ -157,10 +157,17 @@ describe("innhold og tekst", () => {
     );
   });
 
-  it("ber alle si ordet før de peker ut spionen", () => {
-    expect(COPY.nb.manualVoteTitle).toBe("Pek ut spionen");
-    expect(COPY.nb.manualVoteInstruction).toContain("Alle sier ordet sitt høyt");
-    expect(COPY.nb.manualVoteInstruction).toContain("peker alle samtidig");
+  it("avslutter runden med at alle peker ut spionen", () => {
+    expect(COPY.nb.pointTitle).toBe("Pek ut spionen");
+    expect(COPY.nb.pointInstruction).toContain("peker samtidig");
+    expect(COPY.en.pointTitle).toBe("Point out the spy");
+  });
+
+  it("har ingen tekst for avstemning i appen", () => {
+    for (const locale of ["nb", "en"] as const) {
+      const keys = Object.keys(COPY[locale]);
+      expect(keys.filter((key) => /vote|voting|stem/i.test(key))).toEqual([]);
+    }
   });
 });
 
@@ -194,110 +201,5 @@ describe("createRound – edge cases", () => {
 
     expect(round.spyIds).toHaveLength(2);
     expect(new Set(round.spyIds).size).toBe(2); // Ensure unique spies
-  });
-});
-
-describe("determineRoundWinner", () => {
-  const assignments: Record<string, Assignment> = {
-    p1: { playerId: "p1", isSpy: true },
-    p2: { playerId: "p2", isSpy: false },
-    p3: { playerId: "p3", isSpy: false },
-    p4: { playerId: "p4", isSpy: false },
-  };
-
-  it("agenter vinner hvis de stemmer på spionen", () => {
-    const votes = {
-      p2: "p1",
-      p3: "p1",
-      p4: "p1",
-    };
-
-    const result = determineRoundWinner(votes, assignments);
-
-    expect(result.winner).toBe("agents");
-    expect(result.suspectId).toBe("p1");
-  });
-
-  it("spioner vinner hvis de stemmer på en uskyldige", () => {
-    const votes = {
-      p1: "p2",
-      p3: "p2",
-      p4: "p2",
-    };
-
-    const result = determineRoundWinner(votes, assignments);
-
-    expect(result.winner).toBe("spies");
-    expect(result.suspectId).toBe("p2");
-  });
-
-  it("spioner vinner ved stemme-likhet", () => {
-    const votes = {
-      p1: "p2",
-      p2: "p3",
-      p3: "p4",
-    };
-
-    const result = determineRoundWinner(votes, assignments);
-
-    expect(result.winner).toBe("spies");
-    expect(result.suspectId).toBeNull();
-  });
-
-  it("spioner vinner hvis ingen stemmer (tom votes)", () => {
-    const votes = {};
-
-    const result = determineRoundWinner(votes, assignments);
-
-    expect(result.winner).toBe("spies");
-    expect(result.suspectId).toBeNull();
-  });
-
-  it("spioner vinner hvis det er to kandidater med like mange stemmer", () => {
-    const votes = {
-      p1: "p2",
-      p2: "p3",
-      p3: "p2",
-      p4: "p3",
-    };
-
-    const result = determineRoundWinner(votes, assignments);
-
-    expect(result.winner).toBe("spies");
-    expect(result.suspectId).toBeNull();
-  });
-
-  it("agenter kan vinne med bare én stemme hvis den er på spionen", () => {
-    const votes = {
-      p2: "p1",
-    };
-
-    const result = determineRoundWinner(votes, assignments);
-
-    expect(result.winner).toBe("agents");
-    expect(result.suspectId).toBe("p1");
-  });
-
-  it("fungerer med flere spioner", () => {
-    const multiSpyAssignments: Record<string, Assignment> = {
-      p1: { playerId: "p1", isSpy: true },
-      p2: { playerId: "p2", isSpy: true },
-      p3: { playerId: "p3", isSpy: false },
-      p4: { playerId: "p4", isSpy: false },
-      p5: { playerId: "p5", isSpy: false },
-    };
-
-    const votes = {
-      p1: "p3",
-      p2: "p3",
-      p3: "p1",
-      p4: "p1",
-      p5: "p1",
-    };
-
-    const result = determineRoundWinner(votes, multiSpyAssignments);
-
-    expect(result.winner).toBe("agents");
-    expect(result.suspectId).toBe("p1");
   });
 });
