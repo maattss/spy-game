@@ -1,34 +1,44 @@
-import { Minus, Plus, X } from "lucide-react";
+import { ArrowRight, EyeOff, Hand, MapPin, Plus, Radar, RotateCcw, ShieldCheck, Sliders, UserRound, VenetianMask, X } from "lucide-react";
 import { PACKS } from "../../content";
 import type { AppText } from "../../copy";
-import type { Player, RoundResult, RoundState } from "../../types";
+import type { Locale, Player, RoundState } from "../../types";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { Switch } from "../ui/switch";
 
 type DisplayNameFn = (name: string, index: number) => string;
 type PlaceholderFn = (index: number) => string;
-type RelativeStepNumberFn = (currentIndex: number, starterIndex: number, totalPlayers: number) => number;
 
-const getRelativeStepNumber: RelativeStepNumberFn = (currentIndex, starterIndex, totalPlayers) =>
+const relativeStep = (currentIndex: number, starterIndex: number, totalPlayers: number) =>
   ((currentIndex - starterIndex + totalPlayers) % totalPlayers) + 1;
+
+function CardHead({ icon, title, hint }: { icon: React.ReactNode; title: string; hint?: string }) {
+  return (
+    <CardHeader>
+      <span className="card-icon" aria-hidden="true">
+        {icon}
+      </span>
+      <div className="card-headings">
+        <CardTitle>{title}</CardTitle>
+        {hint && <CardDescription>{hint}</CardDescription>}
+      </div>
+    </CardHeader>
+  );
+}
 
 type SetupSectionProps = {
   text: AppText;
-  locale: "nb" | "en";
+  locale: Locale;
   players: Player[];
   selectedPackIds: string[];
   spyCount: number;
-  pointVotingEnabled: boolean;
   canStartGame: boolean;
   minPlayerCount: number;
+  maxPlayerCount: number;
   onUpdatePlayerName: (id: string, name: string) => void;
   onRemovePlayer: (id: string) => void;
   onAddPlayer: () => void;
   onSetSpyCount: (value: number) => void;
-  onSetPointVotingEnabled: (value: boolean) => void;
   onTogglePack: (id: string) => void;
   onStartRound: () => void;
   displayPlayerName: DisplayNameFn;
@@ -41,149 +51,139 @@ export function SetupSection({
   players,
   selectedPackIds,
   spyCount,
-  pointVotingEnabled,
   canStartGame,
   minPlayerCount,
+  maxPlayerCount,
   onUpdatePlayerName,
   onRemovePlayer,
   onAddPlayer,
   onSetSpyCount,
-  onSetPointVotingEnabled,
   onTogglePack,
   onStartRound,
   displayPlayerName,
   playerPlaceholder,
 }: SetupSectionProps) {
   const maxSpyCount = Math.max(1, players.length - 1);
-  return (
-    <section className="phase-stack phase-stack--setup">
-      <Card>
-        <CardHeader>
-          <CardTitle>{text.players}</CardTitle>
-        </CardHeader>
-        <CardContent className="stack-tight">
-          {players.map((player, index) => (
-            <div className="player-row" key={player.id}>
-              <Input
-                aria-label={`${text.nameFor} ${displayPlayerName(player.name, index)}`}
-                value={player.name}
-                placeholder={playerPlaceholder(index)}
-                onChange={(event) => onUpdatePlayerName(player.id, event.target.value)}
-              />
-              <Button
-                type="button"
-                size="icon"
-                variant="outline"
-                className="player-remove"
-                disabled={players.length <= minPlayerCount}
-                aria-label={`${text.remove} ${displayPlayerName(player.name, index)}`}
-                onClick={() => onRemovePlayer(player.id)}
-              >
-                <X size={16} />
-              </Button>
-            </div>
-          ))}
+  const spyOptions = Array.from({ length: maxSpyCount }, (_, index) => index + 1);
 
-          <Button type="button" variant="secondary" onClick={onAddPlayer}>
+  return (
+    <div className="phase phase--setup">
+      <Card className="rules-card">
+        <CardHead icon={<ShieldCheck size={17} />} title={text.howToPlay} />
+        <CardContent>
+          <ol className="rules">
+            <li>{text.ruleDeal}</li>
+            <li>{text.ruleSecret}</li>
+            <li>{text.ruleTalk}</li>
+            <li>{text.rulePoint}</li>
+          </ol>
+        </CardContent>
+      </Card>
+
+      <Card className="players-card">
+        <CardHead icon={<UserRound size={17} />} title={text.players} hint={text.playerCountHint} />
+        <CardContent>
+          <div className="roster">
+            {players.map((player, index) => (
+              <div className="roster__row" key={player.id}>
+                <span className="roster__index" aria-hidden="true">
+                  {index + 1}
+                </span>
+                <Input
+                  aria-label={`${text.nameFor} ${displayPlayerName(player.name, index)}`}
+                  value={player.name}
+                  placeholder={playerPlaceholder(index)}
+                  autoComplete="off"
+                  onChange={(event) => onUpdatePlayerName(player.id, event.target.value)}
+                />
+                <Button
+                  type="button"
+                  size="icon"
+                  variant="quiet"
+                  className="roster__remove"
+                  disabled={players.length <= minPlayerCount}
+                  aria-label={`${text.remove} ${displayPlayerName(player.name, index)}`}
+                  onClick={() => onRemovePlayer(player.id)}
+                >
+                  <X size={15} />
+                </Button>
+              </div>
+            ))}
+          </div>
+
+          <Button
+            type="button"
+            variant="ghost"
+            size="full"
+            disabled={players.length >= maxPlayerCount}
+            onClick={onAddPlayer}
+          >
+            <Plus size={16} />
             {text.addPlayer}
           </Button>
         </CardContent>
       </Card>
 
-      <div className="setup-side-stack">
-        <Card className="setup-card">
-          <CardHeader className="setup-card__header">
-            <CardTitle>{text.spiesCount}</CardTitle>
-          </CardHeader>
-          <CardContent className="setup-card__content">
-            <div className="spy-count-stepper">
-              <Button
+      <Card className="spies-card">
+        <CardHead icon={<Sliders size={17} />} title={text.spiesCount} hint={text.spyCountHint} />
+        <CardContent>
+          <div className="segmented" role="group" aria-label={text.spiesCount}>
+            {spyOptions.map((option) => (
+              <button
+                key={option}
                 type="button"
-                size="icon"
-                variant="outline"
-                disabled={spyCount <= 1}
-                aria-label={text.decreaseSpyCount}
-                onClick={() => onSetSpyCount(spyCount - 1)}
+                className={`segmented__option ${option === spyCount ? "is-active" : ""}`}
+                aria-pressed={option === spyCount}
+                aria-label={`${text.spyCountOption} ${option}`}
+                onClick={() => onSetSpyCount(option)}
               >
-                <Minus size={16} />
-              </Button>
+                {option}
+              </button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
-              <Input
-                aria-label={text.spiesCount}
-                className="spy-count-input"
-                type="number"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                min={1}
-                max={maxSpyCount}
-                step={1}
-                value={spyCount}
-                onChange={(event) => onSetSpyCount(event.target.valueAsNumber)}
-              />
-
-              <Button
-                type="button"
-                size="icon"
-                variant="outline"
-                disabled={spyCount >= maxSpyCount}
-                aria-label={text.increaseSpyCount}
-                onClick={() => onSetSpyCount(spyCount + 1)}
-              >
-                <Plus size={16} />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>{text.voting}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Label className="check-row">
-              <Switch checked={pointVotingEnabled} onCheckedChange={onSetPointVotingEnabled} />
-              <span>{text.pointVoting}</span>
-            </Label>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>{text.locationPacks}</CardTitle>
-          </CardHeader>
-          <CardContent className="chip-grid">
+      <Card className="packs-card">
+        <CardHead icon={<MapPin size={17} />} title={text.locationPacks} />
+        <CardContent>
+          <div className="packs">
             {PACKS.map((pack) => {
               const isSelected = selectedPackIds.includes(pack.id);
               return (
-                <Button
+                <button
                   key={pack.id}
                   type="button"
-                  variant={isSelected ? "chipActive" : "chip"}
-                  className="pack-chip"
+                  className={`pack ${isSelected ? "is-active" : ""}`}
                   aria-pressed={isSelected}
+                  aria-label={pack.name[locale]}
                   onClick={() => onTogglePack(pack.id)}
                 >
-                  <span className="pack-chip__emoji" aria-hidden="true">
+                  <span className="pack__emoji" aria-hidden="true">
                     {pack.emoji}
                   </span>
-                  <span className="pack-chip__label">{pack.name[locale]}</span>
-                </Button>
+                  <span className="pack__name">{pack.name[locale]}</span>
+                  <span className="pack__count">{text.locationsCount(pack.locations.length)}</span>
+                </button>
               );
             })}
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      <Button type="button" size="full" disabled={!canStartGame} onClick={onStartRound}>
-        {text.startRound}
-      </Button>
-    </section>
+      <div className="action-bar">
+        <Button type="button" size="full" disabled={!canStartGame} onClick={onStartRound}>
+          {text.startRound}
+          <ArrowRight size={17} />
+        </Button>
+      </div>
+    </div>
   );
 }
 
 type DealSectionProps = {
   text: AppText;
-  locale: "nb" | "en";
+  locale: Locale;
   round: RoundState;
   revealIndex: number;
   showCard: boolean;
@@ -204,191 +204,157 @@ export function DealSection({
   onShowCard,
   onNextReveal,
 }: DealSectionProps) {
-  const revealStep = getRelativeStepNumber(revealIndex, round.starterPlayerIndex, round.players.length);
+  const totalPlayers = round.players.length;
+  const step = relativeStep(revealIndex, round.starterPlayerIndex, totalPlayers);
+
   return (
-    <section className="phase-stack">
-      <Card className={`stage-card ${showCard ? (isSpy ? "stage-card--spy" : "stage-card--agent") : ""}`}>
-        <CardHeader>
-          <p className="kicker">
-            {text.step} {revealStep} {text.of} {round.players.length}
-          </p>
-          <CardTitle>{revealPlayerName}</CardTitle>
-          {!showCard && <CardDescription>{text.revealPrompt}</CardDescription>}
-        </CardHeader>
+    <div className="phase phase--deal">
+      <div className="progress" role="img" aria-label={text.playerStep(step, totalPlayers)}>
+        {Array.from({ length: totalPlayers }, (_, index) => (
+          <span
+            key={index}
+            className={`progress__dot ${index + 1 < step ? "is-done" : ""} ${index + 1 === step ? "is-current" : ""}`}
+          />
+        ))}
+      </div>
 
-        <CardContent className="stage-card__content">
-          {showCard && (
-            <div className="reveal-box">
-              {isSpy ? (
-                <>
-                  <p className="identity-title identity-title--spy">{text.youAreSpy}</p>
-                  <p>{text.spyInstruction}</p>
-                </>
-              ) : (
-                <>
-                  <p className="identity-title identity-title--agent">{text.youAreAgent}</p>
-                  <p>
-                    {text.location}: <strong>{round.location.name[locale]}</strong>
-                  </p>
-                </>
-              )}
-            </div>
-          )}
+      <div className="deal__meta">
+        <p className="kicker">{text.passPhoneTo}</p>
+        <h2 className="deal__name">{revealPlayerName}</h2>
+      </div>
 
-          <div className="action-row stage-card__actions">
-            {!showCard && (
-              <Button type="button" size="full" onClick={onShowCard}>
-                {text.showCard}
-              </Button>
-            )}
+      <div className={`flip ${showCard ? "is-flipped" : ""}`}>
+        <div className="flip__inner">
+          <button
+            type="button"
+            className="flip__face flip__face--front"
+            onClick={onShowCard}
+            tabIndex={showCard ? -1 : 0}
+            aria-hidden={showCard}
+          >
+            <span className="flip__seal" aria-hidden="true">
+              <EyeOff size={28} />
+            </span>
+            <span className="flip__cta">{text.tapToReveal}</span>
+            <span className="flip__note">{text.keepItHidden}</span>
+          </button>
+
+          {/* Rendered only while revealed: the back face stays visible during the flip-back,
+              so keeping it filled would leak the next player's role to the current holder. */}
+          <div
+            className={`flip__face flip__face--back ${showCard ? (isSpy ? "is-spy" : "is-agent") : ""}`}
+            aria-hidden={!showCard}
+          >
             {showCard && (
-              <Button type="button" size="full" onClick={onNextReveal}>
-                {text.hideAndPass}
-              </Button>
+              <>
+                <span className="role__icon" aria-hidden="true">
+                  {isSpy ? <VenetianMask size={26} /> : <Radar size={26} />}
+                </span>
+                <p className="role">{isSpy ? text.youAreSpy : text.youAreAgent}</p>
+                {isSpy ? (
+                  <p className="role__note">{text.spyInstruction}</p>
+                ) : (
+                  <>
+                    <p className="role__label">{text.location}</p>
+                    <p className="role__location">{round.location.name[locale]}</p>
+                    <p className="role__note">{text.agentInstruction}</p>
+                  </>
+                )}
+              </>
             )}
           </div>
-        </CardContent>
-      </Card>
-    </section>
+        </div>
+      </div>
+
+      <div className="action-bar">
+        <Button type="button" size="full" disabled={!showCard} onClick={onNextReveal}>
+          {text.hideAndPass}
+          <ArrowRight size={17} />
+        </Button>
+      </div>
+    </div>
   );
 }
 
-type VoteSectionProps = {
-  text: AppText;
-  round: RoundState;
-  voteIndex: number;
-  onVote: (targetId: string) => void;
-  activeVoteTargetId: string | null;
-  displayPlayerName: DisplayNameFn;
-};
-
-export function VoteSection({ text, round, voteIndex, onVote, activeVoteTargetId, displayPlayerName }: VoteSectionProps) {
-  const currentVoter = round.players[voteIndex];
-  const voteStep = getRelativeStepNumber(voteIndex, round.starterPlayerIndex, round.players.length);
-  return (
-    <section className="phase-stack">
-      <Card>
-        <CardHeader>
-          <p className="kicker">{text.voting}</p>
-          <CardTitle>
-            {text.step} {voteStep} {text.of} {round.players.length}
-          </CardTitle>
-          <CardDescription>{text.votingInstruction}</CardDescription>
-        </CardHeader>
-
-        <CardContent className="stack-tight">
-          <p aria-live="polite">
-            {text.votingTurn}: <strong>{displayPlayerName(currentVoter?.name ?? "", voteIndex)}</strong>
-          </p>
-          <p className="kicker">{text.votingQuestion}</p>
-
-          <div className="chip-grid chip-grid--large">
-            {round.players.map((player, index) => (
-              <Button
-                key={player.id}
-                type="button"
-                variant="chip"
-                className={`vote-option ${activeVoteTargetId === player.id ? "vote-option--active" : ""}`}
-                aria-pressed={activeVoteTargetId === player.id}
-                onClick={() => onVote(player.id)}
-              >
-                {text.voteFor} {displayPlayerName(player.name, index)}
-              </Button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    </section>
-  );
-}
-
-type ManualVoteSectionProps = {
+type PointSectionProps = {
   text: AppText;
   onShowResult: () => void;
 };
 
-export function ManualVoteSection({ text, onShowResult }: ManualVoteSectionProps) {
+export function PointSection({ text, onShowResult }: PointSectionProps) {
   return (
-    <section className="phase-stack">
-      <Card>
-        <CardHeader>
-          <p className="kicker">{text.voting}</p>
-          <CardTitle>{text.manualVoteTitle}</CardTitle>
-          <CardDescription>{text.manualVoteInstruction}</CardDescription>
-        </CardHeader>
+    <div className="phase phase--point">
+      <div className="point">
+        <span className="point__icon" aria-hidden="true">
+          <Hand size={32} />
+        </span>
+        <p className="kicker">{text.pointKicker}</p>
+        <h2 className="point__title">{text.pointTitle}</h2>
+        <p className="point__instruction">{text.pointInstruction}</p>
+        <p className="point__countdown">{text.pointCountdown}</p>
+      </div>
 
-        <CardContent>
-          <Button type="button" size="full" onClick={onShowResult}>
-            {text.showResult}
-          </Button>
-        </CardContent>
-      </Card>
-    </section>
+      <div className="action-bar">
+        <Button type="button" size="full" onClick={onShowResult}>
+          {text.showResult}
+        </Button>
+      </div>
+    </div>
   );
 }
 
 type ResultSectionProps = {
   text: AppText;
-  locale: "nb" | "en";
+  locale: Locale;
   round: RoundState;
-  roundResult: RoundResult;
   onNewRound: () => void;
   onBackToSetup: () => void;
   displayPlayerName: DisplayNameFn;
 };
 
-export function ResultSection({
-  text,
-  locale,
-  round,
-  roundResult,
-  onNewRound,
-  onBackToSetup,
-  displayPlayerName,
-}: ResultSectionProps) {
-  const spyWinnerLabel = round.spyIds.length === 1 ? text.spyWon : text.spiesWon;
+export function ResultSection({ text, locale, round, onNewRound, onBackToSetup, displayPlayerName }: ResultSectionProps) {
+  const spyNames = round.players.flatMap((player, index) =>
+    round.assignments[player.id]?.isSpy ? [displayPlayerName(player.name, index)] : [],
+  );
+
+  const spyLabel = spyNames.length === 1 ? text.spyWas : text.spiesWere;
+  const joinedSpyNames =
+    spyNames.length <= 1
+      ? spyNames.join("")
+      : `${spyNames.slice(0, -1).join(", ")} ${text.and} ${spyNames[spyNames.length - 1]}`;
 
   return (
-    <section className="phase-stack">
-      <Card>
-        <CardHeader>
-          <p className="kicker">{text.result}</p>
-          <CardTitle>
-            {roundResult.winner === "spies" ? spyWinnerLabel : roundResult.winner === "agents" ? text.agentsWon : text.manualRound}
-          </CardTitle>
-          <CardDescription>{roundResult.reason}</CardDescription>
-        </CardHeader>
+    <div className="phase phase--result">
+      <div className="reveal">
+        <p className="kicker">{text.resultKicker}</p>
+        <p className="reveal__label">{text.location}</p>
+        <h2 className="reveal__location">{round.location.name[locale]}</h2>
+        <p className="reveal__spies">
+          {spyLabel} <strong>{joinedSpyNames}</strong>
+        </p>
+      </div>
 
-        <CardContent className="stack-tight">
-          <p>
-            {text.location}: <strong>{round.location.name[locale]}</strong>
-          </p>
+      <div className="roles">
+        {round.players.map((player, index) => {
+          const isSpy = round.assignments[player.id]?.isSpy ?? false;
+          return (
+            <div className={`roles__row ${isSpy ? "is-spy" : "is-agent"}`} key={player.id}>
+              <span className="roles__name">{displayPlayerName(player.name, index)}</span>
+              <span className="roles__tag">{isSpy ? text.spyShort : text.agentShort}</span>
+            </div>
+          );
+        })}
+      </div>
 
-          <div className="score-grid">
-            {round.players.map((player, index) => {
-              const assignment = round.assignments[player.id];
-              const roleClass = assignment.isSpy ? "score-row--spy" : "score-row--agent";
-              return (
-                <div className={`score-row ${roleClass}`} key={player.id}>
-                  <span>
-                    {displayPlayerName(player.name, index)}{" "}
-                    <span className="score-row__role">{assignment.isSpy ? `(${text.spyShort})` : `(${text.agentShort})`}</span>
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="action-grid">
-            <Button type="button" onClick={onNewRound}>
-              {text.newRound}
-            </Button>
-            <Button type="button" variant="outline" onClick={onBackToSetup}>
-              {text.toSetup}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </section>
+      <div className="action-bar action-bar--split">
+        <Button type="button" size="full" onClick={onNewRound}>
+          <RotateCcw size={16} />
+          {text.newRound}
+        </Button>
+        <Button type="button" variant="ghost" size="full" onClick={onBackToSetup}>
+          {text.toSetup}
+        </Button>
+      </div>
+    </div>
   );
 }

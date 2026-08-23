@@ -1,21 +1,20 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import { Languages, Moon, Sun } from "lucide-react";
 import { PACKS } from "./content";
 import { COPY } from "./copy";
-import { createRound, determineRoundWinner, getLocationKey } from "./game";
-import type { GamePhase, Locale, Player, RoundResult, RoundState } from "./types";
+import { createRound, getLocationKey } from "./game";
+import type { GamePhase, Locale, Player, RoundState } from "./types";
 import { Button } from "./components/ui/button";
-import { DealSection, ManualVoteSection, ResultSection, SetupSection, VoteSection } from "./components/game/phase-sections";
+import { DealSection, PointSection, ResultSection, SetupSection } from "./components/game/phase-sections";
 
 const DEFAULT_PLAYER_COUNT = 4;
 const MIN_PLAYER_COUNT = 3;
 const MAX_PLAYER_COUNT = 12;
 const THEME_STORAGE_KEY = "spy-theme";
 const USED_LOCATIONS_STORAGE_KEY_PREFIX = "spy-used-locations-";
-const VOTE_ADVANCE_DELAY_MS = 220;
 const DEFAULT_PACK_IDS = [PACKS[0]?.id ?? "classic"];
 
-type Theme = "dark" | "light" | "norway";
+type Theme = "dark" | "light";
 
 function newPlayer(name: string): Player {
   return { id: crypto.randomUUID(), name };
@@ -31,7 +30,7 @@ function getInitialTheme(): Theme {
   }
 
   const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
-  return storedTheme === "light" || storedTheme === "dark" || storedTheme === "norway" ? storedTheme : "dark";
+  return storedTheme === "light" ? "light" : "dark";
 }
 
 function usedLocationsStorageKey(packIds: string[]): string {
@@ -75,22 +74,14 @@ export function App() {
   const [players, setPlayers] = useState<Player[]>(buildDefaultPlayers);
   const [selectedPackIds, setSelectedPackIds] = useState<string[]>(() => DEFAULT_PACK_IDS);
   const [spyCount, setSpyCount] = useState(1);
-  const [pointVotingEnabled, setPointVotingEnabled] = useState(false);
   const [nextStarterPlayerIndex, setNextStarterPlayerIndex] = useState(0);
   const [usedLocationKeys, setUsedLocationKeys] = useState<string[]>(() => loadUsedLocationKeys(DEFAULT_PACK_IDS));
 
   const [phase, setPhase] = useState<GamePhase>("setup");
   const [round, setRound] = useState<RoundState | null>(null);
-  const [roundResult, setRoundResult] = useState<RoundResult | null>(null);
 
   const [revealIndex, setRevealIndex] = useState(0);
   const [showCard, setShowCard] = useState(false);
-
-  const [voteIndex, setVoteIndex] = useState(0);
-  const [votesByVoter, setVotesByVoter] = useState<Record<string, string>>({});
-  const [activeVoteTargetId, setActiveVoteTargetId] = useState<string | null>(null);
-  const voteLockedRef = useRef(false);
-  const voteAdvanceTimeoutRef = useRef<number | null>(null);
 
   const text = COPY[locale];
   const maxSpyCount = Math.max(1, players.length - 1);
@@ -98,12 +89,6 @@ export function App() {
   const canStartGame =
     players.length >= MIN_PLAYER_COUNT && selectedPackIds.length > 0 && spyCount >= 1 && spyCount <= maxSpyCount;
 
-  const roundPlayerIndexById = useMemo<Record<string, number>>(() => {
-    if (!round) {
-      return {};
-    }
-    return Object.fromEntries(round.players.map((player, index) => [player.id, index]));
-  }, [round]);
   const selectedLocations = useMemo(
     () => PACKS.filter((pack) => selectedPackIds.includes(pack.id)).flatMap((pack) => pack.locations),
     [selectedPackIds],
@@ -126,16 +111,7 @@ export function App() {
   }
 
   function toggleTheme() {
-    setTheme((current) => {
-      if (current === "dark") return "light";
-      if (current === "light") return "norway";
-      return "dark";
-    });
-  }
-
-  function finishRound(result: RoundResult) {
-    setRoundResult(result);
-    setPhase("result");
+    setTheme((current) => (current === "dark" ? "light" : "dark"));
   }
 
   function addPlayer() {
@@ -175,14 +151,6 @@ export function App() {
     setSpyCount(normalized);
   }
 
-  function clearVoteAdvanceTimeout() {
-    if (voteAdvanceTimeoutRef.current === null) {
-      return;
-    }
-    window.clearTimeout(voteAdvanceTimeoutRef.current);
-    voteAdvanceTimeoutRef.current = null;
-  }
-
   function startRound() {
     if (!canStartGame) {
       return;
@@ -207,15 +175,9 @@ export function App() {
     setRound(createdRound);
     setUsedLocationKeys(nextUsedLocationKeys);
     saveUsedLocationKeys(selectedPackIds, nextUsedLocationKeys);
-    setRoundResult(null);
     setPhase("deal");
     setRevealIndex(createdRound.starterPlayerIndex);
     setShowCard(false);
-    setVoteIndex(createdRound.starterPlayerIndex);
-    setVotesByVoter({});
-    setActiveVoteTargetId(null);
-    voteLockedRef.current = false;
-    clearVoteAdvanceTimeout();
     setNextStarterPlayerIndex((value) => (players.length > 0 ? (value + 1) % players.length : 0));
   }
 
@@ -226,17 +188,8 @@ export function App() {
 
     const nextRevealIndex = (revealIndex + 1) % round.players.length;
     if (nextRevealIndex === round.starterPlayerIndex) {
-      if (pointVotingEnabled) {
-        setPhase("manual-vote");
-      } else {
-        setPhase("vote");
-        setShowCard(false);
-        setVoteIndex(round.starterPlayerIndex);
-        setVotesByVoter({});
-        setActiveVoteTargetId(null);
-        voteLockedRef.current = false;
-        clearVoteAdvanceTimeout();
-      }
+      setPhase("point");
+      setShowCard(false);
       return;
     }
 
@@ -244,86 +197,11 @@ export function App() {
     setShowCard(false);
   }
 
-  function finalizeVotes(votes: Record<string, string>) {
-    if (!round) {
-      return;
-    }
-
-    const result = determineRoundWinner(votes, round.assignments);
-
-    if (result.winner === "agents") {
-      finishRound({ winner: "agents", reason: text.reasons.caughtSpy });
-      return;
-    }
-
-    if (result.suspectId === null) {
-      finishRound({ winner: "spies", reason: text.reasons.voteTie });
-      return;
-    }
-
-    const suspectIndex = roundPlayerIndexById[result.suspectId] ?? 0;
-    const suspectName = displayPlayerName(round.players[suspectIndex]?.name ?? "", suspectIndex);
-    finishRound({ winner: "spies", reason: text.reasons.wrongVote(suspectName) });
-  }
-
-  function submitVote(targetId: string) {
-    if (!round || voteLockedRef.current) {
-      return;
-    }
-    voteLockedRef.current = true;
-
-    const voter = round.players[voteIndex];
-    if (!voter) {
-      voteLockedRef.current = false;
-      return;
-    }
-
-    const nextVotes = { ...votesByVoter, [voter.id]: targetId };
-    setVotesByVoter(nextVotes);
-    setActiveVoteTargetId(targetId);
-
-    clearVoteAdvanceTimeout();
-    voteAdvanceTimeoutRef.current = window.setTimeout(() => {
-      voteAdvanceTimeoutRef.current = null;
-
-      const nextVoteIndex = (voteIndex + 1) % round.players.length;
-      if (nextVoteIndex !== round.starterPlayerIndex) {
-        setVoteIndex(nextVoteIndex);
-        return;
-      }
-
-      finalizeVotes(nextVotes);
-    }, VOTE_ADVANCE_DELAY_MS);
-  }
-
   function endToSetup() {
     setPhase("setup");
     setRound(null);
-    setRoundResult(null);
     setShowCard(false);
-    setVoteIndex(0);
-    setVotesByVoter({});
-    setActiveVoteTargetId(null);
-    voteLockedRef.current = false;
-    clearVoteAdvanceTimeout();
   }
-
-  useEffect(() => {
-    voteLockedRef.current = false;
-    setActiveVoteTargetId(null);
-  }, [phase, voteIndex]);
-
-  useEffect(() => {
-    if (phase !== "vote") {
-      clearVoteAdvanceTimeout();
-    }
-  }, [phase]);
-
-  useEffect(() => {
-    return () => {
-      clearVoteAdvanceTimeout();
-    };
-  }, []);
 
   useEffect(() => {
     setSpyCount((current) => {
@@ -336,78 +214,68 @@ export function App() {
   useLayoutEffect(() => {
     document.documentElement.dataset.theme = theme;
     window.localStorage.setItem(THEME_STORAGE_KEY, theme);
-    const themeColor = theme === "dark" ? "#030507" : theme === "light" ? "#f4f7fb" : "#00205B";
+    const themeColor = theme === "dark" ? "#0c0e11" : "#f5f6f8";
     document.querySelector("meta[name='theme-color']")?.setAttribute("content", themeColor);
   }, [theme]);
 
   return (
-    <main className="app-shell">
-      <section className="app-frame">
-        <header className="app-header">
-          <div className="app-brand">
-            <p className="kicker">{text.brandKicker}</p>
-            <h1 className="app-title">Spy</h1>
+    <main className="app">
+      <div className="app__glow" aria-hidden="true" />
+
+      <div className="app__inner">
+        <header className="topbar">
+          <div className="brand">
+            <span className="brand__mark" aria-hidden="true">
+              <span className="brand__eye" />
+            </span>
+            <div className="brand__text">
+              <h1 className="brand__title">Spy</h1>
+              <p className="brand__tagline">{text.tagline}</p>
+            </div>
           </div>
 
-          <div className="header-controls">
+          <div className="topbar__controls">
             <Button
               type="button"
               variant="secondary"
-              size="sm"
-              className="header-switch"
+              size="icon"
               onClick={toggleLocale}
               aria-label={`${text.languageLabel}: ${locale === "nb" ? text.english : text.norwegian}`}
             >
               <Languages size={16} />
-              <span className="header-switch__label">{text.languageLabel}</span>
             </Button>
 
             <Button
               type="button"
               variant="secondary"
-              size="sm"
-              className="header-switch"
+              size="icon"
               onClick={toggleTheme}
-              aria-label={`${text.themeLabel}: ${theme === "dark" ? text.dark : theme === "light" ? text.light : text.norway}`}
+              aria-label={`${text.themeLabel}: ${theme === "dark" ? text.light : text.dark}`}
             >
               {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-              <span className="header-switch__label">{text.themeLabel}</span>
             </Button>
           </div>
         </header>
 
         {phase === "setup" && (
-          <>
-            <div className="rules-box app-rules" aria-label={text.rulesTitle}>
-              <p className="rules-box__title">{text.playersIntro}</p>
-              <ul className="rules-list">
-                <li>{text.rulePlayerCount}</li>
-                <li>{text.rulePassPhone}</li>
-                <li>{text.ruleNoPeeking}</li>
-                <li>{text.ruleDiscussion}</li>
-              </ul>
-            </div>
-
-            <SetupSection
-              text={text}
-              locale={locale}
-              players={players}
-              selectedPackIds={selectedPackIds}
-              spyCount={spyCount}
-              pointVotingEnabled={pointVotingEnabled}
-              canStartGame={canStartGame}
-              minPlayerCount={MIN_PLAYER_COUNT}
-              onUpdatePlayerName={updatePlayerName}
-              onRemovePlayer={removePlayer}
-              onAddPlayer={addPlayer}
-              onSetSpyCount={updateSpyCount}
-              onSetPointVotingEnabled={setPointVotingEnabled}
-              onTogglePack={togglePack}
-              onStartRound={startRound}
-              displayPlayerName={displayPlayerName}
-              playerPlaceholder={playerPlaceholder}
-            />
-          </>
+          <SetupSection
+            text={text}
+            locale={locale}
+            players={players}
+            selectedPackIds={selectedPackIds}
+            spyCount={spyCount}
+            canStartGame={canStartGame}
+            minPlayerCount={MIN_PLAYER_COUNT}
+            maxPlayerCount={MAX_PLAYER_COUNT}
+            onUpdatePlayerName={updatePlayerName}
+            onRemovePlayer={removePlayer}
+            onAddPlayer={addPlayer}
+            onSetSpyCount={updateSpyCount}
+            onTogglePack={togglePack}
+            onStartRound={startRound}
+            displayPlayerName={displayPlayerName}
+            playerPlaceholder={playerPlaceholder}
+          />
         )}
 
         {phase === "deal" && round && currentRevealPlayer && currentRevealAssignment && (
@@ -424,36 +292,19 @@ export function App() {
           />
         )}
 
-        {phase === "vote" && round && (
-          <VoteSection
-            text={text}
-            round={round}
-            voteIndex={voteIndex}
-            onVote={submitVote}
-            activeVoteTargetId={activeVoteTargetId}
-            displayPlayerName={displayPlayerName}
-          />
-        )}
+        {phase === "point" && <PointSection text={text} onShowResult={() => setPhase("result")} />}
 
-        {phase === "manual-vote" && (
-          <ManualVoteSection
-            text={text}
-            onShowResult={() => finishRound({ winner: "manual", reason: text.reasons.manualVoting })}
-          />
-        )}
-
-        {phase === "result" && round && roundResult && (
+        {phase === "result" && round && (
           <ResultSection
             text={text}
             locale={locale}
             round={round}
-            roundResult={roundResult}
             onNewRound={startRound}
             onBackToSetup={endToSetup}
             displayPlayerName={displayPlayerName}
           />
         )}
-      </section>
+      </div>
     </main>
   );
 }

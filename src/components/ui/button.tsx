@@ -8,15 +8,12 @@ const buttonVariants = cva("ui-button", {
     variant: {
       default: "ui-button--default",
       secondary: "ui-button--secondary",
-      outline: "ui-button--outline",
-      danger: "ui-button--danger",
-      chip: "ui-button--chip",
-      chipActive: "ui-button--chip-active",
+      ghost: "ui-button--ghost",
+      quiet: "ui-button--quiet",
     },
     size: {
       default: "ui-button--default-size",
       sm: "ui-button--sm",
-      lg: "ui-button--lg",
       icon: "ui-button--icon",
       full: "ui-button--full",
     },
