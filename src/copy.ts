@@ -27,7 +27,6 @@ export const COPY = {
     spyCountOption: "Antall spioner:",
 
     locationPacks: "Lokasjonspakker",
-    locationsCount: (count: number) => `${count} steder`,
 
     startRound: "Start runde",
 
@@ -84,7 +83,6 @@ export const COPY = {
     spyCountOption: "Number of spies:",
 
     locationPacks: "Location packs",
-    locationsCount: (count: number) => `${count} places`,
 
     startRound: "Start round",
 

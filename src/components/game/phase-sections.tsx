@@ -157,14 +157,9 @@ export function SetupSection({
                   type="button"
                   className={`pack ${isSelected ? "is-active" : ""}`}
                   aria-pressed={isSelected}
-                  aria-label={pack.name[locale]}
                   onClick={() => onTogglePack(pack.id)}
                 >
-                  <span className="pack__emoji" aria-hidden="true">
-                    {pack.emoji}
-                  </span>
-                  <span className="pack__name">{pack.name[locale]}</span>
-                  <span className="pack__count">{text.locationsCount(pack.locations.length)}</span>
+                  {pack.name[locale]}
                 </button>
               );
             })}

@@ -28,6 +28,8 @@
   --muted: #a3afcc;
   --placeholder: #6a7798;
   --selected: var(--accent);
+  --chip: #ffffff;
+  --chip-ink: #111a2e;
 }
 
 :root[data-theme="light"] {
@@ -41,6 +43,8 @@
   --muted: #56617a;
   --placeholder: #95a0b8;
   --selected: #16181f;
+  --chip: #111a2e;
+  --chip-ink: #ffffff;
 }
 
 * {
@@ -199,8 +203,8 @@ input {
   border-radius: 999px;
   display: grid;
   place-items: center;
-  color: var(--accent-ink);
-  background: var(--accent);
+  color: var(--text);
+  background: var(--surface-hover);
 }
 
 .card-headings {
@@ -314,57 +318,40 @@ input {
 }
 
 .segmented__option.is-active {
-  color: var(--accent-ink);
-  background: var(--accent);
+  color: var(--chip-ink);
+  background: var(--chip);
 }
 
 /* ---------- packs ---------- */
 
 .packs {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(8.6rem, 1fr));
-  gap: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
 }
 
 .pack {
-  display: grid;
-  gap: 0.1rem;
-  padding: 0.8rem 0.9rem;
-  text-align: left;
-  border-radius: var(--r-lg);
-  border: 2px solid transparent;
+  min-height: 2.9rem;
+  padding: 0 1.1rem;
+  border-radius: 999px;
+  border: 0;
   background: var(--surface-hover);
   color: var(--text);
+  font-family: var(--font-display);
+  font-size: 0.98rem;
+  font-weight: 800;
   cursor: pointer;
-  transition: border-color 140ms ease, transform 120ms ease;
+  transition: background-color 140ms ease, color 140ms ease, transform 120ms ease;
   -webkit-tap-highlight-color: transparent;
 }
 
 .pack:active {
-  transform: scale(0.97);
-}
-
-.pack__emoji {
-  font-size: 1.5rem;
-  line-height: 1.3;
-}
-
-.pack__name {
-  font-family: var(--font-display);
-  font-size: 0.98rem;
-  font-weight: 800;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.pack__count {
-  font-size: 0.75rem;
-  color: var(--muted);
+  transform: scale(0.95);
 }
 
 .pack.is-active {
-  border-color: var(--selected);
+  color: var(--chip-ink);
+  background: var(--chip);
 }
 
 /* ---------- deal ---------- */
