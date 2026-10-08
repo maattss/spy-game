@@ -19,27 +19,27 @@
 :root,
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #14161d;
-  --surface: #1e2129;
-  --surface-hover: #282c36;
+  --bg: #111a2e;
+  --surface: #1a2540;
+  --surface-hover: #23304f;
   --line: rgba(255, 255, 255, 0.1);
   --line-strong: rgba(255, 255, 255, 0.2);
   --text: #ffffff;
-  --muted: #a4a9b8;
-  --placeholder: #6c7182;
+  --muted: #a3afcc;
+  --placeholder: #6a7798;
   --selected: var(--accent);
 }
 
 :root[data-theme="light"] {
   color-scheme: light;
-  --bg: #f4f4f6;
+  --bg: #eef2fa;
   --surface: #ffffff;
-  --surface-hover: #ebebef;
+  --surface-hover: #e3e9f5;
   --line: rgba(22, 24, 31, 0.1);
   --line-strong: rgba(22, 24, 31, 0.2);
   --text: #16181f;
-  --muted: #5d6170;
-  --placeholder: #9a9eab;
+  --muted: #56617a;
+  --placeholder: #95a0b8;
   --selected: #16181f;
 }
 
