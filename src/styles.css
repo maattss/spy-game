@@ -7,10 +7,6 @@
   --r-sm: 0.65rem;
   --font-display: "Nunito", system-ui, sans-serif;
   --font-body: "Nunito", system-ui, sans-serif;
-  --accent: #ffcf3f;
-  --accent-hover: #ffd95f;
-  --accent-edge: #d9a514;
-  --accent-ink: #16181f;
   --agent: #0f9b78;
   --spy: #f2484e;
   --on-role: #ffffff;
@@ -27,6 +23,10 @@
   --text: #ffffff;
   --muted: #a3afcc;
   --placeholder: #6a7798;
+  --accent: #ffffff;
+  --accent-hover: #e9eef8;
+  --accent-edge: #a9b5d2;
+  --accent-ink: #111a2e;
   --selected: var(--accent);
   --chip: #ffffff;
   --chip-ink: #111a2e;
@@ -42,6 +42,10 @@
   --text: #16181f;
   --muted: #56617a;
   --placeholder: #95a0b8;
+  --accent: #111a2e;
+  --accent-hover: #1f2b48;
+  --accent-edge: #000000;
+  --accent-ink: #ffffff;
   --selected: #16181f;
   --chip: #111a2e;
   --chip-ink: #ffffff;
@@ -134,11 +138,7 @@ input {
 }
 
 .brand__dot {
-  color: var(--accent);
-}
-
-:root[data-theme="light"] .brand__dot {
-  color: var(--accent-edge);
+  color: var(--spy);
 }
 
 .brand__tagline {
@@ -576,10 +576,6 @@ input {
   line-height: 1;
   color: var(--accent);
   animation: countdown-in 300ms cubic-bezier(0.3, 1.5, 0.5, 1) both;
-}
-
-:root[data-theme="light"] .countdown {
-  color: var(--selected);
 }
 
 @keyframes countdown-in {
