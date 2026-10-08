@@ -13,7 +13,7 @@ Send telefonen rundt. Alle får vite lokasjonen. Alle, bortsett fra **spionen**.
 1. 👥 **Sett opp** spillere (3–12) og velg antall spioner
 2. 🃏 **Del ut** hemmelige kort — én spiller av gangen, ingen kikking!
 3. 🗣️ **Diskuter** hvem som virker mistenkelig
-4. 👉 **Pek ut spionen** — tell ned fra tre og pek samtidig
+4. 👉 **Pek ut spionen** — start nedtellingen og pek samtidig
 5. 🏆 **Vis fasit** og start en ny runde
 
 > **Avstemning i appen?** Nei. Dere peker i gruppa — det er sånn det gjøres.
@@ -39,7 +39,10 @@ Send telefonen rundt. Alle får vite lokasjonen. Alle, bortsett fra **spionen**.
 SPY er laget for å være **raskt**, **lettfattelig** og **mobilsentrisk**:
 
 - 📱 Mobil-first UI — ingen installasjon, bare åpne i nettleseren
+- 🗂️ "Hemmelig mappe"-design med radar-logo, stempler og spionfont
 - 🃏 Kortet snus med en 3D-flip, og innholdet fjernes før telefonen gis videre
+- ⏱️ Animert 3–2–1-nedtelling før alle peker samtidig
+- 📳 Vibrasjon ved kortvisning og nedtelling (der telefonen støtter det)
 - 🌍 Norsk og engelsk språk
 - 🌙 Mørkt og lyst tema
 - ➡️ Tydelig "pass telefonen videre"-flyt

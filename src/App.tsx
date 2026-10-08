@@ -16,6 +16,16 @@ const DEFAULT_PACK_IDS = [PACKS[0]?.id ?? "classic"];
 
 type Theme = "dark" | "light";
 
+const THEME_COLORS: Record<Theme, string> = { dark: "#07080b", light: "#f2eee5" };
+
+function buzz(pattern: number | number[]) {
+  try {
+    navigator.vibrate?.(pattern);
+  } catch {
+    // Vibration is best-effort
+  }
+}
+
 function newPlayer(name: string): Player {
   return { id: crypto.randomUUID(), name };
 }
@@ -79,6 +89,7 @@ export function App() {
 
   const [phase, setPhase] = useState<GamePhase>("setup");
   const [round, setRound] = useState<RoundState | null>(null);
+  const [roundNumber, setRoundNumber] = useState(0);
 
   const [revealIndex, setRevealIndex] = useState(0);
   const [showCard, setShowCard] = useState(false);
@@ -173,12 +184,18 @@ export function App() {
       : [...usedLocationKeys, nextLocationKey];
 
     setRound(createdRound);
+    setRoundNumber((value) => value + 1);
     setUsedLocationKeys(nextUsedLocationKeys);
     saveUsedLocationKeys(selectedPackIds, nextUsedLocationKeys);
     setPhase("deal");
     setRevealIndex(createdRound.starterPlayerIndex);
     setShowCard(false);
     setNextStarterPlayerIndex((value) => (players.length > 0 ? (value + 1) % players.length : 0));
+  }
+
+  function revealCard() {
+    setShowCard(true);
+    buzz(30);
   }
 
   function goToNextReveal() {
@@ -200,6 +217,7 @@ export function App() {
   function endToSetup() {
     setPhase("setup");
     setRound(null);
+    setRoundNumber(0);
     setShowCard(false);
   }
 
@@ -214,8 +232,7 @@ export function App() {
   useLayoutEffect(() => {
     document.documentElement.dataset.theme = theme;
     window.localStorage.setItem(THEME_STORAGE_KEY, theme);
-    const themeColor = theme === "dark" ? "#0c0e11" : "#f5f6f8";
-    document.querySelector("meta[name='theme-color']")?.setAttribute("content", themeColor);
+    document.querySelector("meta[name='theme-color']")?.setAttribute("content", THEME_COLORS[theme]);
   }, [theme]);
 
   return (
@@ -223,10 +240,11 @@ export function App() {
       <div className="app__glow" aria-hidden="true" />
 
       <div className="app__inner">
-        <header className="topbar">
+        <header className={`topbar ${phase === "setup" ? "" : "is-compact"}`}>
           <div className="brand">
             <span className="brand__mark" aria-hidden="true">
-              <span className="brand__eye" />
+              <span className="brand__sweep" />
+              <span className="brand__blip" />
             </span>
             <div className="brand__text">
               <h1 className="brand__title">Spy</h1>
@@ -235,6 +253,7 @@ export function App() {
           </div>
 
           <div className="topbar__controls">
+            {roundNumber > 0 && phase !== "setup" && <span className="mission-tag">{text.mission(roundNumber)}</span>}
             <Button
               type="button"
               variant="secondary"
@@ -257,53 +276,56 @@ export function App() {
           </div>
         </header>
 
-        {phase === "setup" && (
-          <SetupSection
-            text={text}
-            locale={locale}
-            players={players}
-            selectedPackIds={selectedPackIds}
-            spyCount={spyCount}
-            canStartGame={canStartGame}
-            minPlayerCount={MIN_PLAYER_COUNT}
-            maxPlayerCount={MAX_PLAYER_COUNT}
-            onUpdatePlayerName={updatePlayerName}
-            onRemovePlayer={removePlayer}
-            onAddPlayer={addPlayer}
-            onSetSpyCount={updateSpyCount}
-            onTogglePack={togglePack}
-            onStartRound={startRound}
-            displayPlayerName={displayPlayerName}
-            playerPlaceholder={playerPlaceholder}
-          />
-        )}
+        <div className="stage" key={phase === "deal" ? `deal-${roundNumber}-${revealIndex}` : `${phase}-${roundNumber}`}>
+          {phase === "setup" && (
+            <SetupSection
+              text={text}
+              locale={locale}
+              players={players}
+              selectedPackIds={selectedPackIds}
+              spyCount={spyCount}
+              canStartGame={canStartGame}
+              minPlayerCount={MIN_PLAYER_COUNT}
+              maxPlayerCount={MAX_PLAYER_COUNT}
+              onUpdatePlayerName={updatePlayerName}
+              onRemovePlayer={removePlayer}
+              onAddPlayer={addPlayer}
+              onSetSpyCount={updateSpyCount}
+              onTogglePack={togglePack}
+              onStartRound={startRound}
+              displayPlayerName={displayPlayerName}
+              playerPlaceholder={playerPlaceholder}
+            />
+          )}
 
-        {phase === "deal" && round && currentRevealPlayer && currentRevealAssignment && (
-          <DealSection
-            text={text}
-            locale={locale}
-            round={round}
-            revealIndex={revealIndex}
-            showCard={showCard}
-            revealPlayerName={displayPlayerName(currentRevealPlayer.name, revealIndex)}
-            isSpy={currentRevealAssignment.isSpy}
-            onShowCard={() => setShowCard(true)}
-            onNextReveal={goToNextReveal}
-          />
-        )}
+          {phase === "deal" && round && currentRevealPlayer && currentRevealAssignment && (
+            <DealSection
+              text={text}
+              locale={locale}
+              round={round}
+              revealIndex={revealIndex}
+              showCard={showCard}
+              revealPlayerName={displayPlayerName(currentRevealPlayer.name, revealIndex)}
+              isSpy={currentRevealAssignment.isSpy}
+              missionLabel={text.mission(roundNumber)}
+              onShowCard={revealCard}
+              onNextReveal={goToNextReveal}
+            />
+          )}
 
-        {phase === "point" && <PointSection text={text} onShowResult={() => setPhase("result")} />}
+          {phase === "point" && <PointSection text={text} onTick={buzz} onShowResult={() => setPhase("result")} />}
 
-        {phase === "result" && round && (
-          <ResultSection
-            text={text}
-            locale={locale}
-            round={round}
-            onNewRound={startRound}
-            onBackToSetup={endToSetup}
-            displayPlayerName={displayPlayerName}
-          />
-        )}
+          {phase === "result" && round && (
+            <ResultSection
+              text={text}
+              locale={locale}
+              round={round}
+              onNewRound={startRound}
+              onBackToSetup={endToSetup}
+              displayPlayerName={displayPlayerName}
+            />
+          )}
+        </div>
       </div>
     </main>
   );

@@ -10,6 +10,10 @@ export const COPY = {
     dark: "Mørk",
     light: "Lys",
 
+    mission: (round: number) => `Oppdrag #${String(round).padStart(3, "0")}`,
+    classified: "Strengt hemmelig",
+    briefing: "Briefing",
+
     howToPlay: "Slik spiller dere",
     ruleDeal: "Send telefonen rundt. Alle ser kortet sitt alene.",
     ruleSecret: "Alle får lokasjonen — bortsett fra spionen.",
@@ -44,11 +48,13 @@ export const COPY = {
 
     pointKicker: "Siste steg",
     pointTitle: "Pek ut spionen",
-    pointInstruction: "Diskuter runden. Når alle er klare teller dere ned fra tre og peker samtidig på den dere tror er spionen.",
-    pointCountdown: "Tre — to — én — pek!",
+    pointInstruction: "Diskuter runden. Når alle er klare starter dere nedtellingen — og peker samtidig på den dere tror er spionen.",
+    startCountdown: "Start nedtelling",
+    pointNow: "Pek!",
     showResult: "Vis fasit",
 
     resultKicker: "Fasit",
+    exposed: "Avslørt",
     spyWas: "Spionen var",
     spiesWere: "Spionene var",
     newRound: "Ny runde",
@@ -65,6 +71,10 @@ export const COPY = {
     english: "English",
     dark: "Dark",
     light: "Light",
+
+    mission: (round: number) => `Mission #${String(round).padStart(3, "0")}`,
+    classified: "Top secret",
+    briefing: "Briefing",
 
     howToPlay: "How to play",
     ruleDeal: "Pass the phone around. Everyone sees their card alone.",
@@ -100,11 +110,13 @@ export const COPY = {
 
     pointKicker: "Final step",
     pointTitle: "Point out the spy",
-    pointInstruction: "Talk it through. When everyone is ready, count down from three and point at the same time.",
-    pointCountdown: "Three — two — one — point!",
+    pointInstruction: "Talk it through. When everyone is ready, start the countdown — and point at the same time.",
+    startCountdown: "Start countdown",
+    pointNow: "Point!",
     showResult: "Show the answer",
 
     resultKicker: "The answer",
+    exposed: "Exposed",
     spyWas: "The spy was",
     spiesWere: "The spies were",
     newRound: "New round",

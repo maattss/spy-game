@@ -1,4 +1,5 @@
-import { ArrowRight, EyeOff, Hand, MapPin, Plus, Radar, RotateCcw, ShieldCheck, Sliders, UserRound, VenetianMask, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowRight, Check, Fingerprint, Hand, MapPin, Plus, Radar, RotateCcw, ScrollText, Sliders, UserRound, VenetianMask, X } from "lucide-react";
 import { PACKS } from "../../content";
 import type { AppText } from "../../copy";
 import type { Locale, Player, RoundState } from "../../types";
@@ -69,7 +70,7 @@ export function SetupSection({
   return (
     <div className="phase phase--setup">
       <Card className="rules-card">
-        <CardHead icon={<ShieldCheck size={17} />} title={text.howToPlay} />
+        <CardHead icon={<ScrollText size={17} />} title={text.howToPlay} />
         <CardContent>
           <ol className="rules">
             <li>{text.ruleDeal}</li>
@@ -162,6 +163,9 @@ export function SetupSection({
                   <span className="pack__emoji" aria-hidden="true">
                     {pack.emoji}
                   </span>
+                  <span className="pack__check" aria-hidden="true">
+                    <Check size={12} strokeWidth={3} />
+                  </span>
                   <span className="pack__name">{pack.name[locale]}</span>
                   <span className="pack__count">{text.locationsCount(pack.locations.length)}</span>
                 </button>
@@ -172,7 +176,7 @@ export function SetupSection({
       </Card>
 
       <div className="action-bar">
-        <Button type="button" size="full" disabled={!canStartGame} onClick={onStartRound}>
+        <Button type="button" size="full" className="cta" disabled={!canStartGame} onClick={onStartRound}>
           {text.startRound}
           <ArrowRight size={17} />
         </Button>
@@ -189,6 +193,7 @@ type DealSectionProps = {
   showCard: boolean;
   revealPlayerName: string;
   isSpy: boolean;
+  missionLabel: string;
   onShowCard: () => void;
   onNextReveal: () => void;
 };
@@ -201,6 +206,7 @@ export function DealSection({
   showCard,
   revealPlayerName,
   isSpy,
+  missionLabel,
   onShowCard,
   onNextReveal,
 }: DealSectionProps) {
@@ -232,11 +238,25 @@ export function DealSection({
             tabIndex={showCard ? -1 : 0}
             aria-hidden={showCard}
           >
+            <span className="dossier__top" aria-hidden="true">
+              <span>{missionLabel}</span>
+              <span>
+                {step}/{totalPlayers}
+              </span>
+            </span>
+            <span className="dossier__stamp" aria-hidden="true">
+              {text.classified}
+            </span>
             <span className="flip__seal" aria-hidden="true">
-              <EyeOff size={28} />
+              <Fingerprint size={34} strokeWidth={1.6} />
             </span>
             <span className="flip__cta">{text.tapToReveal}</span>
             <span className="flip__note">{text.keepItHidden}</span>
+            <span className="dossier__redacted" aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </span>
           </button>
 
           {/* Rendered only while revealed: the back face stays visible during the flip-back,
@@ -248,18 +268,22 @@ export function DealSection({
             {showCard && (
               <>
                 <span className="role__icon" aria-hidden="true">
-                  {isSpy ? <VenetianMask size={26} /> : <Radar size={26} />}
+                  {isSpy ? <VenetianMask size={30} /> : <Radar size={30} />}
                 </span>
-                <p className="role">{isSpy ? text.youAreSpy : text.youAreAgent}</p>
+                <p className="role" data-text={isSpy ? text.youAreSpy : text.youAreAgent}>
+                  {isSpy ? text.youAreSpy : text.youAreAgent}
+                </p>
                 {isSpy ? (
-                  <p className="role__note">{text.spyInstruction}</p>
+                  <p className="role__location role__location--unknown" aria-hidden="true">
+                    ???
+                  </p>
                 ) : (
                   <>
                     <p className="role__label">{text.location}</p>
                     <p className="role__location">{round.location.name[locale]}</p>
-                    <p className="role__note">{text.agentInstruction}</p>
                   </>
                 )}
+                <p className="role__note">{isSpy ? text.spyInstruction : text.agentInstruction}</p>
               </>
             )}
           </div>
@@ -278,26 +302,80 @@ export function DealSection({
 
 type PointSectionProps = {
   text: AppText;
+  onTick: (pattern: number | number[]) => void;
   onShowResult: () => void;
 };
 
-export function PointSection({ text, onShowResult }: PointSectionProps) {
+const COUNTDOWN_START = 3;
+const COUNTDOWN_STEP_MS = 900;
+
+export function PointSection({ text, onTick, onShowResult }: PointSectionProps) {
+  // null = not started, 3..1 = counting, 0 = point now
+  const [count, setCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (count === null || count === 0) {
+      return;
+    }
+    const timeout = window.setTimeout(() => setCount(count - 1), COUNTDOWN_STEP_MS);
+    return () => window.clearTimeout(timeout);
+  }, [count]);
+
+  useEffect(() => {
+    if (count === null) {
+      return;
+    }
+    onTick(count === 0 ? [80, 60, 160] : 40);
+  }, [count, onTick]);
+
+  const isCounting = count !== null && count > 0;
+  const isDone = count === 0;
+
   return (
     <div className="phase phase--point">
       <div className="point">
-        <span className="point__icon" aria-hidden="true">
-          <Hand size={32} />
-        </span>
-        <p className="kicker">{text.pointKicker}</p>
-        <h2 className="point__title">{text.pointTitle}</h2>
-        <p className="point__instruction">{text.pointInstruction}</p>
-        <p className="point__countdown">{text.pointCountdown}</p>
+        {count === null ? (
+          <>
+            <span className="point__icon" aria-hidden="true">
+              <Hand size={34} />
+            </span>
+            <p className="kicker">{text.pointKicker}</p>
+            <h2 className="point__title">{text.pointTitle}</h2>
+            <p className="point__instruction">{text.pointInstruction}</p>
+          </>
+        ) : (
+          <div className={`countdown ${isDone ? "is-done" : ""}`} aria-live="assertive">
+            <span className="countdown__ring" aria-hidden="true" />
+            <span className="countdown__value" key={count}>
+              {isDone ? text.pointNow : count}
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="action-bar">
-        <Button type="button" size="full" onClick={onShowResult}>
-          {text.showResult}
-        </Button>
+        {isDone ? (
+          <Button type="button" size="full" className="cta" onClick={onShowResult}>
+            {text.showResult}
+            <ArrowRight size={17} />
+          </Button>
+        ) : (
+          <>
+            <Button
+              type="button"
+              size="full"
+              className="cta"
+              disabled={isCounting}
+              onClick={() => setCount(COUNTDOWN_START)}
+            >
+              <Hand size={17} />
+              {text.startCountdown}
+            </Button>
+            <Button type="button" variant="quiet" size="full" disabled={isCounting} onClick={onShowResult}>
+              {text.showResult}
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );
@@ -326,11 +404,18 @@ export function ResultSection({ text, locale, round, onNewRound, onBackToSetup, 
   return (
     <div className="phase phase--result">
       <div className="reveal">
+        <span className="reveal__stamp" aria-hidden="true">
+          {text.exposed}
+        </span>
         <p className="kicker">{text.resultKicker}</p>
         <p className="reveal__label">{text.location}</p>
         <h2 className="reveal__location">{round.location.name[locale]}</h2>
         <p className="reveal__spies">
-          {spyLabel} <strong>{joinedSpyNames}</strong>
+          <span className="reveal__spies-label">{spyLabel}</span>
+          <strong>
+            <VenetianMask size={20} aria-hidden="true" />
+            {joinedSpyNames}
+          </strong>
         </p>
       </div>
 
@@ -338,7 +423,14 @@ export function ResultSection({ text, locale, round, onNewRound, onBackToSetup, 
         {round.players.map((player, index) => {
           const isSpy = round.assignments[player.id]?.isSpy ?? false;
           return (
-            <div className={`roles__row ${isSpy ? "is-spy" : "is-agent"}`} key={player.id}>
+            <div
+              className={`roles__row ${isSpy ? "is-spy" : "is-agent"}`}
+              key={player.id}
+              style={{ animationDelay: `${300 + index * 60}ms` }}
+            >
+              <span className="roles__icon" aria-hidden="true">
+                {isSpy ? <VenetianMask size={15} /> : <Radar size={15} />}
+              </span>
               <span className="roles__name">{displayPlayerName(player.name, index)}</span>
               <span className="roles__tag">{isSpy ? text.spyShort : text.agentShort}</span>
             </div>
@@ -347,7 +439,7 @@ export function ResultSection({ text, locale, round, onNewRound, onBackToSetup, 
       </div>
 
       <div className="action-bar action-bar--split">
-        <Button type="button" size="full" onClick={onNewRound}>
+        <Button type="button" size="full" className="cta" onClick={onNewRound}>
           <RotateCcw size={16} />
           {text.newRound}
         </Button>
