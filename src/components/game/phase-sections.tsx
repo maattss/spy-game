@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { ArrowRight, EyeOff, Hand, MapPin, Plus, Radar, RotateCcw, ShieldCheck, Sliders, UserRound, VenetianMask, X } from "lucide-react";
 import { PACKS } from "../../content";
 import type { AppText } from "../../copy";
@@ -156,14 +157,9 @@ export function SetupSection({
                   type="button"
                   className={`pack ${isSelected ? "is-active" : ""}`}
                   aria-pressed={isSelected}
-                  aria-label={pack.name[locale]}
                   onClick={() => onTogglePack(pack.id)}
                 >
-                  <span className="pack__emoji" aria-hidden="true">
-                    {pack.emoji}
-                  </span>
-                  <span className="pack__name">{pack.name[locale]}</span>
-                  <span className="pack__count">{text.locationsCount(pack.locations.length)}</span>
+                  {pack.name[locale]}
                 </button>
               );
             })}
@@ -233,7 +229,7 @@ export function DealSection({
             aria-hidden={showCard}
           >
             <span className="flip__seal" aria-hidden="true">
-              <EyeOff size={28} />
+              <EyeOff size={32} />
             </span>
             <span className="flip__cta">{text.tapToReveal}</span>
             <span className="flip__note">{text.keepItHidden}</span>
@@ -248,7 +244,7 @@ export function DealSection({
             {showCard && (
               <>
                 <span className="role__icon" aria-hidden="true">
-                  {isSpy ? <VenetianMask size={26} /> : <Radar size={26} />}
+                  {isSpy ? <VenetianMask size={34} /> : <Radar size={34} />}
                 </span>
                 <p className="role">{isSpy ? text.youAreSpy : text.youAreAgent}</p>
                 {isSpy ? (
@@ -278,26 +274,67 @@ export function DealSection({
 
 type PointSectionProps = {
   text: AppText;
+  onTick: (pattern: number | number[]) => void;
   onShowResult: () => void;
 };
 
-export function PointSection({ text, onShowResult }: PointSectionProps) {
+const COUNTDOWN_START = 3;
+const COUNTDOWN_STEP_MS = 900;
+
+export function PointSection({ text, onTick, onShowResult }: PointSectionProps) {
+  // null = not started, 3..1 = counting, 0 = point now
+  const [count, setCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (count === null || count === 0) {
+      return;
+    }
+    const timeout = window.setTimeout(() => setCount(count - 1), COUNTDOWN_STEP_MS);
+    return () => window.clearTimeout(timeout);
+  }, [count]);
+
+  useEffect(() => {
+    if (count !== null) {
+      onTick(count === 0 ? [80, 60, 160] : 40);
+    }
+  }, [count, onTick]);
+
+  const isCounting = count !== null && count > 0;
+
   return (
     <div className="phase phase--point">
       <div className="point">
-        <span className="point__icon" aria-hidden="true">
-          <Hand size={32} />
-        </span>
-        <p className="kicker">{text.pointKicker}</p>
-        <h2 className="point__title">{text.pointTitle}</h2>
-        <p className="point__instruction">{text.pointInstruction}</p>
-        <p className="point__countdown">{text.pointCountdown}</p>
+        {count === null ? (
+          <>
+            <span className="point__icon" aria-hidden="true">
+              <Hand size={32} />
+            </span>
+            <p className="kicker">{text.pointKicker}</p>
+            <h2 className="point__title">{text.pointTitle}</h2>
+            <p className="point__instruction">{text.pointInstruction}</p>
+          </>
+        ) : (
+          <p className="countdown" key={count} aria-live="assertive">
+            {count === 0 ? text.pointNow : count}
+          </p>
+        )}
       </div>
 
       <div className="action-bar">
-        <Button type="button" size="full" onClick={onShowResult}>
-          {text.showResult}
-        </Button>
+        {count === 0 ? (
+          <Button type="button" size="full" onClick={onShowResult}>
+            {text.showResult}
+          </Button>
+        ) : (
+          <>
+            <Button type="button" size="full" disabled={isCounting} onClick={() => setCount(COUNTDOWN_START)}>
+              {text.startCountdown}
+            </Button>
+            <Button type="button" variant="quiet" size="full" disabled={isCounting} onClick={onShowResult}>
+              {text.showResult}
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );

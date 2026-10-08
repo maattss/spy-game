@@ -27,7 +27,6 @@ export const COPY = {
     spyCountOption: "Antall spioner:",
 
     locationPacks: "Lokasjonspakker",
-    locationsCount: (count: number) => `${count} steder`,
 
     startRound: "Start runde",
 
@@ -44,8 +43,9 @@ export const COPY = {
 
     pointKicker: "Siste steg",
     pointTitle: "Pek ut spionen",
-    pointInstruction: "Diskuter runden. Når alle er klare teller dere ned fra tre og peker samtidig på den dere tror er spionen.",
-    pointCountdown: "Tre — to — én — pek!",
+    pointInstruction: "Diskuter runden. Når alle er klare starter dere nedtellingen — og peker samtidig på den dere tror er spionen.",
+    startCountdown: "Start nedtelling",
+    pointNow: "Pek!",
     showResult: "Vis fasit",
 
     resultKicker: "Fasit",
@@ -83,7 +83,6 @@ export const COPY = {
     spyCountOption: "Number of spies:",
 
     locationPacks: "Location packs",
-    locationsCount: (count: number) => `${count} places`,
 
     startRound: "Start round",
 
@@ -100,8 +99,9 @@ export const COPY = {
 
     pointKicker: "Final step",
     pointTitle: "Point out the spy",
-    pointInstruction: "Talk it through. When everyone is ready, count down from three and point at the same time.",
-    pointCountdown: "Three — two — one — point!",
+    pointInstruction: "Talk it through. When everyone is ready, start the countdown — and point at the same time.",
+    startCountdown: "Start countdown",
+    pointNow: "Point!",
     showResult: "Show the answer",
 
     resultKicker: "The answer",

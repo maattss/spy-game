@@ -16,6 +16,14 @@ const DEFAULT_PACK_IDS = [PACKS[0]?.id ?? "classic"];
 
 type Theme = "dark" | "light";
 
+function buzz(pattern: number | number[]) {
+  try {
+    navigator.vibrate?.(pattern);
+  } catch {
+    // Vibration is best-effort
+  }
+}
+
 function newPlayer(name: string): Player {
   return { id: crypto.randomUUID(), name };
 }
@@ -181,6 +189,11 @@ export function App() {
     setNextStarterPlayerIndex((value) => (players.length > 0 ? (value + 1) % players.length : 0));
   }
 
+  function revealCard() {
+    setShowCard(true);
+    buzz(30);
+  }
+
   function goToNextReveal() {
     if (!round) {
       return;
@@ -214,7 +227,7 @@ export function App() {
   useLayoutEffect(() => {
     document.documentElement.dataset.theme = theme;
     window.localStorage.setItem(THEME_STORAGE_KEY, theme);
-    const themeColor = theme === "dark" ? "#0c0e11" : "#f5f6f8";
+    const themeColor = theme === "dark" ? "#090f1b" : "#eef2fa";
     document.querySelector("meta[name='theme-color']")?.setAttribute("content", themeColor);
   }, [theme]);
 
@@ -225,11 +238,10 @@ export function App() {
       <div className="app__inner">
         <header className="topbar">
           <div className="brand">
-            <span className="brand__mark" aria-hidden="true">
-              <span className="brand__eye" />
-            </span>
             <div className="brand__text">
-              <h1 className="brand__title">Spy</h1>
+              <h1 className="brand__title">
+                spy<span className="brand__dot">.</span>
+              </h1>
               <p className="brand__tagline">{text.tagline}</p>
             </div>
           </div>
@@ -287,12 +299,12 @@ export function App() {
             showCard={showCard}
             revealPlayerName={displayPlayerName(currentRevealPlayer.name, revealIndex)}
             isSpy={currentRevealAssignment.isSpy}
-            onShowCard={() => setShowCard(true)}
+            onShowCard={revealCard}
             onNextReveal={goToNextReveal}
           />
         )}
 
-        {phase === "point" && <PointSection text={text} onShowResult={() => setPhase("result")} />}
+        {phase === "point" && <PointSection text={text} onTick={buzz} onShowResult={() => setPhase("result")} />}
 
         {phase === "result" && round && (
           <ResultSection
