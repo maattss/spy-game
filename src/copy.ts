@@ -10,10 +10,6 @@ export const COPY = {
     dark: "Mørk",
     light: "Lys",
 
-    mission: (round: number) => `Oppdrag #${String(round).padStart(3, "0")}`,
-    classified: "Strengt hemmelig",
-    briefing: "Briefing",
-
     howToPlay: "Slik spiller dere",
     ruleDeal: "Send telefonen rundt. Alle ser kortet sitt alene.",
     ruleSecret: "Alle får lokasjonen — bortsett fra spionen.",
@@ -54,7 +50,6 @@ export const COPY = {
     showResult: "Vis fasit",
 
     resultKicker: "Fasit",
-    exposed: "Avslørt",
     spyWas: "Spionen var",
     spiesWere: "Spionene var",
     newRound: "Ny runde",
@@ -71,10 +66,6 @@ export const COPY = {
     english: "English",
     dark: "Dark",
     light: "Light",
-
-    mission: (round: number) => `Mission #${String(round).padStart(3, "0")}`,
-    classified: "Top secret",
-    briefing: "Briefing",
 
     howToPlay: "How to play",
     ruleDeal: "Pass the phone around. Everyone sees their card alone.",
@@ -116,7 +107,6 @@ export const COPY = {
     showResult: "Show the answer",
 
     resultKicker: "The answer",
-    exposed: "Exposed",
     spyWas: "The spy was",
     spiesWere: "The spies were",
     newRound: "New round",

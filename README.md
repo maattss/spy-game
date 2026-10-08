@@ -39,10 +39,7 @@ Send telefonen rundt. Alle får vite lokasjonen. Alle, bortsett fra **spionen**.
 SPY er laget for å være **raskt**, **lettfattelig** og **mobilsentrisk**:
 
 - 📱 Mobil-first UI — ingen installasjon, bare åpne i nettleseren
-- 🗂️ "Hemmelig mappe"-design med radar-logo, stempler og spionfont
 - 🃏 Kortet snus med en 3D-flip, og innholdet fjernes før telefonen gis videre
-- ⏱️ Animert 3–2–1-nedtelling før alle peker samtidig
-- 📳 Vibrasjon ved kortvisning og nedtelling (der telefonen støtter det)
 - 🌍 Norsk og engelsk språk
 - 🌙 Mørkt og lyst tema
 - ➡️ Tydelig "pass telefonen videre"-flyt

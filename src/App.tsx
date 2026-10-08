@@ -16,8 +16,6 @@ const DEFAULT_PACK_IDS = [PACKS[0]?.id ?? "classic"];
 
 type Theme = "dark" | "light";
 
-const THEME_COLORS: Record<Theme, string> = { dark: "#07080b", light: "#f2eee5" };
-
 function buzz(pattern: number | number[]) {
   try {
     navigator.vibrate?.(pattern);
@@ -89,7 +87,6 @@ export function App() {
 
   const [phase, setPhase] = useState<GamePhase>("setup");
   const [round, setRound] = useState<RoundState | null>(null);
-  const [roundNumber, setRoundNumber] = useState(0);
 
   const [revealIndex, setRevealIndex] = useState(0);
   const [showCard, setShowCard] = useState(false);
@@ -184,7 +181,6 @@ export function App() {
       : [...usedLocationKeys, nextLocationKey];
 
     setRound(createdRound);
-    setRoundNumber((value) => value + 1);
     setUsedLocationKeys(nextUsedLocationKeys);
     saveUsedLocationKeys(selectedPackIds, nextUsedLocationKeys);
     setPhase("deal");
@@ -217,7 +213,6 @@ export function App() {
   function endToSetup() {
     setPhase("setup");
     setRound(null);
-    setRoundNumber(0);
     setShowCard(false);
   }
 
@@ -232,7 +227,8 @@ export function App() {
   useLayoutEffect(() => {
     document.documentElement.dataset.theme = theme;
     window.localStorage.setItem(THEME_STORAGE_KEY, theme);
-    document.querySelector("meta[name='theme-color']")?.setAttribute("content", THEME_COLORS[theme]);
+    const themeColor = theme === "dark" ? "#1b1640" : "#f4f1ff";
+    document.querySelector("meta[name='theme-color']")?.setAttribute("content", themeColor);
   }, [theme]);
 
   return (
@@ -240,20 +236,17 @@ export function App() {
       <div className="app__glow" aria-hidden="true" />
 
       <div className="app__inner">
-        <header className={`topbar ${phase === "setup" ? "" : "is-compact"}`}>
+        <header className="topbar">
           <div className="brand">
-            <span className="brand__mark" aria-hidden="true">
-              <span className="brand__sweep" />
-              <span className="brand__blip" />
-            </span>
             <div className="brand__text">
-              <h1 className="brand__title">Spy</h1>
+              <h1 className="brand__title">
+                spy<span className="brand__dot">.</span>
+              </h1>
               <p className="brand__tagline">{text.tagline}</p>
             </div>
           </div>
 
           <div className="topbar__controls">
-            {roundNumber > 0 && phase !== "setup" && <span className="mission-tag">{text.mission(roundNumber)}</span>}
             <Button
               type="button"
               variant="secondary"
@@ -276,56 +269,53 @@ export function App() {
           </div>
         </header>
 
-        <div className="stage" key={phase === "deal" ? `deal-${roundNumber}-${revealIndex}` : `${phase}-${roundNumber}`}>
-          {phase === "setup" && (
-            <SetupSection
-              text={text}
-              locale={locale}
-              players={players}
-              selectedPackIds={selectedPackIds}
-              spyCount={spyCount}
-              canStartGame={canStartGame}
-              minPlayerCount={MIN_PLAYER_COUNT}
-              maxPlayerCount={MAX_PLAYER_COUNT}
-              onUpdatePlayerName={updatePlayerName}
-              onRemovePlayer={removePlayer}
-              onAddPlayer={addPlayer}
-              onSetSpyCount={updateSpyCount}
-              onTogglePack={togglePack}
-              onStartRound={startRound}
-              displayPlayerName={displayPlayerName}
-              playerPlaceholder={playerPlaceholder}
-            />
-          )}
+        {phase === "setup" && (
+          <SetupSection
+            text={text}
+            locale={locale}
+            players={players}
+            selectedPackIds={selectedPackIds}
+            spyCount={spyCount}
+            canStartGame={canStartGame}
+            minPlayerCount={MIN_PLAYER_COUNT}
+            maxPlayerCount={MAX_PLAYER_COUNT}
+            onUpdatePlayerName={updatePlayerName}
+            onRemovePlayer={removePlayer}
+            onAddPlayer={addPlayer}
+            onSetSpyCount={updateSpyCount}
+            onTogglePack={togglePack}
+            onStartRound={startRound}
+            displayPlayerName={displayPlayerName}
+            playerPlaceholder={playerPlaceholder}
+          />
+        )}
 
-          {phase === "deal" && round && currentRevealPlayer && currentRevealAssignment && (
-            <DealSection
-              text={text}
-              locale={locale}
-              round={round}
-              revealIndex={revealIndex}
-              showCard={showCard}
-              revealPlayerName={displayPlayerName(currentRevealPlayer.name, revealIndex)}
-              isSpy={currentRevealAssignment.isSpy}
-              missionLabel={text.mission(roundNumber)}
-              onShowCard={revealCard}
-              onNextReveal={goToNextReveal}
-            />
-          )}
+        {phase === "deal" && round && currentRevealPlayer && currentRevealAssignment && (
+          <DealSection
+            text={text}
+            locale={locale}
+            round={round}
+            revealIndex={revealIndex}
+            showCard={showCard}
+            revealPlayerName={displayPlayerName(currentRevealPlayer.name, revealIndex)}
+            isSpy={currentRevealAssignment.isSpy}
+            onShowCard={revealCard}
+            onNextReveal={goToNextReveal}
+          />
+        )}
 
-          {phase === "point" && <PointSection text={text} onTick={buzz} onShowResult={() => setPhase("result")} />}
+        {phase === "point" && <PointSection text={text} onTick={buzz} onShowResult={() => setPhase("result")} />}
 
-          {phase === "result" && round && (
-            <ResultSection
-              text={text}
-              locale={locale}
-              round={round}
-              onNewRound={startRound}
-              onBackToSetup={endToSetup}
-              displayPlayerName={displayPlayerName}
-            />
-          )}
-        </div>
+        {phase === "result" && round && (
+          <ResultSection
+            text={text}
+            locale={locale}
+            round={round}
+            onNewRound={startRound}
+            onBackToSetup={endToSetup}
+            displayPlayerName={displayPlayerName}
+          />
+        )}
       </div>
     </main>
   );
