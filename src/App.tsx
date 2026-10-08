@@ -227,7 +227,7 @@ export function App() {
   useLayoutEffect(() => {
     document.documentElement.dataset.theme = theme;
     window.localStorage.setItem(THEME_STORAGE_KEY, theme);
-    const themeColor = theme === "dark" ? "#0d1424" : "#eef2fa";
+    const themeColor = theme === "dark" ? "#090f1b" : "#eef2fa";
     document.querySelector("meta[name='theme-color']")?.setAttribute("content", themeColor);
   }, [theme]);
 

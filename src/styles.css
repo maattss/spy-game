@@ -15,9 +15,9 @@
 :root,
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0d1424;
-  --surface: #151f37;
-  --surface-hover: #1e2a47;
+  --bg: #090f1b;
+  --surface: #111a2e;
+  --surface-hover: #1a2540;
   --line: rgba(255, 255, 255, 0.1);
   --line-strong: rgba(255, 255, 255, 0.2);
   --text: #ffffff;
@@ -26,10 +26,10 @@
   --accent: #ffffff;
   --accent-hover: #e9eef8;
   --accent-edge: #a9b5d2;
-  --accent-ink: #0d1424;
+  --accent-ink: #090f1b;
   --selected: var(--accent);
   --chip: #ffffff;
-  --chip-ink: #0d1424;
+  --chip-ink: #090f1b;
 }
 
 :root[data-theme="light"] {
