@@ -53,8 +53,8 @@ diskusjonstimer og poengtavle. Spionen pekes ut i gruppa — appen viser bare fa
 ## 🛠️ Teknologi
 
 - [React 19](https://react.dev/)
-- [TypeScript 5](https://www.typescriptlang.org/)
-- [Vite 7](https://vitejs.dev/)
+- [TypeScript 7](https://www.typescriptlang.org/)
+- [Vite 8](https://vite.dev/)
 - [Radix UI](https://www.radix-ui.com/) primitives + shadcn-style komponenter
 
 ---
@@ -62,7 +62,7 @@ diskusjonstimer og poengtavle. Spionen pekes ut i gruppa — appen viser bare fa
 ## 🚀 Kom i gang
 
 ```bash
-npm install
+npm install   # krever Node 22.12+
 npm run dev
 ```
 
@@ -72,6 +72,7 @@ Appen starter på [http://localhost:5173](http://localhost:5173). Inviter venner
 npm run dev      # lokal utvikling
 npm run build    # produksjonsbuild
 npm run preview  # preview av build
+npm test         # enhetstester (Vitest)
 ```
 
 ---
