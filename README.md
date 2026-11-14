@@ -4,6 +4,13 @@
 
 Et kjapt og intenst sosialt deduksjonsspill for én telefon — perfekt for vennegjenger, familiesammenkomster og alle som liker å lyve med stil.
 
+🌐 **[spionspill.lol](https://spionspill.lol)**
+
+<p>
+  <img src="docs/oppsett.png" alt="Oppsett av spillere, spioner og lokasjonspakker" width="260">
+  <img src="docs/kort.png" alt="Telefonen gis videre til neste spiller før kortet vises" width="260">
+</p>
+
 ---
 
 ## 🎮 Slik spiller dere
